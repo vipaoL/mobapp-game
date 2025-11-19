@@ -530,7 +530,7 @@ public class WorldGen implements Runnable {
             }
             try {
                 if (getNumberOfLogged() > 0) {
-                    return w.carX - getElementAt(0)[0] > maxDistToRemove;
+                    return w.carX - maxDistToRemove > getElementAt(0)[0];
                 } else
                     return false;
             } catch(NullPointerException ex) {

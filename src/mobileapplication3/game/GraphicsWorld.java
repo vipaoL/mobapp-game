@@ -708,7 +708,7 @@ public class GraphicsWorld extends World {
                     zoomOutBase = zoomOutBase * game.currentEffects[GameplayCanvas.EFFECT_SPEED][2] / 100;
                 }
             }
-            if (zoomOut < 1) {
+            if (zoomOut <= 0) {
                 zoomOut = -zoomOut;
                 zoomOut += 1;
             }
