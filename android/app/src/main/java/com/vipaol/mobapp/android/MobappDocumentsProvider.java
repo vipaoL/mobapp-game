@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 package com.vipaol.mobapp.android;
 
 import static mobileapplication3.platform.Platform.SDK_INT;

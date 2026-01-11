@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 package mobileapplication3.editor.elements;
 
 import mobileapplication3.platform.Mathh;

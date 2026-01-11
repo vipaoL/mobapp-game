@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 package utils;
 
 import mobileapplication3.game.GraphicsWorld;

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 package com.vipaol.mobapp.android;
 
 import mobileapplication3.editor.EditorSettings;

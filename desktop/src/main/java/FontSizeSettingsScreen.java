@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-only
+
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.PlatformSettings;
 import mobileapplication3.platform.ui.Font;
