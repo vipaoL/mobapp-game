@@ -1,33 +1,20 @@
 plugins {
     alias(libs.plugins.android.application)
-}
-
-def getVersionCode = { ->
-    try {
-        def code = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'tag', '--list'
-            standardOutput = code
-        }
-        return code.toString().split("\n").size()
-    }
-    catch (ignored) {
-        return -1
-    }
+    alias(libs.plugins.grgit)
 }
 
 def getVersionName = { ->
-    try {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'describe', '--tags', '--dirty'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim()
+    def description = grgit.describe(tags: true, always: true)
+
+    if (!grgit.status().clean) {
+        return description + "-dirty"
     }
-    catch (ignored) {
-        return null
-    }
+
+    return description
+}
+
+def getVersionCode = { ->
+    return grgit.tag.list().size()
 }
 
 android {
@@ -48,6 +35,7 @@ android {
             minifyEnabled false
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -59,6 +47,7 @@ android {
         main.java.srcDirs += '../../lib/mobapp-framework/src'
     }
 }
+
 dependencies {
     implementation files('../../lib/PhysicsEngine_v135b.jar')
 }
