@@ -11,16 +11,16 @@ import mobileapplication3.ui.TextComponent;
  * @author vipaol
  */
 public class Page4 extends AbstractSetupWizardPage {
-    
+
     private final TextComponent text = new TextComponent();
-    
+
     public Page4(Button[] buttons, SetupWizard.Feedback feedback) {
         super("Let's get started", buttons, feedback);
     }
-    
+
     public void init() {
-    	super.init();
-    	actionButtons.setSelected(actionButtons.getButtonCount() - 1);
+        super.init();
+        actionButtons.setSelected(actionButtons.getButtonCount() - 1);
     }
 
     public void initOnFirstShow() {
@@ -35,5 +35,5 @@ public class Page4 extends AbstractSetupWizardPage {
     protected IUIComponent initAndGetPageContent() {
         return text;
     }
-    
+
 }

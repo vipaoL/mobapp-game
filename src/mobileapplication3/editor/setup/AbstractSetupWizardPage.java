@@ -28,7 +28,7 @@ public abstract class AbstractSetupWizardPage extends Page {
     }
 
     public void init() {
-    	super.init();
+        super.init();
         actionButtons.setIsSelectionEnabled(true);
         actionButtons.setIsSelectionVisible(true);
         actionButtons.setFocused(false);

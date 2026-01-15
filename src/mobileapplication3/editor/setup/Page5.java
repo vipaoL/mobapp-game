@@ -24,23 +24,23 @@ public class Page5 extends AbstractSetupWizardPage {
             public boolean handlePointerClicked(int x, int y) {
                 super.handlePointerClicked(x, y);
                 return false;
-        	}
+            }
         };
     }
 
     public void init() {
-    	super.init();
-    	actionButtons.setSelected(actionButtons.getButtonCount() - 1);
-    	actionButtons.buttons[1] = new Button("Finish") {
-			public void buttonPressed() {
-				saveFolderChoice(listButtons[list.getSelected()].getTitle());
-			}
-		};
-		list.setIsSelectionVisible(true);
+        super.init();
+        actionButtons.setSelected(actionButtons.getButtonCount() - 1);
+        actionButtons.buttons[1] = new Button("Finish") {
+            public void buttonPressed() {
+                saveFolderChoice(listButtons[list.getSelected()].getTitle());
+            }
+        };
+        list.setIsSelectionVisible(true);
     }
 
     public void initOnFirstShow() {
-    	fillList();
+        fillList();
         list.setButtonsBgPadding(margin/4);
     }
 
@@ -51,14 +51,14 @@ public class Page5 extends AbstractSetupWizardPage {
                 listButtons = new Button[folders.length];
                 for (int i = 0; i < folders.length; i++) {
                     listButtons[i] = new Button(folders[i]) {
-                    	public void buttonPressed() { }
+                        public void buttonPressed() { }
                     };
                 }
                 list.setButtons(listButtons);
                 list.setSelected(list.buttons.length - 1);
                 if (w != 0 && h != 0) {
-	                onSetBounds(x0, y0, w, h/2);
-	                onSetBounds(x0, y0, w, h);
+                    onSetBounds(x0, y0, w, h/2);
+                    onSetBounds(x0, y0, w, h);
                 }
                 feedback.needRepaint();
             }
@@ -68,11 +68,11 @@ public class Page5 extends AbstractSetupWizardPage {
     private void saveFolderChoice(final String path) {
         showPopup(new LoadingPopup("Checking folder...", this));
         (new Thread(new Runnable() {
-        	String folderPath;
+            String folderPath;
             public void run() {
-            	folderPath = null;
+                folderPath = null;
                 try {
-                	folderPath = EditorSettings.getStructsFolderPath(path);
+                    folderPath = EditorSettings.getStructsFolderPath(path);
                     FileUtils.createFolder(folderPath);
                 } catch (Throwable ex) {
                     closePopup();
@@ -80,7 +80,7 @@ public class Page5 extends AbstractSetupWizardPage {
                 }
                 folderPath = null;
                 try {
-                	folderPath = EditorSettings.getLevelsFolderPath(path);
+                    folderPath = EditorSettings.getLevelsFolderPath(path);
                     Logger.log("creating subfolder: " + folderPath);
                     FileUtils.createFolder(folderPath);
                 } catch (Throwable ex) {
@@ -110,12 +110,12 @@ public class Page5 extends AbstractSetupWizardPage {
     protected IUIComponent initAndGetPageContent() {
         return list;
     }
-    
+
     protected void refreshFocusedComponents() {
-    	super.refreshFocusedComponents();
-    	list.setFocused(true);
+        super.refreshFocusedComponents();
+        list.setFocused(true);
     }
-    
+
     private static class LoadingPopup extends AbstractPopupPage {
         int animOffset = 100;
 

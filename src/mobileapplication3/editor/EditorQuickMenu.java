@@ -50,11 +50,11 @@ public class EditorQuickMenu extends AbstractPopupPage {
 
         Button saveButton = new Button("Save \"" + parent.getFileName() + "\"") {
             public void buttonPressed() {
-            	close();
-            	try {
-            		parent.saveToFile(parent.getFilePath());
-            		AutoSaveUI.deleteAutoSave(parent.getMode());
-            	} catch (Exception ex) {
+                close();
+                try {
+                    parent.saveToFile(parent.getFilePath());
+                    AutoSaveUI.deleteAutoSave(parent.getMode());
+                } catch (Exception ex) {
                     Logger.log(ex);
                     Platform.showError(ex);
                 }
@@ -63,14 +63,14 @@ public class EditorQuickMenu extends AbstractPopupPage {
 
         Button saveAsButton = new Button("Save as...") {
             public void buttonPressed() {
-            	close();
-            	final int mode = parent.getMode();
-            	String path;
-            	if (mode == EditorUI.MODE_STRUCTURE) {
-            		path = EditorSettings.getStructsFolderPath();
-            	} else {
-            		path = EditorSettings.getLevelsFolderPath();
-            	}
+                close();
+                final int mode = parent.getMode();
+                String path;
+                if (mode == EditorUI.MODE_STRUCTURE) {
+                    path = EditorSettings.getStructsFolderPath();
+                } else {
+                    path = EditorSettings.getLevelsFolderPath();
+                }
                 parent.showPopup(new PathPicker(mode, parent).pickFolder(path, "Save as \"" + PathPicker.QUESTION_REPLACE_WITH_PATH + "\" ?", new PathPicker.Feedback() {
                     public void onComplete(final String path) {
                         (new Thread(new Runnable() {
@@ -92,7 +92,7 @@ public class EditorQuickMenu extends AbstractPopupPage {
                     }
 
                     public void onCancel() {
-                    	parent.closePopup();
+                        parent.closePopup();
                     }
                 }));
             }

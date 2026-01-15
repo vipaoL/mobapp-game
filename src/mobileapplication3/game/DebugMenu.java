@@ -40,12 +40,12 @@ public class DebugMenu extends GenericMenu implements Runnable {
     public static boolean whatTheGame = false;
     public static boolean showContacts = false;
     public static boolean structureDebug = false;
-    
+
     public DebugMenu() {
         loadParams(MENU_OPTS);
         loadStatemap(new int[MENU_OPTS.length]);
-	}
-    
+    }
+
     public void init() {
         getFontSize();
         setSpecialOption(0);
@@ -60,7 +60,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
         while (!isStopped) {
             if (!isPaused) {
                 start = System.currentTimeMillis();
-                
+
                 repaint();
                 tick();
 
@@ -76,7 +76,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
             }
         }
     }
-    
+
     void selectPressed() {
         int selected = this.selected;
         switch (selected) {
@@ -87,7 +87,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 Logger.logToStdout(isDebugEnabled);
                 break;
             case 1:
-            	RootContainer.enableOnScreenLog = !RootContainer.enableOnScreenLog;
+                RootContainer.enableOnScreenLog = !RootContainer.enableOnScreenLog;
                 if (RootContainer.enableOnScreenLog) {
                     Logger.enableOnScreenLog(h);
                 } else {

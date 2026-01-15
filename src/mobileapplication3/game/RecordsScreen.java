@@ -16,20 +16,20 @@ public class RecordsScreen extends GenericMenu implements Runnable {
 
     public RecordsScreen() {
         int[] records = new int[0];
-		try {
-			records = Records.getRecords();
-		} catch (Exception ex) {
-			Platform.showError("Can't get records:", ex);
-		}
+        try {
+            records = Records.getRecords();
+        } catch (Exception ex) {
+            Platform.showError("Can't get records:", ex);
+        }
         buttons = new String[records.length + 2];
-    	buttons[0] = "Best scores";
+        buttons[0] = "Best scores";
         buttons[buttons.length-1] = "Back";
         for (int i = 0; i < records.length; i++) {
-        	buttons[i + 1] = records[i] + "";
+            buttons[i + 1] = records[i] + "";
         }
         loadParams(buttons);
         setFirstReachable(1);
-	}
+    }
 
     public void init() {
         isStopped = false;

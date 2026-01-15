@@ -44,7 +44,7 @@ public abstract class StructureBuilder {
     }
 
     public void place(short id, short x, short y) throws IllegalArgumentException {
-    	isEditing = false;
+        isEditing = false;
         placingNow = Element.createTypedInstance(id);
         Logger.log("Placing " + id);
         nextPointHandler = new NextPointHandler();
@@ -55,20 +55,20 @@ public abstract class StructureBuilder {
     }
 
     public void edit(Element e, int step) {
-    	Element[] elements = getElementsAsArray();
-    	for (int i = 0; i < elements.length; i++) {
-			if (elements[i] != null && elements[i].equals(e)) {
-				edit(i, step);
-				break;
-			}
-			
-		}
+        Element[] elements = getElementsAsArray();
+        for (int i = 0; i < elements.length; i++) {
+            if (elements[i] != null && elements[i].equals(e)) {
+                edit(i, step);
+                break;
+            }
+
+        }
     }
 
     public void edit(int i, int step) {
-    	placingNow = getElementsAsArray()[i];
-    	nextPointHandler = new NextPointHandler(step);
-    	isEditing = true;
+        placingNow = getElementsAsArray()[i];
+        nextPointHandler = new NextPointHandler(step);
+        isEditing = true;
     }
 
     public void handleNextPoint(short x, short y, boolean isPreview) {
@@ -82,9 +82,9 @@ public abstract class StructureBuilder {
         // stop if the last step is done
         if (nextPointHandler.step >= placingNow.getStepsToPlace() || isEditing) {
             if (!isPreview) {
-            	if (placingNow.getID() != Element.END_POINT) {
-            		recalculateEndPoint();
-            	}
+                if (placingNow.getID() != Element.END_POINT) {
+                    recalculateEndPoint();
+                }
                 placingNow = null;
                 nextPointHandler = null;
                 onUpdate();
@@ -99,7 +99,7 @@ public abstract class StructureBuilder {
     }
 
     public short[] asShortArray() {
-    	int carriage = 0;
+        int carriage = 0;
         // {file format version, count of elements, ...data..., eof mark}
         short[] data = new short[1 + 1 + getDataLengthInShorts() + 1];
 
@@ -153,12 +153,12 @@ public abstract class StructureBuilder {
     }
 
     public void setFilePath(String path) {
-    	this.path = path;
+        this.path = path;
     }
 
     public void setElements(Element[] elements) {
-    	buffer = new Vector();
-    	for (int i = 0; i < elements.length; i++) {
+        buffer = new Vector();
+        for (int i = 0; i < elements.length; i++) {
             if (elements[i] != null) {
                 buffer.addElement(elements[i]);
             } else {
@@ -189,25 +189,25 @@ public abstract class StructureBuilder {
     }
 
     public void remove(Element e) {
-    	remove(findInBuffer(e));
+        remove(findInBuffer(e));
     }
 
     public int findInBuffer(Element e) {
-    	Element[] elements = getElementsAsArray();
-    	for (int i = 0; i < elements.length; i++) {
-			if (elements[i] != null && elements[i].equals(e)) {
-				return i;
-			}
-		}
-    	throw new IllegalArgumentException("Element " + e + " not found in buffer");
+        Element[] elements = getElementsAsArray();
+        for (int i = 0; i < elements.length; i++) {
+            if (elements[i] != null && elements[i].equals(e)) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Element " + e + " not found in buffer");
     }
 
     public void recalculateEndPoint() {
-    	if (mode == MODE_LEVEL) {
-    		return;
-    	}
+        if (mode == MODE_LEVEL) {
+            return;
+        }
 
-    	Element[] elements = getElementsAsArray();
+        Element[] elements = getElementsAsArray();
         EndPoint endPoint = (EndPoint) elements[0];
         endPoint.setArgs(EndPoint.findEndPoint(elements));
     }
@@ -237,15 +237,15 @@ public abstract class StructureBuilder {
     }
 
     public String getPlacingInfo() {
-    	if (nextPointHandler != null && placingNow != null) {
-    		return nextPointHandler.getCurrentPlacementStep().getCurrentStepInfo();
-    	} else {
-    		return "";
-    	}
+        if (nextPointHandler != null && placingNow != null) {
+            return nextPointHandler.getCurrentPlacementStep().getCurrentStepInfo();
+        } else {
+            return "";
+        }
     }
 
     public int getMode() {
-    	return mode;
+        return mode;
     }
 
     public void setMode(int mode) {
@@ -264,12 +264,12 @@ public abstract class StructureBuilder {
         public boolean showingPreview = false;
 
         public NextPointHandler(int step) {
-        	this.step = step;
-		}
+            this.step = step;
+        }
 
         public NextPointHandler() {
-        	this(0);
-		}
+            this(0);
+        }
 
         void handleNextPoint(short x, short y) {
             try {
@@ -283,7 +283,7 @@ public abstract class StructureBuilder {
         }
 
         public PlacementStep getCurrentPlacementStep() {
-        	return placingNow.getAllSteps()[step];
+            return placingNow.getAllSteps()[step];
         }
 
     }

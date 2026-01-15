@@ -14,7 +14,7 @@ import mobileapplication3.ui.Keys;
  * @author vipaol
  */
 public class EditorCanvas extends StructureViewerComponent {
-	public static final int MODE_STRUCTURE = EditorUI.MODE_STRUCTURE, MODE_LEVEL = EditorUI.MODE_LEVEL;
+    public static final int MODE_STRUCTURE = EditorUI.MODE_STRUCTURE, MODE_LEVEL = EditorUI.MODE_LEVEL;
     private static final int COL_BG = 0x000000;
 
     private int cursorX, cursorY;
@@ -30,7 +30,7 @@ public class EditorCanvas extends StructureViewerComponent {
     private final Car car = new Car();
 
     public EditorCanvas(StructureBuilder structureBuilder, boolean viewMode) {
-    	super(structureBuilder.getElementsAsArray());
+        super(structureBuilder.getElementsAsArray());
         this.structureBuilder = structureBuilder;
         editMode = structureBuilder.getMode();
         this.viewMode = viewMode;
@@ -41,12 +41,12 @@ public class EditorCanvas extends StructureViewerComponent {
     }
 
     public void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
-    	if (editMode == MODE_STRUCTURE) {
-    		car.drawCar(g, x0, y0);
-    	}
+        if (editMode == MODE_STRUCTURE) {
+            car.drawCar(g, x0, y0);
+        }
         super.onPaint(g, x0, y0, w, h, forceInactive);
         if (editMode == MODE_STRUCTURE) {
-        	drawStartPoint(g, x0, y0);
+            drawStartPoint(g, x0, y0);
         }
         drawCursor(g, x0, y0);
         if (structureBuilder.placingNow != null) {
@@ -58,7 +58,7 @@ public class EditorCanvas extends StructureViewerComponent {
     }
 
     public void drawBg(Graphics g, int x0, int y0, int w, int h, boolean isActive) {
-    	g.setColor(COL_BG);
+        g.setColor(COL_BG);
         g.fillRect(x0, y0, w, h);
 
         int step = gridStep * 1000/zoomOut;
@@ -86,9 +86,9 @@ public class EditorCanvas extends StructureViewerComponent {
 
     protected void drawElements(Graphics g, int x0, int y0, Element[] elements) {
         for (int i = 0; i < elements.length; i++) {
-        	try {
-	        	elements[i].paint(g, zoomOut, x0 + offsetX, y0 + offsetY, zoomOut > zoomOutMacroModeThreshold, i == selectedElement);
-        	} catch (Exception ignored) { }
+            try {
+                elements[i].paint(g, zoomOut, x0 + offsetX, y0 + offsetY, zoomOut > zoomOutMacroModeThreshold, i == selectedElement);
+            } catch (Exception ignored) { }
         }
     }
 
@@ -99,14 +99,14 @@ public class EditorCanvas extends StructureViewerComponent {
     }
 
     public void onSetBounds(int x0, int y0, int w, int h) {
-    	// enable macro if line thickness is greater than 1/16 of the smaller side of the screen
-    	// thickness * 1000 / zoomOut >= minSide/16
-    	// thickness * 16000 / minSide >= zoomOut
-    	// threshold = thickness * 16000 / minSide
-    	zoomOutMacroModeThreshold = Element.LINE_THICKNESS * 16000 / Math.min(w, h);
-    	if (!isSizeSet()) {
-    		zoomOut = Mathh.constrain(MIN_ZOOM_OUT, 4000000 / w, MAX_ZOOM_OUT);
-    	}
+        // enable macro if line thickness is greater than 1/16 of the smaller side of the screen
+        // thickness * 1000 / zoomOut >= minSide/16
+        // thickness * 16000 / minSide >= zoomOut
+        // threshold = thickness * 16000 / minSide
+        zoomOutMacroModeThreshold = Element.LINE_THICKNESS * 16000 / Math.min(w, h);
+        if (!isSizeSet()) {
+            zoomOut = Mathh.constrain(MIN_ZOOM_OUT, 4000000 / w, MAX_ZOOM_OUT);
+        }
         recalculateOffset();
     }
 
@@ -148,13 +148,13 @@ public class EditorCanvas extends StructureViewerComponent {
         }
 
         int step = Math.max(count * count * gridStep, zoomOut / 1000 / gridStep * gridStep);
-		switch (RootContainer.getAction(keyCode)) {
+        switch (RootContainer.getAction(keyCode)) {
             case Keys.FIRE:
                 structureBuilder.handleNextPoint((short) cursorX, (short) cursorY, false);
                 break;
             default:
-            	if (!moveCursorByKeyboard(keyCode, step)) {
-                	return false;
+                if (!moveCursorByKeyboard(keyCode, step)) {
+                    return false;
                 }
         }
         pointerHandler.onCursorMove();
@@ -166,7 +166,7 @@ public class EditorCanvas extends StructureViewerComponent {
         int a = Math.min(100, keyRepeats);
         int step = (gridStep * (1 + a)) * pressedCount;
         if (!moveCursorByKeyboard(keyCode, step)) {
-        	return false;
+            return false;
         }
         pointerHandler.onCursorMove();
         keyRepeats++;
@@ -174,43 +174,43 @@ public class EditorCanvas extends StructureViewerComponent {
     }
 
     private boolean moveCursorByKeyboard(int keyCode, int step) {
-    	switch (RootContainer.getAction(keyCode)) {
-	        case Keys.UP:
-	            cursorY -= step;
-	            break;
-	        case Keys.DOWN:
-	            cursorY += step;
-	            break;
-	        case Keys.LEFT:
-	            cursorX -= step;
-	            break;
-	        case Keys.RIGHT:
-	            cursorX += step;
-	            break;
-	        default:
-	            switch (keyCode) {
-	                case Keys.KEY_NUM1:
-	                	cursorX -= step;
-	                    cursorY -= step;
-	                    break;
-	                case Keys.KEY_NUM3:
-	                	cursorX += step;
-	                    cursorY -= step;
-	                    break;
-	                case Keys.KEY_NUM7:
-	                	cursorX -= step;
-	                    cursorY += step;
-	                    break;
-	                case Keys.KEY_NUM9:
-	                	cursorX += step;
-	                    cursorY += step;
-	                    break;
-	                default:
-	                    return false;
-	            }
-	    }
+        switch (RootContainer.getAction(keyCode)) {
+            case Keys.UP:
+                cursorY -= step;
+                break;
+            case Keys.DOWN:
+                cursorY += step;
+                break;
+            case Keys.LEFT:
+                cursorX -= step;
+                break;
+            case Keys.RIGHT:
+                cursorX += step;
+                break;
+            default:
+                switch (keyCode) {
+                    case Keys.KEY_NUM1:
+                        cursorX -= step;
+                        cursorY -= step;
+                        break;
+                    case Keys.KEY_NUM3:
+                        cursorX += step;
+                        cursorY -= step;
+                        break;
+                    case Keys.KEY_NUM7:
+                        cursorX -= step;
+                        cursorY += step;
+                        break;
+                    case Keys.KEY_NUM9:
+                        cursorX += step;
+                        cursorY += step;
+                        break;
+                    default:
+                        return false;
+                }
+        }
         roundToGrid();
-    	return true;
+        return true;
     }
 
     public int getCursorX() {
@@ -269,11 +269,11 @@ public class EditorCanvas extends StructureViewerComponent {
         int wr = 40;
         int carX = 0 - (carBodyLength / 2 - wr);
         int carY = 0 - wr / 2 * 3 - 2;
-    
+
         void drawCar(Graphics g, int x0, int y0) {
-        	if (zoomOut < zoomOutMacroModeThreshold) {
-        		return;
-        	}
+            if (zoomOut < zoomOutMacroModeThreshold) {
+                return;
+            }
             g.setColor(0x444444);
             g.drawRect(x0 + xToPX(carX - carBodyLength / 2),
                     y0 + yToPX(carY - carBodyHeight / 2),

@@ -19,7 +19,7 @@ public class Page1 extends AbstractSetupWizardPage {
     public void initOnFirstShow() { }
 
     protected IUIComponent initAndGetPageContent() {
-    	return About.getAppLogo();
+        return About.getAppLogo();
     }
 
     public void setPageContentBounds(IUIComponent pageContent, int x0, int y0, int w, int h) {

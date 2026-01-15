@@ -23,28 +23,28 @@ public class SettingsUI extends AbstractPopupPage {
 
     protected IUIComponent initAndGetPageContent() {
         Button[] settingsButtons = new Button[]{
-    		new Button("Current game folder: " + EditorSettings.getGameFolderPath()) {
+            new Button("Current game folder: " + EditorSettings.getGameFolderPath()) {
                 public void buttonPressed() { }
             }.setIsActive(false),//.setBgColorInactive(0x223322).setFontColorInactive(0xaaaaaa),
             new Switch("Smooth keyboard scrolling") {
-				public boolean getValue() {
-					return EditorSettings.getKbSmoothScrollingEnabled();
-				}
+                public boolean getValue() {
+                    return EditorSettings.getKbSmoothScrollingEnabled();
+                }
 
-				public void setValue(boolean value) {
-					EditorSettings.setKbSmoothScrollingEnabled(value);
-					getUISettings().onChange();
-				}
+                public void setValue(boolean value) {
+                    EditorSettings.setKbSmoothScrollingEnabled(value);
+                    getUISettings().onChange();
+                }
             },
             new Switch("Kinetic touch scrolling") {
-				public boolean getValue() {
-					return EditorSettings.getKineticScrollingEnabled();
-				}
+                public boolean getValue() {
+                    return EditorSettings.getKineticScrollingEnabled();
+                }
 
-				public void setValue(boolean value) {
-					EditorSettings.setKineticScrollingEnabled(value);
-					getUISettings().onChange();
-				}
+                public void setValue(boolean value) {
+                    EditorSettings.setKineticScrollingEnabled(value);
+                    getUISettings().onChange();
+                }
             },
             new Switch("Transparent background of popups") {
                 public boolean getValue() {
@@ -57,44 +57,44 @@ public class SettingsUI extends AbstractPopupPage {
                 }
             },
             new Switch("Key repeats in lists") {
-				public boolean getValue() {
-					return EditorSettings.getKeyRepeatedInListsEnabled();
-				}
+                public boolean getValue() {
+                    return EditorSettings.getKeyRepeatedInListsEnabled();
+                }
 
-				public void setValue(boolean value) {
-					EditorSettings.setKeyRepeatedInListsEnabled(value);
-					getUISettings().onChange();
-				}
+                public void setValue(boolean value) {
+                    EditorSettings.setKeyRepeatedInListsEnabled(value);
+                    getUISettings().onChange();
+                }
             },
             new Switch("Auto-save") {
-            	public boolean getValue() {
-					return EditorSettings.getAutoSaveEnabled();
-				}
+                public boolean getValue() {
+                    return EditorSettings.getAutoSaveEnabled();
+                }
 
-				public void setValue(boolean value) {
-					EditorSettings.setAutoSaveEnabled(value);
-					getUISettings().onChange();
-				}
+                public void setValue(boolean value) {
+                    EditorSettings.setAutoSaveEnabled(value);
+                    getUISettings().onChange();
+                }
             },
             new Switch("Show log") {
-            	public boolean getValue() {
-					return EditorSettings.getOnScreenLogEnabled();
-				}
+                public boolean getValue() {
+                    return EditorSettings.getOnScreenLogEnabled();
+                }
 
-				public void setValue(boolean value) {
-					EditorSettings.setOnScreenLogEnabled(value);
-					getUISettings().onChange();
-				}
+                public void setValue(boolean value) {
+                    EditorSettings.setOnScreenLogEnabled(value);
+                    getUISettings().onChange();
+                }
             },
             new Button("Open setup wizard") {
                 public void buttonPressed() {
                     showPopup(new SetupWizard(new SetupWizard.FinishSetup() {
-						public void onFinish() {
-							closePopup();
-							isInited = false;
-		                    init();
-						}
-					}));
+                        public void onFinish() {
+                            closePopup();
+                            isInited = false;
+                            init();
+                        }
+                    }));
                 }
             },
             new Button("Reset settings") {
@@ -108,7 +108,7 @@ public class SettingsUI extends AbstractPopupPage {
 
         return new ButtonCol(settingsButtons);
     }
-    
+
     public void setPageContentBounds(IUIComponent pageContent, int x0, int y0, int w, int h) {
         if (pageContent != null) {
             ((ButtonCol) pageContent)

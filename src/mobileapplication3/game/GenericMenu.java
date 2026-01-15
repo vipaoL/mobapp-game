@@ -21,19 +21,19 @@ public abstract class GenericMenu extends CanvasComponent {
     private int fontH, tick = 0, k = 10, keyPressDelay = 0,
             keyPressDelayAfterShowing = 5, firstReachable = 0, lastReachable = NOT_SET,
             firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY, lastKeyCode = 0;
-    
+
     public int selected;
-    
+
     // colors
     protected int normalColor = 0xffffff, selectedColor = 0xff4040,
             pressedColor = 0xE03838, specialOptionActivatedColor = 0xffff00,
             colUnreachable = 0x888888, colReachableEnabled = 0x88ff00, bgColor = 0x000000;
     private String[] options;
-    
+
     private boolean isPressedByPointerNow, firstload = true,
             isSpecialOptionActivated = false, isSelectPressed = false,
             fontFound = false;
-    
+
     private boolean isKnownButton = true, isInited = false;
     public boolean isPaused = false;
     public boolean isStopped = false;
@@ -48,17 +48,17 @@ public abstract class GenericMenu extends CanvasComponent {
     public static final int SIEMENS_KEY_DOWN = -60;
     public static final int SIEMENS_KEY_LEFT = -61;
     public static final int SIEMENS_KEY_RIGHT = -62;
-    
+
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
-    	if (bgColor >= 0) {
-    		g.setColor(bgColor);
-    		g.fillRect(x0, y0, Math.max(w, h), Math.max(w, h));
-    	}
+        if (bgColor >= 0) {
+            g.setColor(bgColor);
+            g.fillRect(x0, y0, Math.max(w, h), Math.max(w, h));
+        }
         if (isInited && options != null) {
             for (int i = firstDrawable; i < options.length; i++) {
-            	if (font != null) {
-            		g.setFont(font);
-            	}
+                if (font != null) {
+                    g.setFont(font);
+                }
                 g.setColor(normalColor);
                 int offset = 0;
 
@@ -87,14 +87,14 @@ public abstract class GenericMenu extends CanvasComponent {
                 int x = x0 + w / 2;
                 int y = y0 + k * (i + 1 - firstDrawable) - fontH / 2 - h / (options.length + 1 - firstDrawable) / 2 + offset*Font.getDefaultFont().getHeight() / 8000;
                 if (options[i] != null) {
-                	g.drawString(options[i], x, y, Graphics.HCENTER | Graphics.TOP); // draw option on (x, y) //
+                    g.drawString(options[i], x, y, Graphics.HCENTER | Graphics.TOP); // draw option on (x, y) //
                 }
 
                 if (DebugMenu.isDebugEnabled && DebugMenu.showFontSize) {
                     g.drawString(String.valueOf(font.getSize()), x0, y0, 0); // display text size (for debug)
                 }
             }
-            
+
             if (!isKnownButton) {
                 g.setColor(0x808080);
                 g.drawString(lastKeyCode + " - unknown keyCode", w, h, Graphics.BOTTOM | Graphics.RIGHT);
@@ -104,10 +104,10 @@ public abstract class GenericMenu extends CanvasComponent {
             g.drawString("Loading the menu...", w / 2, h, Graphics.BOTTOM | Graphics.HCENTER);
         }
     }
-    
+
     public int findOptimalFont(int canvW, int canvH, String[] options) {
         font = new Font(Font.SIZE_LARGE);
-        
+
         // height
         if (font.getHeight() * (options.length - firstDrawable) >= canvH - canvH/16) {
             font = new Font(Font.SIZE_MEDIUM);
@@ -115,7 +115,7 @@ public abstract class GenericMenu extends CanvasComponent {
         if (font.getHeight() * (options.length - firstDrawable) >= canvH - canvH/16) {
             font = new Font(Font.SIZE_SMALL);
         }
-        
+
         // width
         if (font.getSize() != Font.SIZE_SMALL) {
             for (int i = firstDrawable; i < options.length - 1; i++) {
@@ -130,7 +130,7 @@ public abstract class GenericMenu extends CanvasComponent {
         }
         return font.getHeight();
     }
-    
+
     private boolean isOptionAvailable(int n) {
         if (stateMap != null) {
             if (n >= stateMap.length) {
@@ -144,14 +144,14 @@ public abstract class GenericMenu extends CanvasComponent {
         if (n < firstReachable || n > getLastReachable()) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     public boolean isMenuInited() {
         return isInited;
     }
-    
+
     public boolean handlePointerPressed(int x, int y) {
         handlePointer(x, y);
         return true;
@@ -168,7 +168,7 @@ public abstract class GenericMenu extends CanvasComponent {
         }
         return true;
     }
-    
+
     public boolean handlePointer(int x, int y) {
         x -= x0;
         y -= y0;
@@ -185,30 +185,30 @@ public abstract class GenericMenu extends CanvasComponent {
         isPressedByPointerNow = true;
         return stateMap == null || stateMap[selected] != STATE_INACTIVE;
     }
-    
+
     private boolean handleKeyStates(int keyStates) {
         if (keyStates == 0) {
-        	return false;
+            return false;
         }
 
         int lastReachable = getLastReachable();
 
         isPaused = false;
         switch (keyStates) {
-        	case Keys.LEFT:
-        		selected = lastReachable; // back
-			case Keys.RIGHT:
-			case Keys.FIRE:
-				isSelectPressed = true;
-            	isKnownButton = true;
-				return stateMap == null || stateMap[selected] != STATE_INACTIVE;
-		}
-        
+            case Keys.LEFT:
+                selected = lastReachable; // back
+            case Keys.RIGHT:
+            case Keys.FIRE:
+                isSelectPressed = true;
+                isKnownButton = true;
+                return stateMap == null || stateMap[selected] != STATE_INACTIVE;
+        }
+
         boolean needRepeat;
         do {
             switch (keyStates) {
-            	case Keys.UP:
-            		isKnownButton = true;
+                case Keys.UP:
+                    isKnownButton = true;
                     isPaused = false;
                     if (selected > firstReachable) {
                         selected--;
@@ -216,7 +216,7 @@ public abstract class GenericMenu extends CanvasComponent {
                         selected = lastReachable;
                     }
                     break;
-            	case Keys.DOWN:
+                case Keys.DOWN:
                     isKnownButton = true;
                     isPaused = false;
                     if (selected < lastReachable) {
@@ -226,7 +226,7 @@ public abstract class GenericMenu extends CanvasComponent {
                     }
                     break;
             }
-            
+
             needRepeat = !isSelectPressed && stateMap != null && stateMap[selected] == STATE_INACTIVE;
         } while (needRepeat);
 
@@ -234,10 +234,10 @@ public abstract class GenericMenu extends CanvasComponent {
     }
 
     public boolean handleKeyRepeated(int keyCode, int pressedCount) {
-    	handleKeyPressed(keyCode);
-    	return true;
+        handleKeyPressed(keyCode);
+        return true;
     }
-    
+
     public boolean handleKeyPressed(int keyCode, int count) {
         if(handleKeyPressed(keyCode)) {
             selectPressed();
@@ -245,7 +245,7 @@ public abstract class GenericMenu extends CanvasComponent {
         }
         return true;
     }
-    
+
     public boolean handleKeyPressed(int keyCode) {
         lastKeyCode = keyCode;
         isKnownButton = false;
@@ -304,7 +304,7 @@ public abstract class GenericMenu extends CanvasComponent {
             case Keys.KEY_NUM0: // back
             case Keys.KEY_SOFT_RIGHT:
             case SIEMENS_KEY_RIGHT:
-            	return handleKeyStates(Keys.LEFT);
+                return handleKeyStates(Keys.LEFT);
             case Keys.KEY_POUND:
             case Keys.KEY_SOFT_LEFT: // select
             case SIEMENS_KEY_LEFT:
@@ -314,7 +314,7 @@ public abstract class GenericMenu extends CanvasComponent {
                 return handleKeyStates(RootContainer.getAction(keyCode));
         }
         selected += firstReachable;
-        
+
         if (pressed) {
             isKnownButton = true;
             if (isOptionAvailable(selected)) {
@@ -331,17 +331,17 @@ public abstract class GenericMenu extends CanvasComponent {
         isSelectPressed = false;
         return true;
     }
-    
+
     protected void loadCanvasParams(int x0, int y0, int w, int h) {
         this.x0 = x0;
         this.y0 = y0;
         if (w <= 0 || h <= 0) {
-        	return;
+            return;
         }
-        
+
         this.w = w;
         this.h = h;
-        
+
         if (options != null) {
             k = (h + h / (options.length + 1 - firstDrawable)) / (options.length + 1 - firstDrawable);
             fontH = findOptimalFont(w, h, options);
@@ -357,11 +357,11 @@ public abstract class GenericMenu extends CanvasComponent {
 
     public void onShow() {
         Logger.log("menu:showNotify");
-        
+
         isPaused = false;
         pauseDelay = PAUSE_DELAY;
     }
-    
+
     public void onHide() {
         Logger.log("menu:hideNotify");
         // It prevents a bug on siemens that calls hideNotify right after calling showNotify.
@@ -369,7 +369,7 @@ public abstract class GenericMenu extends CanvasComponent {
             isPaused = true;
         }
     }
-    
+
     protected void onSetBounds(int x0, int y0, int w, int h) {
         this.w = w;
         this.h = h;
@@ -377,7 +377,7 @@ public abstract class GenericMenu extends CanvasComponent {
     }
 
     public boolean canBeFocused() {
-    	return true;
+        return true;
     }
 
     public void loadParams(String[] options) {
@@ -480,6 +480,6 @@ public abstract class GenericMenu extends CanvasComponent {
             keyPressDelay--;
         }
     }
-    
+
     abstract void selectPressed();
 }

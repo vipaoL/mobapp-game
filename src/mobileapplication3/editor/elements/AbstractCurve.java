@@ -11,15 +11,15 @@ import mobileapplication3.platform.ui.Graphics;
  */
 public abstract class AbstractCurve extends Element {
     protected static final int NO_ARROWS = 0, ARROWS_NORMAL = 1, ARROWS_INVERTED = -1;
-    
+
     protected PointsCache pointsCache;
 
     public AbstractCurve() {
         pointsCache = null;
     }
-    
+
     abstract void genPoints();
-    
+
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
         if (pointsCache == null) {
             genPoints();
@@ -56,15 +56,15 @@ public abstract class AbstractCurve extends Element {
             startPoint = endPoint;
         }
     }
-    
+
     public boolean isBody() {
-		return false;
-	}
+        return false;
+    }
 
     protected int getArrowsDirection() {
         return NO_ARROWS;
     }
-    
+
     protected class PointsCache {
         short[][] pointsCache;
         int cacheCarriage = 0;
@@ -72,9 +72,9 @@ public abstract class AbstractCurve extends Element {
         PointsCache(int length) {
             pointsCache = new short[length][2];
         }
-        
+
         public void writePointToCache(short[] point) {
-        	writePointToCache(point[0], point[1]);
+            writePointToCache(point[0], point[1]);
         }
 
         public void writePointToCache(int x, int y) {
@@ -82,22 +82,22 @@ public abstract class AbstractCurve extends Element {
             pointsCache[cacheCarriage][1] = (short) y;
             cacheCarriage += 1;
         }
-        
+
         public void movePoints(short dx, short dy) {
-        	for (int i = 0; i < pointsCache.length; i++) {
-				pointsCache[i][0] += dx;
-				pointsCache[i][1] += dy;
-			}
+            for (int i = 0; i < pointsCache.length; i++) {
+                pointsCache[i][0] += dx;
+                pointsCache[i][1] += dy;
+            }
         }
 
         public int getSize() {
             return cacheCarriage;
         }
-        
+
         public short[] getPoint(int i) {
             return pointsCache[i];
         }
-    
+
     }
-    
+
 }

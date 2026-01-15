@@ -111,10 +111,10 @@ public class Levels extends GenericMenu implements Runnable {
     }
 
     private synchronized void openFromRes(String path) {
-    	if (isStopped || loadingLevel) {
-    		return;
-    	}
-    	loadingLevel = true;
+        if (isStopped || loadingLevel) {
+            return;
+        }
+        loadingLevel = true;
 
         InputStream is = null;
         try {
@@ -136,7 +136,7 @@ public class Levels extends GenericMenu implements Runnable {
         getFontSize();
         (new Thread(this, "levels")).start();
     }
-    
+
     public String[] getLevels() {
         Logger.log("Levels:getLevels()");
         return GameFileUtils.listFilesInAllPlaces(LEVELS_FOLDER_NAME);
@@ -149,30 +149,30 @@ public class Levels extends GenericMenu implements Runnable {
             return null;
         }
     }
-    
+
     public synchronized void openFromFS(final String path) {
-    	if (isStopped || loadingLevel) {
-    		return;
-    	}
-    	loadingLevel = true;
+        if (isStopped || loadingLevel) {
+            return;
+        }
+        loadingLevel = true;
 
         (new Thread(new Runnable() {
             public void run() {
-            	try {
-	                GameplayCanvas gameCanvas = null;
-	                if (path.endsWith(".phy")) {
-	                    gameCanvas = new GameplayCanvas(readWorldFile(path));
-	                } else if (path.endsWith(".mglvl")) {
-	                    gameCanvas = openLevel(path);
-	                }
-	                if (gameCanvas != null) {
-	                    RootContainer.setRootUIComponent(gameCanvas);
-	                    isStopped = true;
-	                }
-            	} catch (Exception ex) {
-					Platform.showError(ex);
-					loadingLevel = false;
-				}
+                try {
+                    GameplayCanvas gameCanvas = null;
+                    if (path.endsWith(".phy")) {
+                        gameCanvas = new GameplayCanvas(readWorldFile(path));
+                    } else if (path.endsWith(".mglvl")) {
+                        gameCanvas = openLevel(path);
+                    }
+                    if (gameCanvas != null) {
+                        RootContainer.setRootUIComponent(gameCanvas);
+                        isStopped = true;
+                    }
+                } catch (Exception ex) {
+                    Platform.showError(ex);
+                    loadingLevel = false;
+                }
             }
         })).start();
     }
@@ -201,7 +201,7 @@ public class Levels extends GenericMenu implements Runnable {
         reader.close();
         return w;
     }
-    
+
     public void selectPressed() {
         defaultSelected = selected;
         if (selected == buttons.length - 1) {
@@ -228,12 +228,12 @@ public class Levels extends GenericMenu implements Runnable {
         Logger.log("Levels:run()");
         long sleep = 0;
         long start = 0;
-        
+
         isPaused = false;
         while (!isStopped) {
             if (!isPaused) {
                 start = System.currentTimeMillis();
-                
+
                 repaint();
                 tick();
 

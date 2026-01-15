@@ -24,21 +24,21 @@ import java.util.Vector;
  */
 public class GameplayCanvas extends CanvasComponent implements Runnable {
     public static final int TICK_DURATION = 50;
-	private static final String[] MENU_HINT = {"MENU", "(LSoft, #, 9)"};
+    private static final String[] MENU_HINT = {"MENU", "(LSoft, #, 9)"};
     private static final String[] PAUSE_HINT = {"PAUSE", "(RSoft, *, 3)"};
     public static final short EFFECT_SPEED = 0;
     private static final int BATT_UPD_PERIOD = 10000;
-	private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2, GAME_MODE_EMINI_WORLD = 3;
-	private static final int GAME_OVER_DAMAGE = 8;
-	private static final int GAME_OVER_STUCK_TIME = 1000; // ms
-    
+    private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2, GAME_MODE_EMINI_WORLD = 3;
+    private static final int GAME_OVER_DAMAGE = 8;
+    private static final int GAME_OVER_STUCK_TIME = 1000; // ms
+
     // to prevent siemens' bug which calls hideNotify right after showing canvas
     private static final int PAUSE_DELAY = 5;
     private int pauseDelay = PAUSE_DELAY;
     private boolean wasPaused = false;
-    
+
     // state and mode
-	private int gameMode = GAME_MODE_ENDLESS;
+    private int gameMode = GAME_MODE_ENDLESS;
     private static boolean isFirstStart = true; // show hints only on first start
     public boolean uninterestingDebug = false;
     public boolean shouldWait = false;
@@ -54,176 +54,176 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private boolean isStopping = false;
     private boolean gameOver = false;
     private boolean feltUnderTheWorld = false;
-    
+
     // screen
     private int scW, scH;
     private int maxScSide;
 
-	// car state
+    // car state
     private int carVelocitySqr;
     private int carAngle = 0;
-	public int carSpawnX = 100;
-	public int carSpawnY = -400;
-	private int prevCarX, prevCarY;
+    public int carSpawnX = 100;
+    public int carSpawnY = -400;
+    private int prevCarX, prevCarY;
     // motor state
     private boolean motorTurnedOn = false;
 
     // indicators
     private int flipIndicator = 255; // blink the counter after flip
-	private int posResetIndicator = 0; // show when wg moves the world
+    private int posResetIndicator = 0; // show when wg moves the world
     private int loadingProgress = 0;
     private int speedoState = 0;
     private int tickTime;
     private int fps;
     private int tps;
-	private int physicsIterations;
-	private int debugTickTime, debugPaintTime;
+    private int physicsIterations;
+    private int debugTickTime, debugPaintTime;
     private String statusMessage = null;
 
-	// debug
-	private int debugTextOffset;
-    
+    // debug
+    private int debugTextOffset;
+
     // touchscreen
     private int pointerX = 0, pointerY = 0;
     private boolean pauseTouched = false;
     private boolean menuTouched = false;
-    
+
     // counters
     public int points = 0;
-	private boolean countPoints = true;
+    private boolean countPoints = true;
     private int damage;
-	private int timeStuck = 0;
+    private int timeStuck = 0;
     public int timeFlying = 10;
     private int ticksMotorTurnedOff = 50;
     private long lastBigTickTime;
     private int bgTick = 0;
     private int framesFromLastFPSMeasure = 0;
     private int ticksFromLastTPSMeasure = 0;
-    
+
     public short[][] currentEffects = new short[1][];
-	private short[][] level = null;
+    private short[][] level = null;
 
     // fonts
     private Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
     private Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private Font currentFont = largefont;
     private int currentFontH = currentFont.getHeight();
-    
+
     private GraphicsWorld world;
     private WorldGen worldgen;
     private FlipCounter flipCounter;
-	private IUIComponent prevScreen = null;
+    private IUIComponent prevScreen = null;
 
     private Thread gameThread = null;
-	private int baseTimestepFX = 0;
+    private int baseTimestepFX = 0;
 
-	private Vector deferredStructures = null;
+    private Vector deferredStructures = null;
 
-	// a thread to stop the game and open menu after a delay
-	private Thread stopperThread;
-	private boolean openMenu;
+    // a thread to stop the game and open menu after a delay
+    private Thread stopperThread;
+    private boolean openMenu;
 
     public GameplayCanvas() {
         log("game: constructor");
         repaintOnlyOnFlushGraphics = true;
     }
-    
+
     public GameplayCanvas(GraphicsWorld w) {
-    	this();
-		gameMode = GAME_MODE_EMINI_WORLD;
+        this();
+        gameMode = GAME_MODE_EMINI_WORLD;
         world = w;
-		world.setGame(this);
+        world.setGame(this);
     }
 
-	public GameplayCanvas(IUIComponent prevScreen) {
-		this();
-		this.prevScreen = prevScreen;
-		world = new GraphicsWorld();
-		world.setGame(this);
-	}
+    public GameplayCanvas(IUIComponent prevScreen) {
+        this();
+        this.prevScreen = prevScreen;
+        world = new GraphicsWorld();
+        world.setGame(this);
+    }
 
-	public GameplayCanvas addDeferredStructure(short[][] structureData) {
-		if (worldgen == null) {
-			if (deferredStructures == null) {
-				deferredStructures = new Vector();
-			}
-			deferredStructures.addElement(structureData);
-		} else {
-			worldgen.addDeferredStructure(structureData);
-		}
-		return this;
-	}
+    public GameplayCanvas addDeferredStructure(short[][] structureData) {
+        if (worldgen == null) {
+            if (deferredStructures == null) {
+                deferredStructures = new Vector();
+            }
+            deferredStructures.addElement(structureData);
+        } else {
+            worldgen.addDeferredStructure(structureData);
+        }
+        return this;
+    }
 
-	public GameplayCanvas loadLevel(short[][] levelData) {
-		this.level = levelData;
-		gameMode = GAME_MODE_LEVEL;
-		StructurePlacer.place(world, false, levelData, 0, 0);
-		if (levelData[0][0] == ElementPlacer.LEVEL_START) {
-			carSpawnX = levelData[0][1];
-			carSpawnY = levelData[0][2];
-		}
-		world.removeBodies = false;
-		return this;
-	}
+    public GameplayCanvas loadLevel(short[][] levelData) {
+        this.level = levelData;
+        gameMode = GAME_MODE_LEVEL;
+        StructurePlacer.place(world, false, levelData, 0, 0);
+        if (levelData[0][0] == ElementPlacer.LEVEL_START) {
+            carSpawnX = levelData[0][1];
+            carSpawnY = levelData[0][2];
+        }
+        world.removeBodies = false;
+        return this;
+    }
 
-	public GameplayCanvas disablePointCounter() {
-		countPoints = false;
-		return this;
-	}
-    
+    public GameplayCanvas disablePointCounter() {
+        countPoints = false;
+        return this;
+    }
+
     public void init() {
-		if (gameThread == null || !gameThread.isAlive()) {
-			log("starting game thread");
-			gameThread = new Thread(this, "game canvas");
-			gameThread.start();
-		}
+        if (gameThread == null || !gameThread.isAlive()) {
+            log("starting game thread");
+            gameThread = new Thread(this, "game canvas");
+            gameThread.start();
+        }
     }
-    
+
     private void reset() {
         log("resetting the world");
         points = 0;
         damage = 0;
-		countPoints = true;
-		WorldGen.isEnabled = gameMode == GAME_MODE_ENDLESS;
+        countPoints = true;
+        WorldGen.isEnabled = gameMode == GAME_MODE_ENDLESS;
         if (WorldGen.isEnabled) {
-			if (worldgen == null) {
-				log("starting wg");
-				worldgen = new WorldGen(this, world);
-			}
-			if (deferredStructures != null) {
-				for (int i = 0; i < deferredStructures.size(); i++) {
-					worldgen.addDeferredStructure((short[][]) deferredStructures.elementAt(i));
-				}
-			}
+            if (worldgen == null) {
+                log("starting wg");
+                worldgen = new WorldGen(this, world);
+            }
+            if (deferredStructures != null) {
+                for (int i = 0; i < deferredStructures.size(); i++) {
+                    worldgen.addDeferredStructure((short[][]) deferredStructures.elementAt(i));
+                }
+            }
             flipCounter = new FlipCounter();
             log("wg started");
         }
         setLoadingProgress(50);
-		if (WorldGen.isEnabled) {
-			carSpawnX = -3000;
-		}
-		if (world.carbody == null) {
-			world.addCar(carSpawnX, carSpawnY, FXUtil.TWO_PI_2FX / 360 * 30);
-		}
+        if (WorldGen.isEnabled) {
+            carSpawnX = -3000;
+        }
+        if (world.carbody == null) {
+            world.addCar(carSpawnX, carSpawnY, FXUtil.TWO_PI_2FX / 360 * 30);
+        }
         setLoadingProgress(60);
     }
-    
+
     private void initWorld() {
-    	log("initing world");
+        log("initing world");
         world.setGravity(FXVector.newVector(0, 1000));
         world.getLandscape().getBody().shape().setElasticity(5);
         setLoadingProgress(40);
         reset();
         isWorldLoaded = true;
     }
-    
+
     private void setDefaultWorld() {
         setLoadingProgress(25);
-        
+
         log("creating world");
         // there siemens c65 stucks if obfuscation is enabled
         world = new GraphicsWorld();
-		world.setGame(this);
+        world.setGame(this);
 
         setLoadingProgress(30);
         log("setting the world");
@@ -242,24 +242,24 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             boolean wasPaused = true;
             tickTime = TICK_DURATION;
             int physicsIterationsSetting = MobappGameSettings.DEFAULT_PHYSICS_PRECISION;
-			boolean lockPhysicsPrecision;
-			boolean dynamicPhysicsPrecision;
-			int maxFrameTime = MobappGameSettings.DEFAULT_FRAME_TIME;
-			try {
-            	log("reading settings");
+            boolean lockPhysicsPrecision;
+            boolean dynamicPhysicsPrecision;
+            int maxFrameTime = MobappGameSettings.DEFAULT_FRAME_TIME;
+            try {
+                log("reading settings");
                 physicsIterationsSetting = MobappGameSettings.getPhysicsPrecision();
-				maxFrameTime = MobappGameSettings.getFrameTime();
-    	        showFPS = MobappGameSettings.isFPSShown(showFPS);
-    	        battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
+                maxFrameTime = MobappGameSettings.getFrameTime();
+                showFPS = MobappGameSettings.isFPSShown(showFPS);
+                battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
             } catch (Throwable ex) {
-    			Platform.showError("Can't read settings", ex);
-    		}
-			dynamicPhysicsPrecision = physicsIterationsSetting == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
-			lockPhysicsPrecision = !dynamicPhysicsPrecision && physicsIterationsSetting != MobappGameSettings.AUTO_PHYSICS_PRECISION;
+                Platform.showError("Can't read settings", ex);
+            }
+            dynamicPhysicsPrecision = physicsIterationsSetting == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
+            lockPhysicsPrecision = !dynamicPhysicsPrecision && physicsIterationsSetting != MobappGameSettings.AUTO_PHYSICS_PRECISION;
             physicsIterations = physicsIterationsSetting;
-			if (physicsIterations <= 0) {
-				physicsIterations = 2;
-			}
+            if (physicsIterations <= 0) {
+                physicsIterations = 2;
+            }
 
             if (world == null) {
                 // new world
@@ -270,14 +270,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             }
 
             world.refreshScreenParameters(scW, scH);
-            
+
             Logger.setLogMessageDelay(50);
             currentEffects = new short[1][];
 
-			if (DebugMenu.isDebugEnabled || DebugMenu.simulationMode || deferredStructures != null) {
-				disablePointCounter();
-			}
-            
+            if (DebugMenu.isDebugEnabled || DebugMenu.simulationMode || deferredStructures != null) {
+                disablePointCounter();
+            }
+
             setLoadingProgress(80);
 
             // init music player if enabled
@@ -286,7 +286,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 Sound sound = new Sound();
                 sound.start();
             }
-            
+
             if (DebugMenu.simulationMode) {
                 world.rightWheel.setDynamic(false);
                 world.carbody.setDynamic(false);
@@ -298,425 +298,425 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             log("starting game cycle");
 
             Logger.setLogMessageDelay(0);
-			if (baseTimestepFX == 0) {
-				baseTimestepFX = world.getTimestepFX();
-			}
+            if (baseTimestepFX == 0) {
+                baseTimestepFX = world.getTimestepFX();
+            }
             long lastFPSMeasureTime = System.currentTimeMillis();
             long lastBattUpdateTime = 0;
-			int physicsIterationsUnalteredCount = 0;
+            int physicsIterationsUnalteredCount = 0;
 
-			Object wgLock;
-			if (worldgen != null) {
-				wgLock = worldgen.lock;
-			} else {
-				wgLock = new Object();
-			}
+            Object wgLock;
+            if (worldgen != null) {
+                wgLock = worldgen.lock;
+            } else {
+                wgLock = new Object();
+            }
 
-			try {
-				for (int i = 0; !hasParent() && i < 30; i++) {
-					Thread.sleep(100);
-				}
-			} catch (InterruptedException ignored) { }
+            try {
+                for (int i = 0; !hasParent() && i < 30; i++) {
+                    Thread.sleep(100);
+                }
+            } catch (InterruptedException ignored) { }
 
-			long sleep;
-			long start = System.currentTimeMillis();
-			int bigTickN = 0;
+            long sleep;
+            long start = System.currentTimeMillis();
+            int bigTickN = 0;
 
             // Main game cycle
             while (!stopped && hasParent()) {
-            	try {
-	                if (!paused) {
-	                	// FPS & TPS counter
-	                	int dtFromLastFPSMeasure = (int) (System.currentTimeMillis() - lastFPSMeasureTime);
-	                	if (dtFromLastFPSMeasure > 1000) {
-	                		lastFPSMeasureTime = System.currentTimeMillis();
-	                		fps = framesFromLastFPSMeasure * 1000 / dtFromLastFPSMeasure;
-	                		framesFromLastFPSMeasure = 0;
-	                		tps = ticksFromLastTPSMeasure * 1000 / dtFromLastFPSMeasure;
-	                		ticksFromLastTPSMeasure = 0;
-	                	}
+                try {
+                    if (!paused) {
+                        // FPS & TPS counter
+                        int dtFromLastFPSMeasure = (int) (System.currentTimeMillis() - lastFPSMeasureTime);
+                        if (dtFromLastFPSMeasure > 1000) {
+                            lastFPSMeasureTime = System.currentTimeMillis();
+                            fps = framesFromLastFPSMeasure * 1000 / dtFromLastFPSMeasure;
+                            framesFromLastFPSMeasure = 0;
+                            tps = ticksFromLastTPSMeasure * 1000 / dtFromLastFPSMeasure;
+                            ticksFromLastTPSMeasure = 0;
+                        }
 
-						if (!lockPhysicsPrecision) {
-							if (framesFromLastFPSMeasure == 0) {
-								int prevValue = physicsIterations;
-								if (fps != 0) {
-									physicsIterations = Mathh.constrain(1, 140 / fps + 1, 10);
-									if (physicsIterations == prevValue) {
-										physicsIterationsUnalteredCount++;
-										if (!dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
-											Logger.log("locking precision multiplier: ", physicsIterations);
-											lockPhysicsPrecision = true;
-										}
-									} else {
-										physicsIterationsUnalteredCount = 0;
-									}
-								} else {
-									physicsIterationsUnalteredCount = 0;
-								}
-							}
-						}
+                        if (!lockPhysicsPrecision) {
+                            if (framesFromLastFPSMeasure == 0) {
+                                int prevValue = physicsIterations;
+                                if (fps != 0) {
+                                    physicsIterations = Mathh.constrain(1, 140 / fps + 1, 10);
+                                    if (physicsIterations == prevValue) {
+                                        physicsIterationsUnalteredCount++;
+                                        if (!dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
+                                            Logger.log("locking precision multiplier: ", physicsIterations);
+                                            lockPhysicsPrecision = true;
+                                        }
+                                    } else {
+                                        physicsIterationsUnalteredCount = 0;
+                                    }
+                                } else {
+                                    physicsIterationsUnalteredCount = 0;
+                                }
+                            }
+                        }
 
-						if (fps < 20) {
-							tryReduceLags();
-						}
+                        if (fps < 20) {
+                            tryReduceLags();
+                        }
 
                         // Adjust physics engine tick time to current TPS
-	                    if (!wasPaused) {
-	                        tickTime = (int) (System.currentTimeMillis() - start);
+                        if (!wasPaused) {
+                            tickTime = (int) (System.currentTimeMillis() - start);
                             world.setTimestepFX(Math.max(1, baseTimestepFX * Math.min(tickTime, 100) / 50 / physicsIterations));
                         } else {
-	                        wasPaused = false;
-	                    }
+                            wasPaused = false;
+                        }
 
                         start = System.currentTimeMillis();
-	
-	                    // Tick and draw
-						Contact[][] carContacts = getCarContacts();
-						synchronized (wgLock) {
-							setSimulationArea();
 
-							long tickStart = System.currentTimeMillis();
+                        // Tick and draw
+                        Contact[][] carContacts = getCarContacts();
+                        synchronized (wgLock) {
+                            setSimulationArea();
+
+                            long tickStart = System.currentTimeMillis();
                             for (int i = 0; i < physicsIterations; i++) {
-								world.tick();
-								// Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
-								carContacts = getCarContacts();
-								tickCustomBodyInteractions(carContacts);
-								ticksFromLastTPSMeasure++;
-							}
+                                world.tick();
+                                // Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
+                                carContacts = getCarContacts();
+                                tickCustomBodyInteractions(carContacts);
+                                ticksFromLastTPSMeasure++;
+                            }
                             debugTickTime = (int) (System.currentTimeMillis() - tickStart);
-							long paintStart = System.currentTimeMillis();
+                            long paintStart = System.currentTimeMillis();
                             paint();
-							debugPaintTime = (int) (System.currentTimeMillis() - paintStart);
-						}
+                            debugPaintTime = (int) (System.currentTimeMillis() - paintStart);
+                        }
 
                         boolean leftWheelContacts = carContacts[0][0] != null;
                         boolean carBodyContacts = carContacts[1][0] != null;
                         boolean rightWheelContacts = carContacts[2][0] != null;
-	                    
-	                    // some things should be performed once at a fixed interval (50ms, or 20 times per second)
-	                    boolean bigTick = start - lastBigTickTime > TICK_DURATION;
-	                    if (bigTick) {
-		                    if ((!leftWheelContacts && !rightWheelContacts)) {
-		                        timeFlying += 1;
-		                    } else {
-		                        timeFlying = 0;
-		                    }
-	
-		                    // Hide keyboard/touch buttons hint
-		                    if (isWorldLoaded) {
-	                            hintVisibleTimer--;
-	                        }
-	
-		                    // Prevent pause right after resume to work around some Siemens bug
-	                        if (pauseDelay > 0) {
-	                            pauseDelay--;
-	                        }
-	
-	                        // flip counter and debug posReset indicator
-	                        if (WorldGen.isEnabled) {
-	                            // highlight the score counter on flip
-	                            if (flipIndicator < 255) {
-	                                flipIndicator+=64;
-	                                if (flipIndicator >= 255) {
-	                                    flipIndicator = 255;
-	                                }
-	                            }
-	                            flipCounter.tick();
 
-								if (posResetIndicator > 0) {
-									posResetIndicator-=16;
-									if (posResetIndicator <= 0) {
-										posResetIndicator = 0;
-									}
-								}
-	                        }
+                        // some things should be performed once at a fixed interval (50ms, or 20 times per second)
+                        boolean bigTick = start - lastBigTickTime > TICK_DURATION;
+                        if (bigTick) {
+                            if ((!leftWheelContacts && !rightWheelContacts)) {
+                                timeFlying += 1;
+                            } else {
+                                timeFlying = 0;
+                            }
 
-	                        // move the car to the right in the simulation mode
-	                        if (DebugMenu.simulationMode) {
-	                            world.carbody.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-	                            world.leftWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-	                            world.rightWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-	                        }
-	
-	                        // tick effect timers (speed, slowness, ...)
-	                        tickEffects();
-	
-	                        // distribute some tasks over the ticks to offload the CPU
-	                        if (bigTickN < 3) {
-	                        	if (bigTickN == 1) {
-	                        		// tick the timers of falling platforms, removing bodies felt out of the world
-	                        		world.tickCustomBodies();
-	                        	}
+                            // Hide keyboard/touch buttons hint
+                            if (isWorldLoaded) {
+                                hintVisibleTimer--;
+                            }
+
+                            // Prevent pause right after resume to work around some Siemens bug
+                            if (pauseDelay > 0) {
+                                pauseDelay--;
+                            }
+
+                            // flip counter and debug posReset indicator
+                            if (WorldGen.isEnabled) {
+                                // highlight the score counter on flip
+                                if (flipIndicator < 255) {
+                                    flipIndicator+=64;
+                                    if (flipIndicator >= 255) {
+                                        flipIndicator = 255;
+                                    }
+                                }
+                                flipCounter.tick();
+
+                                if (posResetIndicator > 0) {
+                                    posResetIndicator-=16;
+                                    if (posResetIndicator <= 0) {
+                                        posResetIndicator = 0;
+                                    }
+                                }
+                            }
+
+                            // move the car to the right in the simulation mode
+                            if (DebugMenu.simulationMode) {
+                                world.carbody.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                                world.leftWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                                world.rightWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                            }
+
+                            // tick effect timers (speed, slowness, ...)
+                            tickEffects();
+
+                            // distribute some tasks over the ticks to offload the CPU
+                            if (bigTickN < 3) {
+                                if (bigTickN == 1) {
+                                    // tick the timers of falling platforms, removing bodies felt out of the world
+                                    world.tickCustomBodies();
+                                }
 
                                 bigTickN++;
                             } else {
-	                            bigTickN = 0;
-	                            tickDamage();
-	                            if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD && battIndicator) {
-	                            	batLevel = Battery.getBatteryLevel();
-	                            	lastBattUpdateTime = System.currentTimeMillis();
-	                            }
-	                        }
-	                        lastBigTickTime = start;
-	                    }
-	
-	                    // getting car angle
-	                    carAngle = 360 - FXUtil.angleInDegrees2FX(world.carbody.rotation2FX());
+                                bigTickN = 0;
+                                tickDamage();
+                                if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD && battIndicator) {
+                                    batLevel = Battery.getBatteryLevel();
+                                    lastBattUpdateTime = System.currentTimeMillis();
+                                }
+                            }
+                            lastBigTickTime = start;
+                        }
 
-						FXVector carVelocityFX = world.carbody.velocityFX();
-						int vX = carVelocityFX.xAsInt();
-						int vY = carVelocityFX.yAsInt();
+                        // getting car angle
+                        carAngle = 360 - FXUtil.angleInDegrees2FX(world.carbody.rotation2FX());
 
-						limitTopHeight();
+                        FXVector carVelocityFX = world.carbody.velocityFX();
+                        int vX = carVelocityFX.xAsInt();
+                        int vY = carVelocityFX.yAsInt();
 
-						// Gas and brake
-						boolean isNotFlying = timeFlying <= 2;
-						if (motorTurnedOn) {
-	                        ticksMotorTurnedOff = 0;
-	                        // apply motor force when on the ground
-	                        if (isNotFlying || uninterestingDebug) {
-	                        	// set motor power according to car speed
-	                            // (start quickly and limit max speed)
-	                            if (currentEffects[EFFECT_SPEED] != null) {
-	                                if (currentEffects[EFFECT_SPEED][0] > 0 && currentEffects[EFFECT_SPEED][2] != 0) {
-	                                    vX = vX * 100 / currentEffects[EFFECT_SPEED][2];
-	                                    vY = vY * 100 / currentEffects[EFFECT_SPEED][2];
-	                                }
-	                            }
+                        limitTopHeight();
+
+                        // Gas and brake
+                        boolean isNotFlying = timeFlying <= 2;
+                        if (motorTurnedOn) {
+                            ticksMotorTurnedOff = 0;
+                            // apply motor force when on the ground
+                            if (isNotFlying || uninterestingDebug) {
+                                // set motor power according to car speed
+                                // (start quickly and limit max speed)
+                                if (currentEffects[EFFECT_SPEED] != null) {
+                                    if (currentEffects[EFFECT_SPEED][0] > 0 && currentEffects[EFFECT_SPEED][2] != 0) {
+                                        vX = vX * 100 / currentEffects[EFFECT_SPEED][2];
+                                        vY = vY * 100 / currentEffects[EFFECT_SPEED][2];
+                                    }
+                                }
 
                                 int speedMultiplier;
                                 if (uninterestingDebug) {
-	                                speedMultiplier = 250000;
-	                            } else {
-		                            carVelocitySqr = (vX * vX + vY * vY) / 4;
-		                            if (carVelocitySqr > 1000000) {
-		                                speedMultiplier = 16000;
-		                                speedoState = 2;
-		                            } else if (carVelocitySqr > 100000) {
-		                                speedMultiplier = 123000;
-		                                speedoState = 1;
-		                            } else {
-		                                speedMultiplier = 160000;
-		                                speedoState = 0;
-		                            }
-	                            }
+                                    speedMultiplier = 250000;
+                                } else {
+                                    carVelocitySqr = (vX * vX + vY * vY) / 4;
+                                    if (carVelocitySqr > 1000000) {
+                                        speedMultiplier = 16000;
+                                        speedoState = 2;
+                                    } else if (carVelocitySqr > 100000) {
+                                        speedMultiplier = 123000;
+                                        speedoState = 1;
+                                    } else {
+                                        speedMultiplier = 160000;
+                                        speedoState = 0;
+                                    }
+                                }
 
-	                            int directionOffset = 0;
-	                            if (currentEffects[EFFECT_SPEED] != null) {
-	                                if (currentEffects[EFFECT_SPEED][0] > 0) {
-	                                    directionOffset = currentEffects[EFFECT_SPEED][1];
-	                                    speedMultiplier = speedMultiplier * currentEffects[EFFECT_SPEED][2] / 100;
-	                                }
-	                            }
-	                            int motorForceX = Mathh.cos(carAngle - 15 + directionOffset) * speedMultiplier / 50;
-	                            int motorForceY = Mathh.sin(carAngle - 15 + directionOffset) * speedMultiplier / -50;
-	                            world.carbody.applyMomentum(new FXVector(convertByTimestep(motorForceX), convertByTimestep(motorForceY)));
+                                int directionOffset = 0;
+                                if (currentEffects[EFFECT_SPEED] != null) {
+                                    if (currentEffects[EFFECT_SPEED][0] > 0) {
+                                        directionOffset = currentEffects[EFFECT_SPEED][1];
+                                        speedMultiplier = speedMultiplier * currentEffects[EFFECT_SPEED][2] / 100;
+                                    }
+                                }
+                                int motorForceX = Mathh.cos(carAngle - 15 + directionOffset) * speedMultiplier / 50;
+                                int motorForceY = Mathh.sin(carAngle - 15 + directionOffset) * speedMultiplier / -50;
+                                world.carbody.applyMomentum(new FXVector(convertByTimestep(motorForceX), convertByTimestep(motorForceY)));
 
-	                            if ((!leftWheelContacts && carBodyContacts) || rightWheelContacts) {
-	                                int torque;
-	                                if (rightWheelContacts) {
-	                                    torque = -100000000;
-	                                } else {
-	                                	torque = -50000000;
-	                                }
-	                                world.carbody.applyTorque(convertByTimestep(torque));
-	                            }
-	                        } else {
-	                            // apply rotational force
-	                            if (world.carbody.rotationVelocity2FX() < 100000000) {
-	                            	int torque = convertByTimestep(-80000000);
-	                            	if (carBodyContacts && carAngle > 170 && carAngle < 300) {
-	                            		torque = torque << 1;
-	                            	}
-	                            	world.carbody.applyTorque(torque);
-	                            }
-	                        }
-	                    } else {
-	                        // brake for two seconds after the motor is turned off
-	                        if (ticksMotorTurnedOff < 40 && !uninterestingDebug) {
-	                            try {
-	                                if (world.carbody.angularVelocity2FX() > 0) {
-	                                    world.carbody.applyTorque(2 * convertByTimestep(world.carbody.angularVelocity2FX()));
-	                                }
-	                                if (isNotFlying && !uninterestingDebug) {
-	                                    world.carbody.applyMomentum(new FXVector(convertByTimestep(-world.carbody.velocityFX().xFX/2), convertByTimestep(-world.carbody.velocityFX().yFX/2)));
-	                                }
-	                                if (bigTick) {
-	                                	ticksMotorTurnedOff++;
-										if (isNotFlying) {
-											ticksMotorTurnedOff++;
-										}
-	                                }
-	                            } catch (NullPointerException ex) {
-	                                Logger.log(ex);
-	                            }
-	                        }
-	                    }
+                                if ((!leftWheelContacts && carBodyContacts) || rightWheelContacts) {
+                                    int torque;
+                                    if (rightWheelContacts) {
+                                        torque = -100000000;
+                                    } else {
+                                        torque = -50000000;
+                                    }
+                                    world.carbody.applyTorque(convertByTimestep(torque));
+                                }
+                            } else {
+                                // apply rotational force
+                                if (world.carbody.rotationVelocity2FX() < 100000000) {
+                                    int torque = convertByTimestep(-80000000);
+                                    if (carBodyContacts && carAngle > 170 && carAngle < 300) {
+                                        torque = torque << 1;
+                                    }
+                                    world.carbody.applyTorque(torque);
+                                }
+                            }
+                        } else {
+                            // brake for two seconds after the motor is turned off
+                            if (ticksMotorTurnedOff < 40 && !uninterestingDebug) {
+                                try {
+                                    if (world.carbody.angularVelocity2FX() > 0) {
+                                        world.carbody.applyTorque(2 * convertByTimestep(world.carbody.angularVelocity2FX()));
+                                    }
+                                    if (isNotFlying && !uninterestingDebug) {
+                                        world.carbody.applyMomentum(new FXVector(convertByTimestep(-world.carbody.velocityFX().xFX/2), convertByTimestep(-world.carbody.velocityFX().yFX/2)));
+                                    }
+                                    if (bigTick) {
+                                        ticksMotorTurnedOff++;
+                                        if (isNotFlying) {
+                                            ticksMotorTurnedOff++;
+                                        }
+                                    }
+                                } catch (NullPointerException ex) {
+                                    Logger.log(ex);
+                                }
+                            }
+                        }
 
-						if (motorTurnedOn && Math.abs(world.carX - prevCarX) <= 1 && Math.abs(world.carY - prevCarY) <= 1) {
-							for (int i = 0; i < carContacts.length; i++) {
-								for (int j = 0; j < carContacts[i].length; j++) {
-									if (carContacts[i][j] == null) {
-										continue;
-									}
-									Body body = carContacts[i][j].body1();
-									UserData userData = body.getUserData();
-									if (!(userData instanceof MUserData)) {
-										body = carContacts[i][j].body2();
-										userData = body.getUserData();
-									}
-									if (userData instanceof MUserData &&
-											((MUserData) userData).bodyType == MUserData.TYPE_FALLING_PLATFORM &&
-											!body.isDynamic()) {
-										timeStuck = 0;
-									}
-								}
-							}
-							timeStuck += tickTime;
-							if (timeStuck > GAME_OVER_STUCK_TIME) {
-								gameOver();
-							}
-						} else {
-							timeStuck = 0;
-						}
+                        if (motorTurnedOn && Math.abs(world.carX - prevCarX) <= 1 && Math.abs(world.carY - prevCarY) <= 1) {
+                            for (int i = 0; i < carContacts.length; i++) {
+                                for (int j = 0; j < carContacts[i].length; j++) {
+                                    if (carContacts[i][j] == null) {
+                                        continue;
+                                    }
+                                    Body body = carContacts[i][j].body1();
+                                    UserData userData = body.getUserData();
+                                    if (!(userData instanceof MUserData)) {
+                                        body = carContacts[i][j].body2();
+                                        userData = body.getUserData();
+                                    }
+                                    if (userData instanceof MUserData &&
+                                            ((MUserData) userData).bodyType == MUserData.TYPE_FALLING_PLATFORM &&
+                                            !body.isDynamic()) {
+                                        timeStuck = 0;
+                                    }
+                                }
+                            }
+                            timeStuck += tickTime;
+                            if (timeStuck > GAME_OVER_STUCK_TIME) {
+                                gameOver();
+                            }
+                        } else {
+                            timeStuck = 0;
+                        }
 
-						prevCarX = world.carX;
-						prevCarY = world.carY;
+                        prevCarX = world.carX;
+                        prevCarY = world.carY;
 
-						if (worldgen != null && world.carX + world.viewField > worldgen.lastX) {
-							shouldWait = true;
-							Logger.log("wg can't keep up, locking game thread...");
-						}
+                        if (worldgen != null && world.carX + world.viewField > worldgen.lastX) {
+                            shouldWait = true;
+                            Logger.log("wg can't keep up, locking game thread...");
+                        }
 
-	                    if (shouldWait && !isStopping) {
-	                        isWaiting = true;
-							wasPaused = true;
-							Logger.log("waiting for wg to get ready...");
-							paint();
-							synchronized (wgLock) {
-								wgLock.wait();
-							}
-							Logger.log("resuming");
-	                    }
+                        if (shouldWait && !isStopping) {
+                            isWaiting = true;
+                            wasPaused = true;
+                            Logger.log("waiting for wg to get ready...");
+                            paint();
+                            synchronized (wgLock) {
+                                wgLock.wait();
+                            }
+                            Logger.log("resuming");
+                        }
 
-	                    isWaiting = false;
+                        isWaiting = false;
 
-						Thread.yield(); // fixes input lag on Sony Ericsson phones
-	                    sleep = maxFrameTime - (System.currentTimeMillis() - start);
-	                    sleep = Math.max(sleep, 0);
-	                } else {
-	                    // Pause screen
-	                    wasPaused = true;
-	                    sleep = 200;
-	                    if (isVisible) {
-	                        paint();
-	                    }
-	                }
+                        Thread.yield(); // fixes input lag on Sony Ericsson phones
+                        sleep = maxFrameTime - (System.currentTimeMillis() - start);
+                        sleep = Math.max(sleep, 0);
+                    } else {
+                        // Pause screen
+                        wasPaused = true;
+                        sleep = 200;
+                        if (isVisible) {
+                            paint();
+                        }
+                    }
 
-	                // FPS/TPS control
-	                try {
-	                    if (sleep > 0) {
-	                        Thread.sleep(sleep);
-	                    } else if (System.currentTimeMillis() == start) {
-	                    	Thread thread = Thread.currentThread();
-	                    	while (System.currentTimeMillis() == start) {
-	                    		synchronized (thread) {
-									thread.wait(0, 30);
-								}
-	                    	}
-	                    }
-	                } catch (InterruptedException e) {
-	                    Logger.log(e);
-	                }
-            	} catch (Exception ex) {
-            		Logger.log(ex);
-            	}
+                    // FPS/TPS control
+                    try {
+                        if (sleep > 0) {
+                            Thread.sleep(sleep);
+                        } else if (System.currentTimeMillis() == start) {
+                            Thread thread = Thread.currentThread();
+                            while (System.currentTimeMillis() == start) {
+                                synchronized (thread) {
+                                    thread.wait(0, 30);
+                                }
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        Logger.log(e);
+                    }
+                } catch (Exception ex) {
+                    Logger.log(ex);
+                }
             }
         } catch (NullPointerException ex) {
-			Platform.showError(ex);
+            Platform.showError(ex);
         }
         Logger.log("game thread stopped");
     }
 
-	private void tryReduceLags() {
-		if (gameMode == GAME_MODE_ENDLESS) {
-			int layer = 5;
-			world.getLandscape().getBody().addCollisionLayer(layer);
-			Body[] bodies = world.getBodies();
-			for (int i = 0; i < world.getBodyCount(); i++) {
-				Body body = bodies[i];
-				if (body != world.leftWheel && body != world.carbody && body != world.rightWheel && body.isDynamic() && (body.getColissionBitFlag() & (1 << layer)) == 0) {
-					body.addCollisionLayer(layer);
-					break;
-				}
-			}
-		}
-	}
-
-	private void limitTopHeight() {
-		FXVector carVelocityFX = world.carbody.velocityFX();
-		if (worldgen != null && carVelocityFX.yAsInt() < 0) {
-			int d = worldgen.lastY - world.carY - 7000;
-			if (d > 1) {
-				world.carbody.applyMomentum(new FXVector(0, FXUtil.divideFX(carVelocityFX.yFX, FXUtil.toFX(-Math.max(100000 / d, 1)))));
-			}
-		}
-	}
-
-	private void tickDamage() {
-		// add damage if the car lies upside down or fell out of the world
-		int lowestY = getLowestSafeY();
-		feltUnderTheWorld = world.carY > 2000 + lowestY;
-		if (feltUnderTheWorld || (carAngle > 140 && carAngle < 220 && world.carbody.getContacts()[0] != null) || gameOver) {
-		    if (uninterestingDebug) {
-		        damage = 0;
-		    }
-		    if (damage < GAME_OVER_DAMAGE) {
-		        damage++;
-		    } else {
-		    	gameOver();
-		    }
-		} else {
-		    if (damage > 0) {
-		        damage--;
-		    } else {
-		        damage = 0;
-		    }
-		}
-	}
-    
-    private int convertByTimestep(int valueInDefaultTimestep) {
-    	return valueInDefaultTimestep / TICK_DURATION * tickTime;
+    private void tryReduceLags() {
+        if (gameMode == GAME_MODE_ENDLESS) {
+            int layer = 5;
+            world.getLandscape().getBody().addCollisionLayer(layer);
+            Body[] bodies = world.getBodies();
+            for (int i = 0; i < world.getBodyCount(); i++) {
+                Body body = bodies[i];
+                if (body != world.leftWheel && body != world.carbody && body != world.rightWheel && body.isDynamic() && (body.getColissionBitFlag() & (1 << layer)) == 0) {
+                    body.addCollisionLayer(layer);
+                    break;
+                }
+            }
+        }
     }
 
-	private int getLowestSafeY() {
-		if (gameMode != GAME_MODE_EMINI_WORLD) {
-			return world.lowestY;
-		} else {
-			return 10000;
-		}
-	}
+    private void limitTopHeight() {
+        FXVector carVelocityFX = world.carbody.velocityFX();
+        if (worldgen != null && carVelocityFX.yAsInt() < 0) {
+            int d = worldgen.lastY - world.carY - 7000;
+            if (d > 1) {
+                world.carbody.applyMomentum(new FXVector(0, FXUtil.divideFX(carVelocityFX.yFX, FXUtil.toFX(-Math.max(100000 / d, 1)))));
+            }
+        }
+    }
 
-	private void setSimulationArea() {
-		world.refreshCarPos(); 
-		world.setSimulationArea(world.carX - world.viewField, world.carX + world.viewField);
-	}
-    
+    private void tickDamage() {
+        // add damage if the car lies upside down or fell out of the world
+        int lowestY = getLowestSafeY();
+        feltUnderTheWorld = world.carY > 2000 + lowestY;
+        if (feltUnderTheWorld || (carAngle > 140 && carAngle < 220 && world.carbody.getContacts()[0] != null) || gameOver) {
+            if (uninterestingDebug) {
+                damage = 0;
+            }
+            if (damage < GAME_OVER_DAMAGE) {
+                damage++;
+            } else {
+                gameOver();
+            }
+        } else {
+            if (damage > 0) {
+                damage--;
+            } else {
+                damage = 0;
+            }
+        }
+    }
+
+    private int convertByTimestep(int valueInDefaultTimestep) {
+        return valueInDefaultTimestep / TICK_DURATION * tickTime;
+    }
+
+    private int getLowestSafeY() {
+        if (gameMode != GAME_MODE_EMINI_WORLD) {
+            return world.lowestY;
+        } else {
+            return 10000;
+        }
+    }
+
+    private void setSimulationArea() {
+        world.refreshCarPos();
+        world.setSimulationArea(world.carX - world.viewField, world.carX + world.viewField);
+    }
+
     private Contact[][] getCarContacts() {
-		return new Contact[][] {
-			world.getContactsForBody(world.leftWheel),
-			world.getContactsForBody(world.carbody),
-			world.getContactsForBody(world.rightWheel)};
-	}
+        return new Contact[][] {
+            world.getContactsForBody(world.leftWheel),
+            world.getContactsForBody(world.carbody),
+            world.getContactsForBody(world.rightWheel)};
+    }
 
-	private void tickCustomBodyInteractions(Contact[][] carContacts) {
-    	// if touched an interactive object (falling platform, effect plate)
+    private void tickCustomBodyInteractions(Contact[][] carContacts) {
+        // if touched an interactive object (falling platform, effect plate)
         for (int j = 0; j < carContacts.length; j++) {
             for (int i = 0; i < carContacts[j].length; i++) {
                 if (carContacts[j][i] != null) {
                     Body body = carContacts[j][i].body1();
                     if (body == world.leftWheel || body == world.carbody || body == world.rightWheel) {
-                    	body = carContacts[j][i].body2();
+                        body = carContacts[j][i].body2();
                     }
                     if (body == null) {
                         continue;
@@ -744,23 +744,23 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                             giveEffect(bodyUserData.data);
                             world.setWheelColor(bodyUserData.color);
                             break;
-						case MUserData.TYPE_LEVEL_FINISH:
-							if (!isPopupShown()) {
-								showPopup(new LevelCompletedScreen(this));
-							}
-							break;
-						case MUserData.TYPE_LAVA:
-							world.destroyCar();
-							stop(true, false);
-							break;
+                        case MUserData.TYPE_LEVEL_FINISH:
+                            if (!isPopupShown()) {
+                                showPopup(new LevelCompletedScreen(this));
+                            }
+                            break;
+                        case MUserData.TYPE_LAVA:
+                            world.destroyCar();
+                            stop(true, false);
+                            break;
                     }
                 }
             }
         }
     }
-    
+
     private void tickEffects() {
-    	for (int i = 0; i < currentEffects.length; i++) {
+        for (int i = 0; i < currentEffects.length; i++) {
             if (currentEffects[i] != null) {
                 if (currentEffects[i][0] > 0) {
                     currentEffects[i][0]--;
@@ -769,53 +769,53 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 }
             }
         }
-	}
-    
-    public boolean drawAsBG(Graphics g) {
-    	if (feltUnderTheWorld || world.currColBodies == 0 && world.currColBg == 0) {
-    		return false;
-    	}
+    }
 
-		world.setTimestepFX(baseTimestepFX / 7);
-    	world.refreshCarPos();
-    	setSimulationArea();
-    	world.tickCustomBodies();
-    	tickEffects();
-		for (int i = 0; i < 7; i++) {
-			world.tick();
-		}
-    	tickCustomBodyInteractions(getCarContacts());
-    	tickDamage();
-    	if (worldgen != null) {
-    		worldgen.tick();
-    	}
+    public boolean drawAsBG(Graphics g) {
+        if (feltUnderTheWorld || world.currColBodies == 0 && world.currColBg == 0) {
+            return false;
+        }
+
+        world.setTimestepFX(baseTimestepFX / 7);
+        world.refreshCarPos();
+        setSimulationArea();
+        world.tickCustomBodies();
+        tickEffects();
+        for (int i = 0; i < 7; i++) {
+            world.tick();
+        }
+        tickCustomBodyInteractions(getCarContacts());
+        tickDamage();
+        if (worldgen != null) {
+            worldgen.tick();
+        }
 
         if (worldgen != null) {
             world.drawWorld(g, worldgen.getStructures(), worldgen.getStructuresRingBufferOffset(), worldgen.getStructuresCount());
         } else {
-			world.drawWorld(g, null, 0, 0);
-		}
+            world.drawWorld(g, null, 0, 0);
+        }
 
-		limitTopHeight();
+        limitTopHeight();
 
         if (world.carY > getLowestSafeY()) {
-    		if (bgTick % 10 == 0) {
-    			dimColors();
-    			bgTick = 0;
-    		} else {
-    			bgTick++;
-    		}
-    	}
-    	return true;
+            if (bgTick % 10 == 0) {
+                dimColors();
+                bgTick = 0;
+            } else {
+                bgTick++;
+            }
+        }
+        return true;
     }
-    
+
     private void drawBg(Graphics g) {
-    	g.setColor(0, 0, 0);
+        g.setColor(0, 0, 0);
         g.fillRect(0, 0, maxScSide, maxScSide);
     }
-    
+
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
-    	drawBg(g);
+        drawBg(g);
         if (loadingProgress < 100) {
             drawLoading(g);
             Logger.paint(g);
@@ -823,21 +823,21 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             if (worldgen != null) {
                 world.drawWorld(g, worldgen.getStructures(), worldgen.getStructuresRingBufferOffset(), worldgen.getStructuresCount());
             } else {
-				world.drawWorld(g, null, 0, 0);
-			}
+                world.drawWorld(g, null, 0, 0);
+            }
             drawHUD(g);
         }
     }
 
     private synchronized void paint() {
-    	if (!gameOver) {
-	    	try {
-	    		Graphics g = getUGraphics();
-		        paint(g);
-		        flushGraphics();
-		        framesFromLastFPSMeasure++;
-	        } catch (Exception ignored) { }
-    	}
+        if (!gameOver) {
+            try {
+                Graphics g = getUGraphics();
+                paint(g);
+                flushGraphics();
+                framesFromLastFPSMeasure++;
+            } catch (Exception ignored) { }
+        }
     }
 
     private String nameBody(Body body) {
@@ -868,7 +868,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
         return ret.toString();
     }
-    
+
     // point counter, very beautiful pause menu,
     // debug info, on-screen log, game over screen
     private void drawHUD(Graphics g) {
@@ -876,13 +876,13 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         if (isFirstStart && hintVisibleTimer > 0) {
             int color = 255 * hintVisibleTimer / 120;
             g.setColor(0, 0, color/4);
-			int btnW = scW/3;
-			int btnH = scH/6;
-			int btnRoundingD = Math.min(btnW, btnH) / 4;
-			if (color / 4 > 7) {
-				g.fillRoundRect(0, 0, btnW, btnH, btnRoundingD, btnRoundingD);
-				g.fillRoundRect(w - btnW, 0, btnW, btnH, btnRoundingD, btnRoundingD);
-			}
+            int btnW = scW/3;
+            int btnH = scH/6;
+            int btnRoundingD = Math.min(btnW, btnH) / 4;
+            if (color / 4 > 7) {
+                g.fillRoundRect(0, 0, btnW, btnH, btnRoundingD, btnRoundingD);
+                g.fillRoundRect(w - btnW, 0, btnW, btnH, btnRoundingD, btnRoundingD);
+            }
             g.setColor(color/2, color/2, color);
             setFont(new Font(Font.SIZE_MEDIUM), g);
             for (int i = 0; i < MENU_HINT.length; i++) {
@@ -892,31 +892,31 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 g.drawString(PAUSE_HINT[i], scW*5/6, i * currentFontH + scH / 12 - currentFontH*PAUSE_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
             }
         }
-        
+
         // draw some debug info if debug is enabled
         setFont(smallfont, g);
         debugTextOffset = 0;
         if (battIndicator) {
-			if (batLevel < 6) {
-				g.setColor(0x00ff00);
-			} else if (batLevel < 10) {
-				g.setColor(0xff8000);
-			} else if (batLevel < 30) {
-        		g.setColor(0xffff00);
-        	} else {
-        		g.setColor(0x00ff00);
-        	}
+            if (batLevel < 6) {
+                g.setColor(0x00ff00);
+            } else if (batLevel < 10) {
+                g.setColor(0xff8000);
+            } else if (batLevel < 30) {
+                g.setColor(0xffff00);
+            } else {
+                g.setColor(0x00ff00);
+            }
 
-			drawDebugText(g, "BAT: " + batLevel + "%");
-		}
+            drawDebugText(g, "BAT: " + batLevel + "%");
+        }
 
         g.setColor(0xffffff);
         if (DebugMenu.showContacts) {
             Contact[][] contacts = getCarContacts();
             String[] names = {"LW", "CB", "RW"};
             for (int i = 0; i < contacts.length; i++) {
-				drawDebugText(g, names[i] + contactsToString(contacts[i]));
-			}
+                drawDebugText(g, names[i] + contactsToString(contacts[i]));
+            }
         }
         if (DebugMenu.isDebugEnabled) {
             // speedometer
@@ -934,8 +934,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 }
                 g.fillRect(0, debugTextOffset, currentFontH * 5, currentFontH);
                 g.setColor(255, 255, 255);
-				drawDebugText(g, String.valueOf(carVelocitySqr));
-			}
+                drawDebugText(g, String.valueOf(carVelocitySqr));
+            }
             // car angle
             if (DebugMenu.showAngle) {
                 if (timeFlying > 0) {
@@ -943,20 +943,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 } else {
                     g.setColor(255, 255, 255);
                 }
-				drawDebugText(g, String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())));
-			}
-			drawDebugText(g, "physics: " + debugTickTime + "ms, paint: " + debugPaintTime + "ms");
+                drawDebugText(g, String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())));
+            }
+            drawDebugText(g, "physics: " + debugTickTime + "ms, paint: " + debugPaintTime + "ms");
 
-			if (flipCounter != null) {
-				int x = world.xToPX(flipCounter.lastFlipX);
-				g.drawLine(x, 0, x, h);
-			}
+            if (flipCounter != null) {
+                int x = world.xToPX(flipCounter.lastFlipX);
+                g.drawLine(x, 0, x, h);
+            }
         }
         // show coordinates of car if enabled
         if (DebugMenu.coordinates) {
             g.setColor(127, 127, 127);
-			drawDebugText(g, world.carX + " " + world.carY);
-		}
+            drawDebugText(g, world.carX + " " + world.carY);
+        }
 
         if (showFPS) {
             g.setColor(0, 255, 0);
@@ -966,30 +966,30 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     g.setColor(255, 0, 0);
                 }
             }
-			drawDebugText(g, "FPS:" + fps + " TPS:" + tps + " m=" + physicsIterations);
-		}
+            drawDebugText(g, "FPS:" + fps + " TPS:" + tps + " m=" + physicsIterations);
+        }
 
         try {
             if (DebugMenu.isDebugEnabled) {
                 switch (worldgen.currStep) {
-					case WorldGen.STEP_IDLE:
+                    case WorldGen.STEP_IDLE:
                         g.setColor(0, 255, 0);
                         break;
-					case WorldGen.STEP_ADD:
+                    case WorldGen.STEP_ADD:
                         g.setColor(127, 127, 255);
                         break;
-					case WorldGen.STEP_RES_POS:
+                    case WorldGen.STEP_RES_POS:
                         g.setColor(255, 0, 0);
                         break;
-					case WorldGen.STEP_CLEAN_SGS:
+                    case WorldGen.STEP_CLEAN_SGS:
                         g.setColor(127, 127, 0);
                         break;
                     default:
                         break;
                 }
-				drawDebugText(g, "wg: mspt" + worldgen.mspt + " step:" + worldgen.currStep);
-				drawDebugText(g, "sgs" + worldgen.getSegmentCount() + " bds" + world.getBodyCount());
-			}
+                drawDebugText(g, "wg: mspt" + worldgen.mspt + " step:" + worldgen.currStep);
+                drawDebugText(g, "sgs" + worldgen.getSegmentCount() + " bds" + world.getBodyCount());
+            }
         } catch (NullPointerException ignored) { }
 
         // game over screen
@@ -1001,30 +1001,30 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             g.fillRect(0, 0, scW, scH* damage / GAME_OVER_DAMAGE /2 + 1);
             g.fillRect(0, scH - scH* damage / GAME_OVER_DAMAGE /2, scW, scH - 1);
         }
-        
+
         // score counter and debug posReset indicator
         if (WorldGen.isEnabled && world != null) {
-			if (countPoints || flipIndicator < 127) {
-				g.setColor(flipIndicator, flipIndicator, 255);
-			} else {
-				g.setColor(127, 31, 31);
-			}
+            if (countPoints || flipIndicator < 127) {
+                g.setColor(flipIndicator, flipIndicator, 255);
+            } else {
+                g.setColor(127, 31, 31);
+            }
             setFont(largefont, g);
             g.drawString(String.valueOf(points), scW/2, scH * 15 / 16,
                     Graphics.HCENTER | Graphics.BOTTOM);
-			if (DebugMenu.isDebugEnabled && posResetIndicator > 0) {
-				g.setColor(posResetIndicator, 0, 0);
-				int d = h / 20;
-				g.fillArc(x0, y0 + h - d, d, d, 0, 360);
-			}
-			int d;
-			if (worldgen.firstDeferredStructureX != -1 && (d = (worldgen.firstDeferredStructureX - world.carX) / 100 * 100) >= 0) {
-				int c = Mathh.constrain(0, d / 20, 255);
-				g.setColor(c, c, c);
-				drawDebugText(g, d + " ->");
-			}
+            if (DebugMenu.isDebugEnabled && posResetIndicator > 0) {
+                g.setColor(posResetIndicator, 0, 0);
+                int d = h / 20;
+                g.fillArc(x0, y0 + h - d, d, d, 0, 360);
+            }
+            int d;
+            if (worldgen.firstDeferredStructureX != -1 && (d = (worldgen.firstDeferredStructureX - world.carX) / 100 * 100) >= 0) {
+                int c = Mathh.constrain(0, d / 20, 255);
+                g.setColor(c, c, c);
+                drawDebugText(g, d + " ->");
+            }
         }
-        
+
         // draw beautiful(isn't it?) pause screen
         if (paused) {
             int d = scH / 40;
@@ -1034,7 +1034,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             } else {
                 g.setColor(0, 255, 0);
             }
-            
+
             if (shouldWait) {
                 g.setColor(127, 0, 0);
             }
@@ -1052,19 +1052,19 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
 
-	private void drawDebugText(Graphics g, String str) {
-		g.drawString(str, 0, debugTextOffset, 0);
-		debugTextOffset += currentFontH;
-	}
+    private void drawDebugText(Graphics g, String str) {
+        g.drawString(str, 0, debugTextOffset, 0);
+        debugTextOffset += currentFontH;
+    }
 
-	private void drawLoading(Graphics g) {
+    private void drawLoading(Graphics g) {
         g.setColor(255, 255, 255);
         int l = scW * 2 / 3;
         int h = scH / 24;
         g.drawRect(scW / 2 - l / 2, scH * 2 / 3, l, h);
         g.fillRect(scW / 2 - l / 2, scH * 2 / 3, l*loadingProgress/100, h);
         if (statusMessage != null) {
-        	g.drawString(statusMessage, this.w/2, this.h, HCENTER | BOTTOM);
+            g.drawString(statusMessage, this.w/2, this.h, HCENTER | BOTTOM);
         }
     }
     private void setLoadingProgress(int percents) {
@@ -1072,164 +1072,164 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         Logger.log(percents + "%");
         paint();
     }
-    
+
     private void setFont(Font font, Graphics g) {
         g.setFont(font);
         currentFont = font;
         currentFontH = currentFont.getHeight();
     }
-    
+
     // log and repaint
     private void log(String text) {
-    	statusMessage = text;
+        statusMessage = text;
         Logger.log(text);
         if (Thread.currentThread() == gameThread && (Logger.isOnScreenLogEnabled() || loadingProgress < 100)) {
-        	paint();
+            paint();
         }
     }
-    
+
     private void giveEffect(short[] data) {
         int id = data[0];
         int dataLength = data.length - 1;
         currentEffects[id] = new short[dataLength];
         System.arraycopy(data, 1, currentEffects[id], 0, data.length - 1);
     }
-    
+
     private void gameOver() {
-    	if (gameOver) {
-    		return;
-    	}
+        if (gameOver) {
+            return;
+        }
 
-    	if (feltUnderTheWorld) {
-    		stop(true, false);
-    		return;
-    	}
+        if (feltUnderTheWorld) {
+            stop(true, false);
+            return;
+        }
 
-    	gameOver = true;
-    	motorTurnedOn = false;
-    	world.destroyCar();
-    	dimColors();
-    	stop(true, false);
+        gameOver = true;
+        motorTurnedOn = false;
+        world.destroyCar();
+        dimColors();
+        stop(true, false);
     }
-    
+
     private void dimColors() {
-    	world.currColLandscape = dimColor(world.currColLandscape, 80);
-    	world.currColBodies = dimColor(world.currColBodies, 80);
-    	if (world.currColBodies > 0) {
-    		world.currColBg = dimColor(Math.max(0x000015, world.currColBg), 105);
-    	} else {
-    		world.currColBg = dimColor(world.currColBg, 70);
-    	}
+        world.currColLandscape = dimColor(world.currColLandscape, 80);
+        world.currColBodies = dimColor(world.currColBodies, 80);
+        if (world.currColBodies > 0) {
+            world.currColBg = dimColor(Math.max(0x000015, world.currColBg), 105);
+        } else {
+            world.currColBg = dimColor(world.currColBg, 70);
+        }
     }
 
     private int dimColor(int color, int percent) {
-    	int r = getColorRedComponent(color) * percent / 100;
-    	int g = getColorGreenComponent(color) * percent / 100;
-    	int b = getColorBlueComponent(color) * percent / 100;
-    	r = Mathh.constrain(0, r, 255);
-    	g = Mathh.constrain(0, g, 255);
-    	b = Mathh.constrain(0, b, 255);
-    	return (r << 16) + (g << 8) + b;
-    }
-    
-    private int getColorRedComponent(int color) {
-    	return (color >> 16) & 0xff;
-    }
-    
-    private int getColorGreenComponent(int color) {
-    	return (color >> 8) & 0xff;
-    }
-    
-    private int getColorBlueComponent(int color) {
-    	return color & 0xff;
+        int r = getColorRedComponent(color) * percent / 100;
+        int g = getColorGreenComponent(color) * percent / 100;
+        int b = getColorBlueComponent(color) * percent / 100;
+        r = Mathh.constrain(0, r, 255);
+        g = Mathh.constrain(0, g, 255);
+        b = Mathh.constrain(0, b, 255);
+        return (r << 16) + (g << 8) + b;
     }
 
-	public void stop(final boolean openMenu, boolean blockUntilCompleted) {
-		stop(openMenu, blockUntilCompleted, 0);
-	}
+    private int getColorRedComponent(int color) {
+        return (color >> 16) & 0xff;
+    }
+
+    private int getColorGreenComponent(int color) {
+        return (color >> 8) & 0xff;
+    }
+
+    private int getColorBlueComponent(int color) {
+        return color & 0xff;
+    }
+
+    public void stop(final boolean openMenu, boolean blockUntilCompleted) {
+        stop(openMenu, blockUntilCompleted, 0);
+    }
 
     public void stop(final boolean openMenu, final boolean blockUntilCompleted, final int delay) {
-		this.openMenu = openMenu;
-    	log("stopping game thread");
+        this.openMenu = openMenu;
+        log("stopping game thread");
         if (isStopping) {
-        	return;
+            return;
         }
 
         if (stopperThread != null) {
-			return;
+            return;
         }
 
         final GameplayCanvas inst = this;
         Runnable stopperRunnable = new Runnable() {
             public void run() {
-				if (!blockUntilCompleted) {
-					try {
-						Thread.sleep(delay);
-					} catch (InterruptedException ex) {
-						Logger.log(ex);
-					}
-				}
+                if (!blockUntilCompleted) {
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException ex) {
+                        Logger.log(ex);
+                    }
+                }
 
-				isStopping = true;
-				stopped = true;
-				isFirstStart = false;
+                isStopping = true;
+                stopped = true;
+                isFirstStart = false;
 
-				if (gameMode == GAME_MODE_ENDLESS && countPoints) {
-					new Thread(new Runnable() {
-						public void run() {
-							try {
-								Records.saveRecord(points, 9);
-							} catch (Exception ex) {
-								Platform.showError("Can't save record:", ex);
-							}
-						}
-					}, "record saver").start();
-				}
-            	if (worldgen != null) {
-            		worldgen.stop();
-            	}
+                if (gameMode == GAME_MODE_ENDLESS && countPoints) {
+                    new Thread(new Runnable() {
+                        public void run() {
+                            try {
+                                Records.saveRecord(points, 9);
+                            } catch (Exception ex) {
+                                Platform.showError("Can't save record:", ex);
+                            }
+                        }
+                    }, "record saver").start();
+                }
+                if (worldgen != null) {
+                    worldgen.stop();
+                }
                 boolean succeed = gameThread == null;
-				try {
-					while (!succeed) {
-						gameThread.join();
-						succeed = true;
-					}
-					log("game: stopped");
-				} catch (InterruptedException ex) {
-					Logger.log(ex);
-				}
+                try {
+                    while (!succeed) {
+                        gameThread.join();
+                        succeed = true;
+                    }
+                    log("game: stopped");
+                } catch (InterruptedException ex) {
+                    Logger.log(ex);
+                }
                 if (GameplayCanvas.this.openMenu) {
-					if (prevScreen == null) {
-						RootContainer.setRootUIComponent(new MenuCanvas(inst));
-					} else {
-						RootContainer.setRootUIComponent(prevScreen);
-					}
+                    if (prevScreen == null) {
+                        RootContainer.setRootUIComponent(new MenuCanvas(inst));
+                    } else {
+                        RootContainer.setRootUIComponent(prevScreen);
+                    }
                 }
             }
         };
 
         if (blockUntilCompleted) {
-        	stopperRunnable.run();
+            stopperRunnable.run();
         } else {
-			stopperThread = new Thread(stopperRunnable);
-			stopperThread.start();
+            stopperThread = new Thread(stopperRunnable);
+            stopperThread.start();
         }
     }
 
-	public void startAgain() {
-		if (stopperThread != null && stopperThread.isAlive()) {
-			stopperThread.interrupt();
-		}
-		stopperThread = null;
-		isStopping = false;
-		stopped = false;
-		gameOver = false;
-		init();
-		if (worldgen != null) {
-			worldgen.start();
-		}
-	}
-    
+    public void startAgain() {
+        if (stopperThread != null && stopperThread.isAlive()) {
+            stopperThread.interrupt();
+        }
+        stopperThread = null;
+        isStopping = false;
+        stopped = false;
+        gameOver = false;
+        init();
+        if (worldgen != null) {
+            worldgen.start();
+        }
+    }
+
     private void resume() {
         paused = false;
         if (worldgen != null) {
@@ -1237,12 +1237,12 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
 
-	public void onPosReset(int dx) {
-		posResetIndicator = 255;
-		if (flipCounter != null) {
-			flipCounter.onPosReset(dx);
-		}
-	}
+    public void onPosReset(int dx) {
+        posResetIndicator = 255;
+        if (flipCounter != null) {
+            flipCounter.onPosReset(dx);
+        }
+    }
 
     public void onHide() {
         log("onHide");
@@ -1260,12 +1260,12 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     public void onShow() {
         log("onShow");
-        
+
         // to prevent siemens' bug that calls hideNotify right after showing canvas
         pauseDelay = PAUSE_DELAY;
         wasPaused = paused;
     }
-    
+
     protected void onSetBounds(int x0, int y0, int w, int h) {
         scW = w;
         scH = h;
@@ -1274,7 +1274,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             world.refreshScreenParameters(w, h);
         }
     }
-    
+
     private void pauseButtonPressed() {
         if (!paused) {
             pauseDelay = 0;
@@ -1284,34 +1284,34 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
 
-	private void restart() {
-		stop(false, true);
-		if (worldgen != null) {
-			worldgen.reset();
-		} else {
-			world.cleanWorld();
-		}
-		reset();
-		if (level != null) {
-			loadLevel(level);
-		}
-		startAgain();
-	}
+    private void restart() {
+        stop(false, true);
+        if (worldgen != null) {
+            worldgen.reset();
+        } else {
+            world.cleanWorld();
+        }
+        reset();
+        if (level != null) {
+            loadLevel(level);
+        }
+        startAgain();
+    }
 
-	public boolean handleMouseEvent(int event, int x, int y) {
-		if (event == MOUSE_SECONDARY_RELEASED) {
-			restart();
-			motorTurnedOn = false;
-			return true;
-		} else if (event == MOUSE_WHEEL_RELEASED) {
-			stop(true, false);
-		}
-		return false;
-	}
+    public boolean handleMouseEvent(int event, int x, int y) {
+        if (event == MOUSE_SECONDARY_RELEASED) {
+            restart();
+            motorTurnedOn = false;
+            return true;
+        } else if (event == MOUSE_WHEEL_RELEASED) {
+            stop(true, false);
+        }
+        return false;
+    }
 
     // keyboard events
     public boolean handleKeyReleased(int keyCode, int count) {
-    	if (gameOver) {
+        if (gameOver) {
             return false;
         }
 
@@ -1322,47 +1322,47 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
         return true;
     }
-    
+
     public boolean handleKeyPressed(int keyCode, int count) {
-		if (gameOver) {
-			return false;
-		}
+        if (gameOver) {
+            return false;
+        }
 
         switch (keyCode) {
-			case Keys.KEY_SOFT_LEFT:
-			case Keys.KEY_POUND:
-			case Keys.KEY_NUM0:
-			case Keys.KEY_NUM9:
-				stop(true, false);
-				break;
-			case Keys.KEY_SOFT_RIGHT:
-			case Keys.KEY_STAR:
-			case Keys.KEY_NUM3:
-				pauseButtonPressed();
-				break;
-			case Keys.KEY_NUM6:
-				world.destroyCar();
-				disablePointCounter();
-				break;
-			case Keys.KEY_NUM7:
-				restart();
-				break;
-			default:
-				int gameAction = RootContainer.getAction(keyCode);
-				if (gameAction == Keys.GAME_D) {
-					stop(true, false);
-				} else if (gameAction == Keys.GAME_B) {
-					pauseButtonPressed();
-				} else {
-					// any other button turns the motor on
-					motorTurnedOn = true;
-				}
-				break;
+            case Keys.KEY_SOFT_LEFT:
+            case Keys.KEY_POUND:
+            case Keys.KEY_NUM0:
+            case Keys.KEY_NUM9:
+                stop(true, false);
+                break;
+            case Keys.KEY_SOFT_RIGHT:
+            case Keys.KEY_STAR:
+            case Keys.KEY_NUM3:
+                pauseButtonPressed();
+                break;
+            case Keys.KEY_NUM6:
+                world.destroyCar();
+                disablePointCounter();
+                break;
+            case Keys.KEY_NUM7:
+                restart();
+                break;
+            default:
+                int gameAction = RootContainer.getAction(keyCode);
+                if (gameAction == Keys.GAME_D) {
+                    stop(true, false);
+                } else if (gameAction == Keys.GAME_B) {
+                    pauseButtonPressed();
+                } else {
+                    // any other button turns the motor on
+                    motorTurnedOn = true;
+                }
+                break;
         }
 
         return true;
     }
-    
+
     public boolean handleKeyRepeated(int keyCode, int pressedCount) { return !gameOver; }
 
     // touch events
@@ -1373,16 +1373,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             menuTouched = true;
         } else {
             // if not on buttons, turn on the motor
-        	if (!gameOver) {
-        		motorTurnedOn = true;
-        	}
+            if (!gameOver) {
+                motorTurnedOn = true;
+            }
         }
         pointerX = x;
         pointerY = y;
         return !gameOver;
     }
     public boolean handlePointerDragged(int x, int y) {
-    	if (gameOver) {
+        if (gameOver) {
             return false;
         }
         if (pauseTouched || menuTouched) {
@@ -1410,14 +1410,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     public boolean canBeFocused() {
-		return true;
-	}
+        return true;
+    }
 
     private class FlipCounter {
         int step = 0;
         boolean flipDirection = false;
         boolean prevFlipDirection = false;
-		int lastFlipX = -3000;
+        int lastFlipX = -3000;
 
         void tick() {
             if (DebugMenu.dontCountFlips) {
@@ -1432,18 +1432,18 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             int ang = carAngle;
             boolean isInNormalPos = ang < 45 || ang > 315;
             if (isInNormalPos && step % 2 == 0) {
-				if (world.carX > lastFlipX || step < 1) {
-					step++;
-					if (step > 1) {
-						if (flipDirection) {
-							if ((step - 1) % 4 == 0) {
-								afterFlip();
-							}
-						} else {
-							afterFlip();
-						}
-					}
-				}
+                if (world.carX > lastFlipX || step < 1) {
+                    step++;
+                    if (step > 1) {
+                        if (flipDirection) {
+                            if ((step - 1) % 4 == 0) {
+                                afterFlip();
+                            }
+                        } else {
+                            afterFlip();
+                        }
+                    }
+                }
             } else if (!isInNormalPos && step % 2 != 0) {
                 step++;
             }
@@ -1453,11 +1453,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         public void afterFlip() {
             flipIndicator = 0;
             points++;
-			lastFlipX = world.carX;
+            lastFlipX = world.carX;
         }
 
-		public void onPosReset(int dx) {
-			lastFlipX += dx;
-		}
+        public void onPosReset(int dx) {
+            lastFlipX += dx;
+        }
     }
 }

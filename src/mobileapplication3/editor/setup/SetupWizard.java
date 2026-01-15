@@ -47,12 +47,12 @@ public class SetupWizard extends Container {
     }
 
     public void init() {
-    	for (int i = 0; i < pages.length; i++) {
-        	pages[i].setParent(this);
-		}
-    	setCurrentPage(currentPageI);
+        for (int i = 0; i < pages.length; i++) {
+            pages[i].setParent(this);
+        }
+        setCurrentPage(currentPageI);
     }
-    
+
     private Button getNewNextButton() {
         return new Button("Next") {
             public void buttonPressed() {
@@ -60,7 +60,7 @@ public class SetupWizard extends Container {
             }
         };
     }
-    
+
     private Button getNewPrevButton() {
         return new Button("Back") {
             public void buttonPressed() {
@@ -68,7 +68,7 @@ public class SetupWizard extends Container {
             }
         };
     }
-    
+
     private void setCurrentPage(int i) {
         Logger.log("setting page i=" + i);
         pages[currentPageI].setParent(this);
@@ -79,7 +79,7 @@ public class SetupWizard extends Container {
             finishSetup();
             return;
         }
-        
+
         currentPageI = i;
         pages[currentPageI].onShow();
         pages[currentPageI].setVisible(true);
@@ -88,7 +88,7 @@ public class SetupWizard extends Container {
             setSize(w, h);
         }
     }
-    
+
     private void finishSetup() {
         pages = null;
         finishSetup.onFinish();
@@ -98,7 +98,7 @@ public class SetupWizard extends Container {
     public void onSetBounds(int x0, int y0, int w, int h) {
         pages[currentPageI].setSize(w, h);
     }
-    
+
     public interface Feedback {
         public void nextPage();
         public void prevPage();
@@ -108,7 +108,7 @@ public class SetupWizard extends Container {
 //    protected IUIComponent[] getComponents() {
 //        return new IUIComponent[]{currentPage};
 //    }
-    
+
     public interface FinishSetup {
         void onFinish();
     }

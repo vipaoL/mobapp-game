@@ -10,17 +10,17 @@ import mobileapplication3.ui.Property;
  * @author vipaol
  */
 public class Sine extends AbstractCurve {
-	
-	//	      #
-	//	    #
-	//	.  #	"." - (x0;y0)
-	//	  #
-	//	@		"@" - (anchorX;anchorY)
-    
-	private final static int STEP = 30;
+
+    //        #
+    //      #
+    //  .  #    "." - (x0;y0)
+    //    #
+    //  @       "@" - (anchorX;anchorY)
+
+    private final static int STEP = 30;
     private short x0, y0, l, halfperiods = 1, offset = 270, amp;
     private short anchorX, anchorY;
-    
+
     public PlacementStep[] getPlacementSteps() {
         return new PlacementStep[] {
             new PlacementStep() {
@@ -31,10 +31,10 @@ public class Sine extends AbstractCurve {
                 public String getName() {
                     return "Move start point";
                 }
-                
+
                 public String getCurrentStepInfo() {
-					return "x0=" + x0 + " y0=" + y0;
-				}
+                    return "x0=" + x0 + " y0=" + y0;
+                }
             },
             new PlacementStep() {
                 public void place(short pointX, short pointY) {
@@ -42,7 +42,7 @@ public class Sine extends AbstractCurve {
                     int sinoffset = Mathh.sin(-offset);
                     int amp = (anchorY - pointY);
                     if (sinoffset != 0) {
-                    	amp = amp * 1000 / sinoffset;
+                        amp = amp * 1000 / sinoffset;
                     }
                     setAmplitude((short) (amp/2));
                     calcZeroPoint();
@@ -51,49 +51,49 @@ public class Sine extends AbstractCurve {
                 public String getName() {
                     return "Change length and amplitude";
                 }
-                
+
                 public String getCurrentStepInfo() {
-					return "l=" + l;
-				}
+                    return "l=" + l;
+                }
             },
             new PlacementStep() {
                 public void place(short pointX, short pointY) {
-                	int dx = pointX - anchorX;
-                	if (dx * l > 0) {
-                		setHalfperiodsNumber((short) Math.max(1, l/dx));
-                	}
+                    int dx = pointX - anchorX;
+                    if (dx * l > 0) {
+                        setHalfperiodsNumber((short) Math.max(1, l/dx));
+                    }
                 }
 
                 public String getName() {
                     return "Change number of halfperiods";
                 }
-                
+
                 public String getCurrentStepInfo() {
-					return "halfperiods=" + halfperiods;
-				}
+                    return "halfperiods=" + halfperiods;
+                }
             }
         };
     }
 
     public PlacementStep[] getExtraEditingSteps() {
         return new PlacementStep[] {
-        		new PlacementStep() {
+                new PlacementStep() {
                     public void place(short pointX, short pointY) {
-                    	int dx = pointX - anchorX;
-                    	setOffset((short) ((dx)*halfperiods*180/l + 90));
+                        int dx = pointX - anchorX;
+                        setOffset((short) ((dx)*halfperiods*180/l + 90));
                     }
 
                     public String getName() {
                         return "Change phase shift";
                     }
-                    
+
                     public String getCurrentStepInfo() {
-    					return "offset=" + offset;
-    				}
+                        return "offset=" + offset;
+                    }
                 }
         };
     }
-    
+
     public void setAnchorPoint(short x, short y) {
         if (anchorX == x && anchorY == y) {
             return;
@@ -103,15 +103,15 @@ public class Sine extends AbstractCurve {
         anchorY = y;
         calcZeroPoint();
     }
-    
+
     public void calcZeroPoint() {
         setZeroPoint(anchorX, (short) (anchorY - amp*Mathh.sin(-offset)/1000));
     }
-    
+
     public void calcAnchorPoint() {
-    	setAnchorPoint(x0, (short) (y0 + amp*Mathh.sin(-offset)/1000));
+        setAnchorPoint(x0, (short) (y0 + amp*Mathh.sin(-offset)/1000));
     }
-    
+
     public void setZeroPoint(short x, short y) {
         if (x0 == x && y0 == y) {
             return;
@@ -121,7 +121,7 @@ public class Sine extends AbstractCurve {
         y0 = y;
         calcAnchorPoint();
     }
-    
+
     public void setLength(short l) {
         if (this.l == l) {
             return;
@@ -129,7 +129,7 @@ public class Sine extends AbstractCurve {
         pointsCache = null;
         this.l = l;
     }
-    
+
     public void setHalfperiodsNumber(short n) {
         if (halfperiods == n) {
             return;
@@ -147,7 +147,7 @@ public class Sine extends AbstractCurve {
         this.offset = offset;
         calcZeroPoint();
     }
-    
+
     public void setAmplitude(short a) {
         if (amp == a) {
             return;
@@ -166,101 +166,101 @@ public class Sine extends AbstractCurve {
         recalcCalculatedArgs();
         return this;
     }
-    
+
     public short[] getArgsValues() {
         return new short[]{x0, y0, l, halfperiods, (short) Mathh.normalizeAngle(-offset), amp};
     }
-    
+
     public Property[] getArgs() {
-    	return new Property[] {
-    			new Property("X0") {
-					public void setValue(short value) {
-						if (x0 != value) {
-							pointsCache = null;
-						}
-						x0 = value;
-						calcAnchorPoint();
-					}
+        return new Property[] {
+                new Property("X0") {
+                    public void setValue(short value) {
+                        if (x0 != value) {
+                            pointsCache = null;
+                        }
+                        x0 = value;
+                        calcAnchorPoint();
+                    }
 
-					public short getValue() {
-						return x0;
-					}
-    			},
-    			new Property("Y0") {
-					public void setValue(short value) {
-						if (y0 != value) {
-							pointsCache = null;
-						}
-						y0 = value;
-					}
+                    public short getValue() {
+                        return x0;
+                    }
+                },
+                new Property("Y0") {
+                    public void setValue(short value) {
+                        if (y0 != value) {
+                            pointsCache = null;
+                        }
+                        y0 = value;
+                    }
 
-					public short getValue() {
-						return y0;
-					}
-    			},
-    			new Property("Length") {
-					public void setValue(short value) {
-						setLength(value);
-					}
+                    public short getValue() {
+                        return y0;
+                    }
+                },
+                new Property("Length") {
+                    public void setValue(short value) {
+                        setLength(value);
+                    }
 
-					public short getValue() {
-						return l;
-					}
-					
-					public short getMinValue() {
-						return (short) -x0;
-					}
-					
-					public short getMaxValue() {
-						return (short) (Short.MAX_VALUE - x0);
-					}
-    			},
-    			new Property("Halfperiods") {
-					public void setValue(short value) {
-						setHalfperiodsNumber(value);
-					}
+                    public short getValue() {
+                        return l;
+                    }
 
-					public short getValue() {
-						return halfperiods;
-					}
-					
-					public short getMinValue() {
-						return 1;
-					}
-					
-					public short getMaxValue() {
-						return (short) (l / 64);
-					}
-    			},
-    			new Property("Phase shift") {
-					public void setValue(short value) {
-						setOffset(value);
-					}
+                    public short getMinValue() {
+                        return (short) -x0;
+                    }
 
-					public short getValue() {
-						return offset;
-					}
-					
-					public short getMaxValue() {
-						return 360;
-					}
-					
-					public short getMinValue() {
-						return 0;
-					}
-    			},
-    			new Property("Amplitude") {
-					public void setValue(short value) {
-						setAmplitude(value);
-					}
+                    public short getMaxValue() {
+                        return (short) (Short.MAX_VALUE - x0);
+                    }
+                },
+                new Property("Halfperiods") {
+                    public void setValue(short value) {
+                        setHalfperiodsNumber(value);
+                    }
 
-					public short getValue() {
-						return amp;
-					}
-    			}
-    	};
+                    public short getValue() {
+                        return halfperiods;
+                    }
+
+                    public short getMinValue() {
+                        return 1;
+                    }
+
+                    public short getMaxValue() {
+                        return (short) (l / 64);
+                    }
+                },
+                new Property("Phase shift") {
+                    public void setValue(short value) {
+                        setOffset(value);
+                    }
+
+                    public short getValue() {
+                        return offset;
+                    }
+
+                    public short getMaxValue() {
+                        return 360;
+                    }
+
+                    public short getMinValue() {
+                        return 0;
+                    }
+                },
+                new Property("Amplitude") {
+                    public void setValue(short value) {
+                        setAmplitude(value);
+                    }
+
+                    public short getValue() {
+                        return amp;
+                    }
+                }
+        };
     }
-    
+
     public short getID() {
         return Element.SINE;
     }
@@ -272,35 +272,35 @@ public class Sine extends AbstractCurve {
     public String getName() {
         return "Sine";
     }
-    
+
     public void move(short dx, short dy) {
-    	anchorX += dx;
-    	anchorY += dy;
-    	x0 += dx;
-    	y0 += dy;
-    	
-    	if (pointsCache != null) {
-    		pointsCache.movePoints(dx, dy);
-    	}
+        anchorX += dx;
+        anchorY += dy;
+        x0 += dx;
+        y0 += dy;
+
+        if (pointsCache != null) {
+            pointsCache.movePoints(dx, dy);
+        }
     }
-    
+
     private short[][] getEnds() {
-    	return new short[][] {
-	    		new short[]{anchorX, anchorY},
-	    		new short[]{(short) (x0 + l), (short) (y0 + amp*Mathh.sin(180*halfperiods - offset)/1000)}
-		};
+        return new short[][] {
+                new short[]{anchorX, anchorY},
+                new short[]{(short) (x0 + l), (short) (y0 + amp*Mathh.sin(180*halfperiods - offset)/1000)}
+        };
     }
-    
+
     public short[] getStartPoint() {
-    	short[][] ends = getEnds();
+        short[][] ends = getEnds();
         return StartPoint.compareAsStartPoints(ends[0], ends[1]);
     }
 
     public short[] getEndPoint() {
-    	short[][] ends = getEnds();
-    	return EndPoint.compareAsEndPoints(ends[0], ends[1]);
+        short[][] ends = getEnds();
+        return EndPoint.compareAsEndPoints(ends[0], ends[1]);
     }
-    
+
     protected void genPoints() {
         if (amp == 0) {
             pointsCache = new PointsCache(2);
@@ -319,7 +319,7 @@ public class Sine extends AbstractCurve {
                 nextPointY = y0 + amp*Mathh.sin(i)/1000;
                 pointsCache.writePointToCache(nextPointX, nextPointY);
             }
-            
+
             if (a % STEP != 0) {
                 nextPointX = x0 + l;
                 nextPointY = y0 + amp*Mathh.sin(endA)/1000;
@@ -327,9 +327,9 @@ public class Sine extends AbstractCurve {
             }
         }
     }
-    
+
     public void recalcCalculatedArgs() {
-    	calcAnchorPoint();
+        calcAnchorPoint();
     }
 
     protected int getArrowsDirection() {

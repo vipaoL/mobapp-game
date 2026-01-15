@@ -38,8 +38,8 @@ public class EditorUI extends Container {
     private boolean inited = false;
 
     public EditorUI(int editorMode) {
-    	mode = editorMode;
-    	elementsBuffer = new StructureBuilder(mode) {
+        mode = editorMode;
+        elementsBuffer = new StructureBuilder(mode) {
             public void onUpdate() {
                 try {
                     initListPanel();
@@ -48,13 +48,13 @@ public class EditorUI extends Container {
                 } catch (NullPointerException ignored) { }
             }
         };
-	}
+    }
 
     public EditorUI(int editorMode, Element[] elements, String path) {
-		this(editorMode);
-		elementsBuffer.setElements(elements);
-		elementsBuffer.setFilePath(path);
-	}
+        this(editorMode);
+        elementsBuffer.setElements(elements);
+        elementsBuffer.setFilePath(path);
+    }
 
     public void init() {
         init(false);
@@ -67,7 +67,7 @@ public class EditorUI extends Container {
 
         super.init();
 
-    	isAutoSaveEnabled = EditorSettings.getAutoSaveEnabled(true);
+        isAutoSaveEnabled = EditorSettings.getAutoSaveEnabled(true);
         initEditorCanvas();
         initBottomPanel();
         initStartPointWarning();
@@ -81,7 +81,7 @@ public class EditorUI extends Container {
 
     public void onSetBounds(int x0, int y0, int w, int h) {
         bottomButtonPanel
-        		.setButtonsBgPadding(BTN_H/16)
+                .setButtonsBgPadding(BTN_H/16)
                 .setSize(w, BTN_H)
                 .setPos(x0, y0 + h, BOTTOM | LEFT);
         editorCanvas
@@ -94,9 +94,9 @@ public class EditorUI extends Container {
                 .setSizes(w/3, bottomButtonPanel.getTopY() - y0 - BTN_H / 4, FONT_H * 3)
                 .setPos(x0 + w, y0 + h - bottomButtonPanel.h, RIGHT | BOTTOM);
         if (startPointWarning != null) {
-        	startPointWarning
-	        		.setSize(startPointWarning.getOptimalW(w/3), startPointWarning.getOptimalH(bottomButtonPanel.getTopY() - y0))
-	        		.setPos(bottomButtonPanel.getLeftX(), bottomButtonPanel.getTopY(), LEFT | BOTTOM);
+            startPointWarning
+                    .setSize(startPointWarning.getOptimalW(w/3), startPointWarning.getOptimalH(bottomButtonPanel.getTopY() - y0))
+                    .setPos(bottomButtonPanel.getLeftX(), bottomButtonPanel.getTopY(), LEFT | BOTTOM);
         }
     }
 
@@ -104,27 +104,27 @@ public class EditorUI extends Container {
         if (startPointWarning != null) {
             startPointWarning.setVisible(!StartPoint.checkStartPoint(elementsBuffer.getElementsAsArray()));
         }
-    	super.paint(g, x0, y0, w, h, forceInactive);
+        super.paint(g, x0, y0, w, h, forceInactive);
     }
 
     public String getFilePath() {
-    	return elementsBuffer.getFilePath();
+        return elementsBuffer.getFilePath();
     }
 
     public void setFilePath(String path) {
-    	elementsBuffer.setFilePath(path);
+        elementsBuffer.setFilePath(path);
     }
 
     public String getFileName() {
-    	String path = getFilePath();
-    	String name = "Unnamed file";
-    	try {
-	    	if (path != null) {
-	    		String[] tmp = Utils.split(path, "/");
-	    		name = tmp[tmp.length - 1];
-	    	}
-    	} catch (Exception ignored) { }
-    	return name;
+        String path = getFilePath();
+        String name = "Unnamed file";
+        try {
+            if (path != null) {
+                String[] tmp = Utils.split(path, "/");
+                name = tmp[tmp.length - 1];
+            }
+        } catch (Exception ignored) { }
+        return name;
     }
 
     public short[][] getData() {
@@ -167,30 +167,30 @@ public class EditorUI extends Container {
     }
 
     public void saveToFile(String path) throws SecurityException, IOException {
-    	elementsBuffer.saveToFile(path);
+        elementsBuffer.saveToFile(path);
     }
 
     private void saveToAutoSave() {
-    	if (isAutoSaveEnabled && elementsBuffer != null) {
-    		new Thread(new Runnable() {
-				public void run() {
-					try {
-						AutoSaveUI.autoSaveWrite(elementsBuffer, elementsBuffer.getFilePath(), mode);
-					} catch (Exception ex) {
-						Logger.log(ex);
-						Platform.showError(ex);
-					}
-				}
-			}).start();
-    	}
-	}
+        if (isAutoSaveEnabled && elementsBuffer != null) {
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        AutoSaveUI.autoSaveWrite(elementsBuffer, elementsBuffer.getFilePath(), mode);
+                    } catch (Exception ex) {
+                        Logger.log(ex);
+                        Platform.showError(ex);
+                    }
+                }
+            }).start();
+        }
+    }
 
     private void initEditorCanvas() {
         editorCanvas = new EditorCanvas(elementsBuffer, viewMode);
     }
 
     private void initBottomPanel() {
-    	Button placeButton = new Button("Place") {
+        Button placeButton = new Button("Place") {
             public void buttonPressed() {
                 placedElementsList.setVisible(false);
                 placementButtonPanel.toggleIsVisible();
@@ -237,11 +237,11 @@ public class EditorUI extends Container {
     }
 
     private void initStartPointWarning() {
-    	if (mode == MODE_STRUCTURE) {
-    		startPointWarning = (StartPointWarning) new StartPointWarning().setVisible(false);
+        if (mode == MODE_STRUCTURE) {
+            startPointWarning = (StartPointWarning) new StartPointWarning().setVisible(false);
         } else {
             startPointWarning = null;
-    	}
+        }
     }
 
     private void initPlacementPanel() {
@@ -289,14 +289,14 @@ public class EditorUI extends Container {
 
         Button btnFinish = new Button("Level-\nFinish") {
             public void buttonPressed() {
-            	place(Element.LEVEL_FINISH, editorCanvas.getCursorX(), editorCanvas.getCursorY());
+                place(Element.LEVEL_FINISH, editorCanvas.getCursorX(), editorCanvas.getCursorY());
                 placementButtonPanel.setVisible(false);
             }
         };
 
         Button btnTrampoline = new Button("Trampo-\nline") {
             public void buttonPressed() {
-            	place(Element.TRAMPOLINE, editorCanvas.getCursorX(), editorCanvas.getCursorY());
+                place(Element.TRAMPOLINE, editorCanvas.getCursorX(), editorCanvas.getCursorY());
                 placementButtonPanel.setVisible(false);
             }
         };
@@ -310,9 +310,9 @@ public class EditorUI extends Container {
 
         Button[] placementButtons;
         if (mode == MODE_STRUCTURE) {
-        	placementButtons = new Button[] {btnLine, btnCircle, btnSine, btnBrLine, btnBrCircle.setIsActive(false), btnAccel, btnTrampoline, btnLava};
+            placementButtons = new Button[] {btnLine, btnCircle, btnSine, btnBrLine, btnBrCircle.setIsActive(false), btnAccel, btnTrampoline, btnLava};
         } else {
-        	placementButtons = new Button[] {btnLine, btnCircle, btnSine, btnBrLine, btnBrCircle.setIsActive(false), btnAccel, btnTrampoline, btnLava, btnFinish};
+            placementButtons = new Button[] {btnLine, btnCircle, btnSine, btnBrLine, btnBrCircle.setIsActive(false), btnAccel, btnTrampoline, btnLava, btnFinish};
         }
         placementButtonPanel = (ButtonPanelHorizontal) new ButtonPanelHorizontal(placementButtons)
                 .setBtnsInRowCount(BUTTONS_IN_ROW)
@@ -321,8 +321,8 @@ public class EditorUI extends Container {
     }
 
     private void place(int id, int x, int y) {
-    	elementsBuffer.place((short) id, (short) x, (short) y);
-    	placedElementsList.setSelected(placedElementsList.getButtonCount() - 1);
+        elementsBuffer.place((short) id, (short) x, (short) y);
+        placedElementsList.setSelected(placedElementsList.getButtonCount() - 1);
     }
 
     private void initListPanel() {
@@ -334,8 +334,8 @@ public class EditorUI extends Container {
             listButtons[i] = new Button(elements[i].getName()) {
                 public void buttonPressed() { }
                 public void buttonPressedSelected() {
-                	placedElementsList.setVisible(false);
-                	placementButtonPanel.setVisible(false);
+                    placedElementsList.setVisible(false);
+                    placementButtonPanel.setVisible(false);
                     showPopup(new ElementEditUI(element, elementsBuffer, EditorUI.this));
                 }
             };
@@ -343,58 +343,58 @@ public class EditorUI extends Container {
 
         if (placedElementsList == null) {
             placedElementsList = new ButtonCol() {
-            	public AbstractButtonSet setSelected(int selected) {
-            		editorCanvas.selectedElement = selected;
-            		return super.setSelected(selected);
-            	}
+                public AbstractButtonSet setSelected(int selected) {
+                    editorCanvas.selectedElement = selected;
+                    return super.setSelected(selected);
+                }
             };
         }
 
         placedElementsList
-        		.setButtons(listButtons)
-        		.setSelected(Mathh.constrain(0, placedElementsList.getSelected(), listButtons.length - 1))
-		        .setIsSelectionVisible(true)
-		        .setVisible(false);
+                .setButtons(listButtons)
+                .setSelected(Mathh.constrain(0, placedElementsList.getSelected(), listButtons.length - 1))
+                .setIsSelectionVisible(true)
+                .setVisible(false);
     }
 
     private void moveToZeros() {
-    	StartPoint.moveToZeros(elementsBuffer.getElementsAsArray());
+        StartPoint.moveToZeros(elementsBuffer.getElementsAsArray());
         saveToAutoSave();
     }
 
     class StartPointWarning extends Container {
-    	private final TextComponent message;
-    	private final ButtonComponent button;
+        private final TextComponent message;
+        private final ButtonComponent button;
 
-    	public StartPointWarning() {
-    		setBgColor(COLOR_TRANSPARENT);
-    		message = new TextComponent("Warn: start point of the structure should be on (x,y) 0 0");
-    		message.setBgColor(COLOR_TRANSPARENT);
-    		message.setFontColor(0xffff00);
-    		Button button = new Button("Move to 0 0") {
+        public StartPointWarning() {
+            setBgColor(COLOR_TRANSPARENT);
+            message = new TextComponent("Warn: start point of the structure should be on (x,y) 0 0");
+            message.setBgColor(COLOR_TRANSPARENT);
+            message.setFontColor(0xffff00);
+            Button button = new Button("Move to 0 0") {
                 public void buttonPressed() {
-					moveToZeros();
-				}
-			}.setBgColor(0x002200);
-    		this.button = new ButtonComponent(button).setBindedKeyCode(Keys.KEY_NUM7);
-		}
+                    moveToZeros();
+                }
+            }.setBgColor(0x002200);
+            this.button = new ButtonComponent(button).setBindedKeyCode(Keys.KEY_NUM7);
+        }
 
-    	public void init() {
-    		setComponents(new IUIComponent[] {message, this.button});
-    	}
+        public void init() {
+            setComponents(new IUIComponent[] {message, this.button});
+        }
 
-		protected void onSetBounds(int x0, int y0, int w, int h) {
-			button.setSize(w, ButtonComponent.H_AUTO).setPos(x0, y0 + h, LEFT | BOTTOM);
-			message.setSize(w, h - button.getHeight()).setPos(x0, y0, LEFT | TOP);
-		}
+        protected void onSetBounds(int x0, int y0, int w, int h) {
+            button.setSize(w, ButtonComponent.H_AUTO).setPos(x0, y0 + h, LEFT | BOTTOM);
+            message.setSize(w, h - button.getHeight()).setPos(x0, y0, LEFT | TOP);
+        }
 
-		public int getOptimalW(int freeSpace) {
-			return Math.min(freeSpace, Font.defaultFontStringWidth(message.getText()) / 2);
-		}
+        public int getOptimalW(int freeSpace) {
+            return Math.min(freeSpace, Font.defaultFontStringWidth(message.getText()) / 2);
+        }
 
-		public int getOptimalH(int freeSpace) {
-			return Math.min(freeSpace, FONT_H * 10);
-		}
+        public int getOptimalH(int freeSpace) {
+            return Math.min(freeSpace, FONT_H * 10);
+        }
 
     }
 }

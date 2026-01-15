@@ -19,8 +19,8 @@ public class Page2 extends AbstractSetupWizardPage {
     }
 
     public void init() {
-    	super.init();
-    	actionButtons.setSelected(actionButtons.getButtonCount() - 1);
+        super.init();
+        actionButtons.setSelected(actionButtons.getButtonCount() - 1);
     }
 
     public void initOnFirstShow() {
@@ -36,5 +36,5 @@ public class Page2 extends AbstractSetupWizardPage {
     protected IUIComponent initAndGetPageContent() {
         return text;
     }
-    
+
 }

@@ -20,7 +20,7 @@ public class MUserData implements UserData {
         public int bodyType = -1;
         public short[] data = null;
         public int color = 0x00ffff;
-        
+
         public MUserData(int bodyType, short[] data) {
             this.bodyType = bodyType;
             this.data = data;
@@ -29,7 +29,7 @@ public class MUserData implements UserData {
         public UserData copy() {
             return this;
         }
-        
+
         public UserData createNewUserData(String string, int i) {
             MUserData mUserData = new MUserData(bodyType, data);
             mUserData.i = i;
