@@ -8,16 +8,16 @@ import mobileapplication3.platform.Settings;
 
 public class MobappGameSettings {
     private static final String
-    		RECORD_STORE_SETTINGS = "gamesettings",
-		    GRAPHICS_FOR_HIRES = "btrGr",
+            RECORD_STORE_SETTINGS = "gamesettings",
+            GRAPHICS_FOR_HIRES = "btrGr",
             LANDSCAPE_COLOR = "landscapeCol",
             LEGACY_DRAWING_METHOD = "oldDrawing",
             PHYSICS_PRECISION = "PhyPrecision",
             DETAIL_LEVEL = "DetailLvl",
             FRAME_TIME = "FrameTime",
-		    SHOW_FPS = "showFPS",
-		    SHOW_BG = "enBG",
-		    BATTERY_INDICATOR = "Batt";
+            SHOW_FPS = "showFPS",
+            SHOW_BG = "enBG",
+            BATTERY_INDICATOR = "Batt";
 
     public static final int DYNAMIC_PHYSICS_PRECISION = -1, AUTO_PHYSICS_PRECISION = 0;
     public static final int
@@ -34,20 +34,20 @@ public class MobappGameSettings {
     private MobappGameSettings() { }
 
     private static Settings getSettingsInst() {
-    	if (settingsInst == null) {
-    		settingsInst = new Settings(new String[]{
+        if (settingsInst == null) {
+            settingsInst = new Settings(new String[]{
                     GRAPHICS_FOR_HIRES,
                     LANDSCAPE_COLOR,
                     LEGACY_DRAWING_METHOD,
                     PHYSICS_PRECISION,
                     DETAIL_LEVEL,
                     FRAME_TIME,
-    	            SHOW_FPS,
-    	            SHOW_BG,
-    	            BATTERY_INDICATOR
-    	        }, RECORD_STORE_SETTINGS);
-    	}
-    	return settingsInst;
+                    SHOW_FPS,
+                    SHOW_BG,
+                    BATTERY_INDICATOR
+                }, RECORD_STORE_SETTINGS);
+        }
+        return settingsInst;
     }
 
     public static boolean isBattIndicatorEnabled() {
@@ -59,11 +59,11 @@ public class MobappGameSettings {
     }
 
     public static void setBattIndicatorEnabled(boolean b) {
-    	getSettingsInst().set(BATTERY_INDICATOR, b);
+        getSettingsInst().set(BATTERY_INDICATOR, b);
     }
 
     public static boolean toggleBattIndicator() {
-    	return getSettingsInst().toggleBool(BATTERY_INDICATOR);
+        return getSettingsInst().toggleBool(BATTERY_INDICATOR);
     }
 
     ///
@@ -77,11 +77,11 @@ public class MobappGameSettings {
     }
 
     public static void setBGEnabled(boolean b) {
-    	getSettingsInst().set(SHOW_BG, b);
+        getSettingsInst().set(SHOW_BG, b);
     }
 
     public static boolean toggleBG() {
-    	return getSettingsInst().toggleBool(SHOW_BG);
+        return getSettingsInst().toggleBool(SHOW_BG);
     }
 
     ///
@@ -95,11 +95,11 @@ public class MobappGameSettings {
     }
 
     public static void setFPSShown(boolean b) {
-    	getSettingsInst().set(SHOW_FPS, b);
+        getSettingsInst().set(SHOW_FPS, b);
     }
 
     public static boolean toggleFPSShown() {
-    	return getSettingsInst().toggleBool(SHOW_FPS);
+        return getSettingsInst().toggleBool(SHOW_FPS);
     }
 
     ///

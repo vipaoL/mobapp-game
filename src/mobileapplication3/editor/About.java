@@ -30,7 +30,7 @@ public class About extends AbstractPopupPage {
     }
 
     public static UIComponent getAppLogo() {
-    	Image logoImage = null;
+        Image logoImage = null;
         String errorMessage = null;
 
         try {

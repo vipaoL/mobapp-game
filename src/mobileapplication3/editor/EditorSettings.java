@@ -10,7 +10,7 @@ import mobileapplication3.platform.Settings;
  */
 public class EditorSettings {
     public static final String
-    		RECORD_STORE_SETTINGS = "editorsettings",
+            RECORD_STORE_SETTINGS = "editorsettings",
 
             IS_SETUP_WIZARD_COMPLETED = "setupDone",
             GAME_FOLDER_PATH = "MGPath",
@@ -19,8 +19,8 @@ public class EditorSettings {
             LISTS_KEY_REPEATS = "listKRepeats",
             AUTO_SAVE = "autoSave",
             WHAT_TO_LOAD_AUTOMATICALLY = "alwLoad",
-    		SHOW_LOG = "showLog",
-    		KINETIC_SCROLL = "knScrl";
+            SHOW_LOG = "showLog",
+            KINETIC_SCROLL = "knScrl";
 
     public static final int
             OPTION_ALWAYS_LOAD_NONE = 0,
@@ -33,24 +33,24 @@ public class EditorSettings {
     private static Settings settingsInst = null;
 
     public static void resetSettings() {
-    	getSettingsInst().resetSettings();
+        getSettingsInst().resetSettings();
     }
 
     private static Settings getSettingsInst() {
-    	if (settingsInst == null) {
-    		settingsInst = new Settings(new String[]{
-    	            IS_SETUP_WIZARD_COMPLETED,
-    	            GAME_FOLDER_PATH,
+        if (settingsInst == null) {
+            settingsInst = new Settings(new String[]{
+                    IS_SETUP_WIZARD_COMPLETED,
+                    GAME_FOLDER_PATH,
                     KB_SMOOTH_SCROLLING,
                     TRANSPARENCY,
-    	            LISTS_KEY_REPEATS,
-    	            AUTO_SAVE,
+                    LISTS_KEY_REPEATS,
+                    AUTO_SAVE,
                     WHAT_TO_LOAD_AUTOMATICALLY,
                     SHOW_LOG,
                     KINETIC_SCROLL
-    	        }, RECORD_STORE_SETTINGS);
-    	}
-    	return settingsInst;
+                }, RECORD_STORE_SETTINGS);
+        }
+        return settingsInst;
     }
 
     ///
@@ -64,7 +64,7 @@ public class EditorSettings {
     }
 
     public static void setKineticScrollingEnabled(boolean b) {
-    	getSettingsInst().set(KINETIC_SCROLL, b);
+        getSettingsInst().set(KINETIC_SCROLL, b);
     }
 
     ///
@@ -78,7 +78,7 @@ public class EditorSettings {
     }
 
     public static void setOnScreenLogEnabled(boolean b) {
-    	getSettingsInst().set(SHOW_LOG, b);
+        getSettingsInst().set(SHOW_LOG, b);
     }
 
     ///
@@ -107,11 +107,11 @@ public class EditorSettings {
     }
 
     public static void setAutoSaveEnabled(boolean b) {
-    	getSettingsInst().set(AUTO_SAVE, b);
+        getSettingsInst().set(AUTO_SAVE, b);
     }
 
     public static boolean toggleAutoSaveEnabled() {
-    	return getSettingsInst().toggleBool(AUTO_SAVE);
+        return getSettingsInst().toggleBool(AUTO_SAVE);
     }
 
     ///
@@ -125,11 +125,11 @@ public class EditorSettings {
     }
 
     public static void setKeyRepeatedInListsEnabled(boolean b) {
-    	getSettingsInst().set(LISTS_KEY_REPEATS, b);
+        getSettingsInst().set(LISTS_KEY_REPEATS, b);
     }
 
     public static boolean toggleKeyRepeatedInListsEnabled() {
-    	return getSettingsInst().toggleBool(LISTS_KEY_REPEATS);
+        return getSettingsInst().toggleBool(LISTS_KEY_REPEATS);
     }
 
     ///
@@ -161,25 +161,25 @@ public class EditorSettings {
     }
 
     public static void setKbSmoothScrollingEnabled(boolean b) {
-    	getSettingsInst().set(KB_SMOOTH_SCROLLING, b);
+        getSettingsInst().set(KB_SMOOTH_SCROLLING, b);
     }
 
 ///
 
     public static String getLevelsFolderPath() {
-    	return getLevelsFolderPath(EditorSettings.getGameFolderPath());
+        return getLevelsFolderPath(EditorSettings.getGameFolderPath());
     }
 
     public static String getLevelsFolderPath(String gameFolderPath) {
-    	return gameFolderPath + "Levels/";
+        return gameFolderPath + "Levels/";
     }
 
     public static String getStructsFolderPath() {
-    	return getStructsFolderPath(EditorSettings.getGameFolderPath());
+        return getStructsFolderPath(EditorSettings.getGameFolderPath());
     }
 
     public static String getStructsFolderPath(String gameFolderPath) {
-    	return gameFolderPath + "MGStructs/";
+        return gameFolderPath + "MGStructs/";
     }
 
     public static String getGameFolderPath() {
@@ -190,8 +190,8 @@ public class EditorSettings {
     }
 
     public static void setGameFolderPath(String path) {
-    	getSettingsInst().set(GAME_FOLDER_PATH, path);
-    	gameFolderPath = path;
+        getSettingsInst().set(GAME_FOLDER_PATH, path);
+        gameFolderPath = path;
     }
 
     ///
@@ -201,6 +201,6 @@ public class EditorSettings {
     }
 
     public static void setIsSetupWizardCompleted(boolean b) {
-    	getSettingsInst().set(IS_SETUP_WIZARD_COMPLETED, b);
+        getSettingsInst().set(IS_SETUP_WIZARD_COMPLETED, b);
     }
 }

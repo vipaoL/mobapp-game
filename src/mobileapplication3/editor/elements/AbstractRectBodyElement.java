@@ -8,8 +8,8 @@ import mobileapplication3.ui.Property;
 
 public abstract class AbstractRectBodyElement extends Element {
 
-    // *############	"*" - (anchorX;anchorY)
-    // #     @     #	"@" - (x;y)
+    // *############    "*" - (anchorX;anchorY)
+    // #     @     #    "@" - (x;y)
     // #############
 
     protected short x, y, l, thickness = 20, angle;

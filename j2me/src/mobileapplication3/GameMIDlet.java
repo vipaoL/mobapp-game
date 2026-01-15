@@ -26,5 +26,5 @@ public class GameMIDlet extends MobappMIDlet {
         MenuCanvas menuCanvas = new MenuCanvas();
         RootContainer.setRootUIComponent(menuCanvas);
     }
-    
+
 }

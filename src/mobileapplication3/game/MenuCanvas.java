@@ -14,39 +14,39 @@ import utils.MgStruct;
  * @author vipaol
  */
 public class MenuCanvas extends GenericMenu implements Runnable {
-	
+
     private final String[] menuOptions = {
-    		"",
-    		"Play",
-    		"Load Structures",
-    		"Levels",
-    		"Editor",
-    		"Records",
-    		"Settings",
-    		"Exit",
-    		""
-	};
+            "",
+            "Play",
+            "Load Structures",
+            "Levels",
+            "Editor",
+            "Records",
+            "Settings",
+            "Exit",
+            ""
+    };
 
     private static int defaultSelected = 1; // currently selected option in menu
-    
+
     // states
     private boolean isInited = false;
     private boolean isGameStarted = false;
     private int c = 0;
-    
+
     private MgStruct mgStruct;
     private GameplayCanvas bg = null;
-    
+
     private static boolean areExtStructsLoaded = false;
 
-	private Thread menuThread = null;
-    
+    private Thread menuThread = null;
+
     public MenuCanvas(GameplayCanvas bg) {
-    	this();
-    	this.bg = bg;
-    	if (bg != null) {
-    		bgColor = COLOR_TRANSPARENT;
-    	}
+        this();
+        this.bg = bg;
+        if (bg != null) {
+            bgColor = COLOR_TRANSPARENT;
+        }
     }
 
     public MenuCanvas() {
@@ -57,10 +57,10 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         setFirstReachable(1);
         setLastReachable(menuOptions.length - 2);
     }
-    
+
     public void init() {
         Logger.log("menu:init");
-        
+
         if (areExtStructsLoaded) { // highlight and change label of "Ext Structs" btn if it already loaded
             setStateFor(1, 2);
             menuOptions[2] = "Reload";
@@ -68,7 +68,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         try {
             Class.forName("mobileapplication3.editor.Editor");
         } catch (ClassNotFoundException ex) {
-        	setStateFor(STATE_INACTIVE, 4);
+            setStateFor(STATE_INACTIVE, 4);
         }
         isInited = true;
     }
@@ -116,9 +116,9 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
         try {
             if (bg != null) {
-            	if (!bg.drawAsBG(g)) {
-            		bg = null;
-            	}
+                if (!bg.drawAsBG(g)) {
+                    bg = null;
+                }
             }
             if (isInited) {
                 super.onPaint(g, x0, y0, w, h, forceInactive);
@@ -126,12 +126,12 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             }
         } catch (Exception ex) { }
     }
-    
+
     protected void onSetBounds(int x0, int y0, int w, int h) {
-    	super.onSetBounds(x0, y0, w, h);
-    	if (bg != null) {
-    		bg.setSize(w, h);
-    	}
+        super.onSetBounds(x0, y0, w, h);
+        if (bg != null) {
+            bg.setSize(w, h);
+        }
     }
 
     private synchronized void startGame() {
@@ -158,7 +158,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             isGameStarted = false;
         }
     }
-    
+
     public boolean handleKeyPressed(int keyCode, int count) {         // Keyboard
         if (keyCode == Keys.KEY_STAR | keyCode == -10) {
             if (!Logger.isOnScreenLogEnabled()) {
@@ -194,39 +194,39 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             RootContainer.setRootUIComponent(new Levels());
         }
         if (selected == 4) { // Editor
-        	stop();
-        	try {
-				Class.forName("mobileapplication3.editor.Editor").newInstance();
-			} catch (Exception ex) {
-				Logger.log("Can't open editor: " + ex);
-			}
-        	Logger.log("opened editor");
+            stop();
+            try {
+                Class.forName("mobileapplication3.editor.Editor").newInstance();
+            } catch (Exception ex) {
+                Logger.log("Can't open editor: " + ex);
+            }
+            Logger.log("opened editor");
         }
         if (selected == 5) { // Records
             stop();
             RootContainer.setRootUIComponent(new RecordsScreen());
         }
         if (selected == 6) { // Settings
-        	stop();
+            stop();
             RootContainer.setRootUIComponent(new SettingsScreen());
         }
         if (selected == 7) { // Exit
-        	stop();
+            stop();
             Platform.exit();
         }
     }
-    
+
     private void stop() {
-    	isStopped = true;
+        isStopped = true;
         stopBG();
     }
 
     private void stopBG() {
-    	if (bg != null) {
-        	bg.stop(false, true);
+        if (bg != null) {
+            bg.stop(false, true);
         }
     }
-    
+
     private void log(String s) {
         Logger.log(s);
         repaint();
@@ -260,5 +260,5 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             }
         })).start();
     }
-    
+
 }

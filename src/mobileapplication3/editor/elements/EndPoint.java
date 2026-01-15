@@ -10,9 +10,9 @@ import mobileapplication3.ui.Property;
  * @author vipaol
  */
 public class EndPoint extends Element {
-    
+
     private short x, y;
-    
+
     public PlacementStep[] getPlacementSteps() {
         return new PlacementStep[] {
             new PlacementStep() {
@@ -24,10 +24,10 @@ public class EndPoint extends Element {
                 public String getName() {
                     return "Move";
                 }
-                
+
                 public String getCurrentStepInfo() {
-					return "x=" + x + " y=" + y;
-				}
+                    return "x=" + x + " y=" + y;
+                }
             }
         };
     }
@@ -35,7 +35,7 @@ public class EndPoint extends Element {
     public PlacementStep[] getExtraEditingSteps() {
         return new PlacementStep[0];
     }
-    
+
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
         int r = 3;
         int prevColor = g.getColor();
@@ -49,33 +49,33 @@ public class EndPoint extends Element {
         y = args[1];
         return this;
     }
-    
+
     public short[] getArgsValues() {
         short[] args = {x, y};
         return args;
     }
-    
+
     public Property[] getArgs() {
-    	return new Property[] {
-    			new Property("X") {
-					public void setValue(short value) {
-						x = value;
-					}
+        return new Property[] {
+                new Property("X") {
+                    public void setValue(short value) {
+                        x = value;
+                    }
 
-					public short getValue() {
-						return x;
-					}
-    			},
-    			new Property("Y") {
-					public void setValue(short value) {
-						y = value;
-					}
+                    public short getValue() {
+                        return x;
+                    }
+                },
+                new Property("Y") {
+                    public void setValue(short value) {
+                        y = value;
+                    }
 
-					public short getValue() {
-						return y;
-					}
-    			}
-    	};
+                    public short getValue() {
+                        return y;
+                    }
+                }
+        };
     }
 
     public short getID() {
@@ -85,24 +85,24 @@ public class EndPoint extends Element {
     public int getStepsToPlace() {
         return 1;
     }
-    
+
     public String getName() {
         return "End point";
     }
-    
+
     public void move(short dx, short dy) {
-    	x += dx;
-    	y += dy;
+        x += dx;
+        y += dy;
     }
-    
+
     public short[] getStartPoint() {
-    	return new short[] {x, y};
+        return new short[] {x, y};
     }
-    
+
     public short[] getEndPoint() throws Exception {
         throw new Exception("Never ask end point its end point");
     }
-    
+
     public static boolean compare(short[] oldEndPoint, short[] newEndPoint) {
         short oldX = oldEndPoint[0];
         short oldY = oldEndPoint[1];
@@ -115,17 +115,17 @@ public class EndPoint extends Element {
         }
         return false;
     }
-    
+
     public static short[] compareAsEndPoints(short[] a, short[] b) {
-		if (compare(a, b)) {
-			return b;
-		} else {
-			return a;
-		}
-	}
-    
+        if (compare(a, b)) {
+            return b;
+        } else {
+            return a;
+        }
+    }
+
     public static short[] findEndPoint(Element[] elements) {
-    	short[] endPoint = {0, 0};
+        short[] endPoint = {0, 0};
         short[] mayBeEndPoint = endPoint;
         for (int i = 1; i < elements.length; i++) {
             try {
@@ -140,10 +140,10 @@ public class EndPoint extends Element {
         return endPoint;
     }
 
-	public boolean isBody() {
-		return false;
-	}
+    public boolean isBody() {
+        return false;
+    }
 
-	public void recalcCalculatedArgs() { }
-    
+    public void recalcCalculatedArgs() { }
+
 }

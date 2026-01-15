@@ -40,7 +40,7 @@ public class MgStruct {
     static boolean isInited = false;
     public static int loadedFromResNumber = 0;
     public boolean loadCancelled = false;
-    
+
     public MgStruct() {
         Logger.log("MGStruct constructor");
         if (!isInited) {
@@ -55,30 +55,30 @@ public class MgStruct {
         Logger.log("inited");
         isInited = true;
     }
-    
+
     public boolean readRes(String path) {
-    	InputStream is = null;
+        InputStream is = null;
         try {
             is = Platform.getResource(path);
             DataInputStream dis = new DataInputStream(is);
             try {
-            	saveStructToStorage(readFromDataInputStream(dis));
+                saveStructToStorage(readFromDataInputStream(dis));
             } finally {
                 try {
                     dis.close();
                 } catch (IOException ignored) { }
-			}
+            }
             return true;
         } catch (Exception ex) {
-        	Logger.log(path + " " + ex);
+            Logger.log(path + " " + ex);
             return false;
         } finally {
-        	try {
-				is.close();
+            try {
+                is.close();
             } catch (Exception ex) { }
-		}
+        }
     }
-    
+
     public boolean loadFromFiles() {
         Logger.log("mgs load()");
         loadCancelled = false;
@@ -86,10 +86,10 @@ public class MgStruct {
         int loadedFromFiles = 0;
         loadedStructsNumber = loadedFromResNumber;
         for (int i = 0; i < paths.length; i++) {
-        	String path = paths[i];
-        	DataInputStream dis = null;
+            String path = paths[i];
+            DataInputStream dis = null;
             try {
-            	dis = FileUtils.fileToDataInputStream(path);
+                dis = FileUtils.fileToDataInputStream(path);
             } catch (SecurityException sex) {
                 Logger.log("mgs:load cancelled");
                 sex.printStackTrace();
@@ -140,16 +140,16 @@ public class MgStruct {
                     length = dis.readShort();
                 }
                 Logger.log("read: ver=" + fileFormatVersion + " length=" + length);
-                
+
                 short[][] structure = new short[length][];
                 for (int c = 0; true; c++) {
                     short id = dis.readShort();
-                    
+
                     // structID 0 is end of file
                     if (id == 0) {
                         break;
                     }
-                    
+
                     // reading a primitive, e.g., line or circle
                     short[] data = new short[argsNumber[id] + 1]; // {2, 0, 0, 100, 0} // - e.g.: line
                     // first cell is ID of primitive, next cells are arguments
@@ -168,13 +168,13 @@ public class MgStruct {
                 }
 
                 try {
-                	dis.close();
+                    dis.close();
                 } catch (Exception e) { }
                 return structure;
             } else {
                 Logger.log("Unsupported file format version: " + fileFormatVersion);
                 try {
-                	dis.close();
+                    dis.close();
                 } catch (Exception e) { }
                 return null;
             }
@@ -187,20 +187,20 @@ public class MgStruct {
             return null;
         }
     }
-    
+
     void saveStructToStorage(short[][] data) {
         Logger.log("savivg new structure, id=" + loadedStructsNumber);
         structStorage = increaseArrayIfNeeded(structStorage, loadedStructsNumber, 8);
         structStorage[loadedStructsNumber] = data;
         loadedStructsNumber++;
     }
-    
+
     short[][][] increaseArrayIfNeeded(short[][][] array, int newElementIndex, int inc) {
-    	if (newElementIndex >= array.length) {
-    		short[][][] newArray = new short[array.length + inc][][];
-    		System.arraycopy(array, 0, newArray, 0, array.length);
-    		return newArray;
-    	}
-    	return array;
+        if (newElementIndex >= array.length) {
+            short[][][] newArray = new short[array.length + inc][][];
+            System.arraycopy(array, 0, newArray, 0, array.length);
+            return newArray;
+        }
+        return array;
     }
 }

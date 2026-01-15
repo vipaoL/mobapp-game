@@ -48,7 +48,7 @@ public class AboutScreen extends GenericMenu implements Runnable {
     }
 
     protected void onSetBounds(int x0, int y0, int w, int h) {
-    	super.onSetBounds(x0, y0, w, h);
+        super.onSetBounds(x0, y0, w, h);
         if (this.w == w && this.h == h && qr != null) {
             return;
         }
@@ -115,7 +115,7 @@ public class AboutScreen extends GenericMenu implements Runnable {
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
-    	//   if qr isn't selected, repaint on each frame
+        //   if qr isn't selected, repaint on each frame
         //
         //   if big qr is open, draw it once,
         // and then we don't need to refresh screen anymore

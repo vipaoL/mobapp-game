@@ -24,7 +24,7 @@ public class PathPicker extends AbstractPopupPage {
 
     public static final String STRUCTURE_FILE_EXTENSION = ".mgstruct";
     public static final String LEVEL_FILE_EXTENSION = ".mglvl";
-	public static final String QUESTION_REPLACE_WITH_PATH = ".curr_folder.";
+    public static final String QUESTION_REPLACE_WITH_PATH = ".curr_folder.";
     private static final int TARGET_SAVE = 0, TARGET_OPEN = 1;
     public static final int MODE_STRUCTURE = EditorUI.MODE_STRUCTURE, MODE_LEVEL = EditorUI.MODE_LEVEL;
 
@@ -38,9 +38,9 @@ public class PathPicker extends AbstractPopupPage {
     private String questionTemplate = "";
 
     public PathPicker(int mode, IPopupFeedback parent) {
-    	super("File picker", parent);
-    	this.mode = mode;
-    	initUI();
+        super("File picker", parent);
+        this.mode = mode;
+        initUI();
     }
 
     public PathPicker pickFolder(String question, Feedback onComplete) {
@@ -160,7 +160,7 @@ public class PathPicker extends AbstractPopupPage {
     }
 
     protected Button[] getActionButtons() {
-    	Button okBtn = new Button("OK") {
+        Button okBtn = new Button("OK") {
             public void buttonPressed() {
                 if (currentTarget == TARGET_OPEN && pickedPath.endsWith(String.valueOf(FileUtils.SEP))) {
                     return;
@@ -175,42 +175,42 @@ public class PathPicker extends AbstractPopupPage {
                 feedback.onCancel();
             }
         };
-    	return new Button[]{okBtn, cancelBtn};
+        return new Button[]{okBtn, cancelBtn};
     }
 
     protected IUIComponent initAndGetPageContent() {
-    	return new Container() {
-    		public void init() {
-    			setComponents(new IUIComponent[] {list, question});
-    			super.init();
-    		}
+        return new Container() {
+            public void init() {
+                setComponents(new IUIComponent[] {list, question});
+                super.init();
+            }
 
-    		protected void onSetBounds(int x0, int y0, int w, int h) {
-    	        question
-    			        .setSize(w, Font.getDefaultFontHeight())
-    			        .setPos(x0 + w/2, y0 + h, TextComponent.HCENTER | TextComponent.BOTTOM);
-    	        list
-    	        		.setButtonsBgPadding(margin/4)
-    	                .setSize(w, question.getTopY() - margin - y0)
-    	                .setPos(x0 + w/2, question.getTopY() - margin, ButtonCol.HCENTER | ButtonCol.BOTTOM);
-    	    }
-		};
+            protected void onSetBounds(int x0, int y0, int w, int h) {
+                question
+                        .setSize(w, Font.getDefaultFontHeight())
+                        .setPos(x0 + w/2, y0 + h, TextComponent.HCENTER | TextComponent.BOTTOM);
+                list
+                        .setButtonsBgPadding(margin/4)
+                        .setSize(w, question.getTopY() - margin - y0)
+                        .setPos(x0 + w/2, question.getTopY() - margin, ButtonCol.HCENTER | ButtonCol.BOTTOM);
+            }
+        };
     }
 
     private String generateNewFileName() {
         Calendar calendar = Calendar.getInstance();
         String fileExtension;
         switch (mode) {
-		case MODE_STRUCTURE:
-			fileExtension = STRUCTURE_FILE_EXTENSION;
-			break;
-		case MODE_LEVEL:
-			fileExtension = LEVEL_FILE_EXTENSION;
-			break;
-		default:
-			fileExtension = ".unknown";
-			break;
-		}
+        case MODE_STRUCTURE:
+            fileExtension = STRUCTURE_FILE_EXTENSION;
+            break;
+        case MODE_LEVEL:
+            fileExtension = LEVEL_FILE_EXTENSION;
+            break;
+        default:
+            fileExtension = ".unknown";
+            break;
+        }
         return calendar.get(Calendar.YEAR)
                 // it counts months from 0 while everything else from 1.
                 + "-" + format((calendar.get(Calendar.MONTH) + 1)) // why? who knows...
@@ -222,11 +222,11 @@ public class PathPicker extends AbstractPopupPage {
     }
 
     private String format(int date) {
-    	String dateStr = String.valueOf(date);
-    	if (dateStr.length() < 2) {
-    		dateStr = "0" + dateStr;
-    	}
-    	return dateStr;
+        String dateStr = String.valueOf(date);
+        if (dateStr.length() < 2) {
+            dateStr = "0" + dateStr;
+        }
+        return dateStr;
     }
 
     public interface Feedback {

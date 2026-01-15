@@ -24,37 +24,37 @@ public class WorldGen implements Runnable {
     public final Object lock = new Object();
 
     public static boolean isEnabled = false;
-    
+
     private int prevStructRandomId;
     private int nextStructRandomId;
     private boolean isResettingPosition = false;
     private Vector deferredStructures = null;
     public int firstDeferredStructureX = -1;
-    
+
     public int lastX, lastY;
     private final int POINTS_DIVIDER = 2000;
     private int nextPointsCounterTargetX;
     int tick = 0;
     public int mspt;
-    
+
     private boolean paused = false;
     private boolean needSpeed = true;
-    
+
     private final Random rand;
     private final GameplayCanvas game;
     private final GraphicsWorld w;
     private final Landscape landscape;
     private StructLog structLogger;
     private Thread wgThread = null;
-    
+
     // wg activity indicator
     public int currStep;
     public static final int STEP_IDLE = 0;
     public static final int STEP_ADD = 1;
     public static final int STEP_RES_POS = 2;
     public static final int STEP_CLEAN_SGS = 3;
-    
-    
+
+
     public WorldGen(GameplayCanvas game, GraphicsWorld w) {
         w.lowestY = 2000;
         Logger.log("wg:starting");
@@ -75,7 +75,7 @@ public class WorldGen implements Runnable {
         }
         deferredStructures.addElement(structureData);
     }
-    
+
     public void run() {
         Logger.log("wg:run()");
         while(isEnabled) {
@@ -87,12 +87,12 @@ public class WorldGen implements Runnable {
         }
         Logger.log("wg stopped.");
     }
-    
+
     public void tick() {
-    	long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         if (!paused || needSpeed) {
             w.refreshCarPos();
-            
+
             if ((w.carX + w.viewField*2 > lastX)) {
                 currStep = STEP_ADD;
                 placeNext();
@@ -107,7 +107,7 @@ public class WorldGen implements Runnable {
                     }
                 }
             }
-            
+
             if (tick == 0) {
                 currStep = STEP_RES_POS;
                 /* World cycling
@@ -141,7 +141,7 @@ public class WorldGen implements Runnable {
         } catch (InterruptedException ignored) { }
         mspt = (int) (System.currentTimeMillis() - startTime);
     }
-    
+
     private void placeNext() {
         int idsCount;
         if (DebugMenu.mgstructOnly) {
@@ -227,22 +227,22 @@ public class WorldGen implements Runnable {
             wgThread.start();
         }
     }
-    
+
     public void pause() {
         Logger.log("wg pause");
         needSpeed = true;
         paused = true;
     }
-    
+
     public void resume() {
         Logger.log("wg resume");
         paused = false;
     }
-    
+
     public void stop() {
-    	Logger.log("stopping wg thread...");
-    	isEnabled = false;
-    	boolean succeed = wgThread == null;
+        Logger.log("stopping wg thread...");
+        isEnabled = false;
+        boolean succeed = wgThread == null;
         while (!succeed) {
             try {
                 wgThread.join();
@@ -253,7 +253,7 @@ public class WorldGen implements Runnable {
         }
         Logger.log("wg: stopped");
     }
-    
+
     public void reset() {
         needSpeed = true;
         Logger.log("wg:restart()");
@@ -266,9 +266,9 @@ public class WorldGen implements Runnable {
             Logger.log("wg:cleaning world");
             w.cleanWorld();
         } catch (NullPointerException ignored) { }
-        
+
         structLogger = new StructLog(10);
-        
+
         // start platform
         ElementPlacer elementPlacer = new ElementPlacer(w, isResettingPosition);
         int x1 = lastX - 600;
@@ -296,7 +296,7 @@ public class WorldGen implements Runnable {
     public int getStructuresRingBufferOffset() {
         return structLogger.getRingBufferOffset();
     }
-    
+
     private void resetPosition() { // world cycling
         isResettingPosition = true;
 
@@ -320,12 +320,12 @@ public class WorldGen implements Runnable {
         }
         game.onPosReset(dx);
     }
-    
+
     private void moveLandscape(int dx) {
         movePoints(landscape.elementStartPoints(), dx);
         movePoints(landscape.elementEndPoints(), dx);
     }
-    
+
     private void movePoints(FXVector[] points, int dx) {
         try {
             for (int i = 0; i < landscape.segmentCount(); i++) {
@@ -336,7 +336,7 @@ public class WorldGen implements Runnable {
             Logger.log(ex);
         }
     }
-    
+
     private void moveBodies(int dx) {
         Body[] bodies = w.getBodies();
         for (int i = 0; i < w.getBodyCount(); i++) {
@@ -373,7 +373,7 @@ public class WorldGen implements Runnable {
         System.arraycopy(arr2, 0, structData, arr1.length, arr2.length);
         return structData;
     }
-    
+
     private class StructLog {
         private static final boolean DEBUG = false;
         public static final int MAX_DIST_TO_RM_STRUCT = 4000;
@@ -382,11 +382,11 @@ public class WorldGen implements Runnable {
         private int numberOfLoggedStructs = 0;
         private int ringLogStart = 0;
         private boolean isLeftBarrierAdded = false;
-        
+
         public StructLog(int structLogSize) {
             structLog = new int[structLogSize][];
         }
-        
+
         public void add(int[] structureData) {
             if (numberOfLoggedStructs >= structLog.length) {
                 int ns = structLog.length+1;
@@ -397,10 +397,10 @@ public class WorldGen implements Runnable {
             int nextID = (ringLogStart + numberOfLoggedStructs) % structLog.length;
             logDebug("logging struct to " + nextID);
             structLog[nextID] = structureData;
-            
+
             numberOfLoggedStructs++;
         }
-        
+
         public void increase(int newSize) {
             if (newSize < structLog.length) {
                 throw new IllegalArgumentException("newSize can't be less than current size");
@@ -418,15 +418,15 @@ public class WorldGen implements Runnable {
             int id = getElementID(i);
             return structLog[id];
         }
-        
+
         public int getElementID(int i) {
             return (ringLogStart+i)%structLog.length;
         }
-        
+
         public int getNumberOfLogged() {
             return numberOfLoggedStructs;
         }
-        
+
         public int getSize() {
             return structLog.length;
         }
@@ -438,12 +438,12 @@ public class WorldGen implements Runnable {
         public int[][] getStructures() {
             return structLog;
         }
-        
+
         public void rmFirstElement() {
             ringLogStart = (ringLogStart + 1) % structLog.length;
             numberOfLoggedStructs--;
         }
-        
+
         public void moveXAllElements(int dx) {
             for (int i = 0; i < getSize(); i++) {
                 int[] structureData = getElementAt(i);
@@ -491,7 +491,7 @@ public class WorldGen implements Runnable {
         }
         public void rmFarStructures() {
             if (shouldRmFirstStruct()) {
-                
+
                 // add a barrier to the left world border
                 if (!isLeftBarrierAdded) {
                     w.barrierX = structLog[getElementID(0)][0];
@@ -500,7 +500,7 @@ public class WorldGen implements Runnable {
                     structLog[getElementID(1)][2] += 1;
                     isLeftBarrierAdded = true;
                 }
-                
+
                 int deletedSegments = 0;
                 for (int i = 0; i < Math.min(getElementAt(0)[2], 3); i++) {
                     landscape.removeSegment(0);
@@ -517,7 +517,7 @@ public class WorldGen implements Runnable {
                 }
             }
         }
-    
+
         public boolean shouldRmFirstStruct() {
             int maxDistToRemove = MAX_DIST_TO_RM_STRUCT;
             if (DebugMenu.simulationMode) {

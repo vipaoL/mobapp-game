@@ -11,8 +11,8 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 public class MGStructs {
-	public static Element[] readMGStruct(String path) {
-		Logger.log(path);
+    public static Element[] readMGStruct(String path) {
+        Logger.log(path);
         return readMGStruct(FileUtils.fileToDataInputStream(path));
     }
 
@@ -34,7 +34,7 @@ public class MGStructs {
             }
             ret = shrinkArray(elements);
         } catch (NullPointerException ex) {
-        	Logger.log("nothing to read (null)");
+            Logger.log("nothing to read (null)");
         } catch (IOException ex) {
             Logger.log(ex);
         }
