@@ -2,8 +2,6 @@
 
 package mobileapplication3.game;
 
-import java.io.IOException;
-
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.FXVector;
 import mobileapplication3.platform.Logger;
@@ -12,6 +10,8 @@ import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.Image;
 import mobileapplication3.platform.ui.RootContainer;
+
+import java.io.IOException;
 
 /**
  *

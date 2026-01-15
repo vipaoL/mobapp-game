@@ -3,15 +3,10 @@
 package mobileapplication3.editor;
 
 import mobileapplication3.editor.elements.Element;
-import mobileapplication3.editor.elements.EndPoint;
 import mobileapplication3.editor.elements.Element.PlacementStep;
+import mobileapplication3.editor.elements.EndPoint;
 import mobileapplication3.editor.elements.LevelStart;
-import mobileapplication3.ui.AbstractPopupPage;
-import mobileapplication3.ui.BackButton;
-import mobileapplication3.ui.Button;
-import mobileapplication3.ui.ButtonCol;
-import mobileapplication3.ui.IPopupFeedback;
-import mobileapplication3.ui.IUIComponent;
+import mobileapplication3.ui.*;
 
 public class ElementEditUI extends AbstractPopupPage {
 

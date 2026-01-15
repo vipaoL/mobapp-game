@@ -3,7 +3,6 @@
 package mobileapplication3.editor.elements;
 
 import mobileapplication3.platform.Mathh;
-import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
 
 /**

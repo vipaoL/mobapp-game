@@ -2,10 +2,6 @@
 
 package mobileapplication3.game;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import at.emini.physics2D.World;
 import at.emini.physics2D.util.PhysicsFileReader;
 import mobileapplication3.platform.FileUtils;
@@ -14,6 +10,10 @@ import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.RootContainer;
 import utils.GameFileUtils;
 import utils.MgStruct;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *

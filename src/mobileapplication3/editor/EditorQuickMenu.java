@@ -5,12 +5,7 @@ package mobileapplication3.editor;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.RootContainer;
-import mobileapplication3.ui.AbstractPopupPage;
-import mobileapplication3.ui.BackButton;
-import mobileapplication3.ui.Button;
-import mobileapplication3.ui.ButtonCol;
-import mobileapplication3.ui.IUIComponent;
-import mobileapplication3.ui.Keys;
+import mobileapplication3.ui.*;
 
 /**
  *

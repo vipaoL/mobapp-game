@@ -2,20 +2,14 @@
 
 package mobileapplication3.editor;
 
-import java.io.IOException;
-import java.util.Calendar;
-
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.Font;
-import mobileapplication3.ui.AbstractPopupPage;
-import mobileapplication3.ui.Button;
-import mobileapplication3.ui.ButtonCol;
-import mobileapplication3.ui.Container;
-import mobileapplication3.ui.IPopupFeedback;
-import mobileapplication3.ui.IUIComponent;
-import mobileapplication3.ui.TextComponent;
+import mobileapplication3.ui.*;
+
+import java.io.IOException;
+import java.util.Calendar;
 
 /**
  *

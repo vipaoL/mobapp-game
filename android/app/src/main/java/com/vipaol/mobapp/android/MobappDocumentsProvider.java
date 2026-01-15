@@ -2,25 +2,24 @@
 
 package com.vipaol.mobapp.android;
 
-import static mobileapplication3.platform.Platform.SDK_INT;
-
 import android.annotation.TargetApi;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
-import android.provider.DocumentsProvider;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
+import android.provider.DocumentsProvider;
 import android.webkit.MimeTypeMap;
+import mobileapplication3.editor.EditorSettings;
+import mobileapplication3.platform.Platform;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import mobileapplication3.editor.EditorSettings;
-import mobileapplication3.platform.Platform;
+import static mobileapplication3.platform.Platform.SDK_INT;
 
 @TargetApi(Build.VERSION_CODES.KITKAT)
 public class MobappDocumentsProvider extends DocumentsProvider {

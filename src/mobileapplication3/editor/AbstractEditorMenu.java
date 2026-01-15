@@ -2,13 +2,13 @@
 
 package mobileapplication3.editor;
 
-import java.io.IOException;
-
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.ui.*;
+
+import java.io.IOException;
 
 public abstract class AbstractEditorMenu extends AbstractPopupWindow {
 

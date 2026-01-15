@@ -6,8 +6,6 @@
  */
 package mobileapplication3.game;
 
-import java.util.Vector;
-
 import at.emini.physics2D.Body;
 import at.emini.physics2D.Contact;
 import at.emini.physics2D.UserData;
@@ -21,6 +19,8 @@ import mobileapplication3.ui.CanvasComponent;
 import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.Keys;
 import utils.MobappGameSettings;
+
+import java.util.Vector;
 
 /**
  *

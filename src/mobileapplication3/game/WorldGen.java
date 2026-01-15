@@ -2,17 +2,16 @@
 
 package mobileapplication3.game;
 
-import java.util.Random;
-import java.util.Vector;
-
 import at.emini.physics2D.Body;
-import at.emini.physics2D.Constraint;
 import at.emini.physics2D.Landscape;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
 import utils.MgStruct;
+
+import java.util.Random;
+import java.util.Vector;
 
 /**
  *

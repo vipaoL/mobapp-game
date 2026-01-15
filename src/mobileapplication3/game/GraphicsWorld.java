@@ -6,9 +6,6 @@
  */
 package mobileapplication3.game;
 
-import java.util.Random;
-import java.util.Vector;
-
 import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
@@ -16,6 +13,9 @@ import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Graphics;
 import utils.MobappGameSettings;
+
+import java.util.Random;
+import java.util.Vector;
 
 /**
  *

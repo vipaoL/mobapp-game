@@ -8,16 +8,15 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
-
-import java.io.DataInputStream;
-import java.io.FileNotFoundException;
-
 import mobileapplication3.editor.EditorSettings;
 import mobileapplication3.editor.EditorUI;
 import mobileapplication3.editor.MGStructs;
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.ui.IUIComponent;
+
+import java.io.DataInputStream;
+import java.io.FileNotFoundException;
 
 public class IntentsUtil {
     public static IUIComponent handleFileOpenIntent(Intent intent, Context context) throws FileNotFoundException {

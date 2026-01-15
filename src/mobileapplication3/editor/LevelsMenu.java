@@ -2,15 +2,15 @@
 
 package mobileapplication3.editor;
 
-import java.io.IOException;
-import java.util.Vector;
-
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.Button;
 import mobileapplication3.ui.IPopupFeedback;
 import mobileapplication3.ui.IUIComponent;
+
+import java.io.IOException;
+import java.util.Vector;
 
 public class LevelsMenu extends AbstractEditorMenu {
 

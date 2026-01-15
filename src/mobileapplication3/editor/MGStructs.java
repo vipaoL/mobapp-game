@@ -2,13 +2,13 @@
 
 package mobileapplication3.editor;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Utils;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 
 public class MGStructs {
 	public static Element[] readMGStruct(String path) {

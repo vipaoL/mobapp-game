@@ -2,25 +2,18 @@
 
 package mobileapplication3.editor;
 
-import java.io.IOException;
-
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.editor.elements.StartPoint;
-import mobileapplication3.platform.*;
+import mobileapplication3.platform.Logger;
+import mobileapplication3.platform.Mathh;
+import mobileapplication3.platform.Platform;
+import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.RootContainer;
-import mobileapplication3.ui.AbstractButtonSet;
-import mobileapplication3.ui.BackButton;
-import mobileapplication3.ui.Button;
-import mobileapplication3.ui.ButtonCol;
-import mobileapplication3.ui.ButtonComponent;
-import mobileapplication3.ui.ButtonPanelHorizontal;
-import mobileapplication3.ui.ButtonRow;
-import mobileapplication3.ui.Container;
-import mobileapplication3.ui.IUIComponent;
-import mobileapplication3.ui.Keys;
-import mobileapplication3.ui.TextComponent;
+import mobileapplication3.ui.*;
+
+import java.io.IOException;
 
 /**
  *

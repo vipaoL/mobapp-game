@@ -4,9 +4,9 @@ package com.vipaol.mobapp.android;
 
 import mobileapplication3.editor.EditorSettings;
 import mobileapplication3.editor.MainMenu;
+import mobileapplication3.editor.setup.SetupWizard;
 import mobileapplication3.platform.ui.MobappActivity;
 import mobileapplication3.platform.ui.RootContainer;
-import mobileapplication3.editor.setup.SetupWizard;
 import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.UISettings;
 

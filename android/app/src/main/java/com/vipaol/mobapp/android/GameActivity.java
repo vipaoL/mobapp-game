@@ -7,9 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-
-import java.util.Objects;
-
 import mobileapplication3.game.MenuCanvas;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
@@ -18,6 +15,8 @@ import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.UISettings;
 import utils.MobappGameSettings;
+
+import java.util.Objects;
 
 public class GameActivity extends MobappActivity {
     private IUIComponent root = new MenuCanvas();

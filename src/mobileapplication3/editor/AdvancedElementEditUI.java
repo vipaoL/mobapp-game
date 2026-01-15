@@ -3,15 +3,7 @@
 package mobileapplication3.editor;
 
 import mobileapplication3.editor.elements.Element;
-import mobileapplication3.ui.AbstractPopupPage;
-import mobileapplication3.ui.Button;
-import mobileapplication3.ui.ButtonComponent;
-import mobileapplication3.ui.IPopupFeedback;
-import mobileapplication3.ui.IUIComponent;
-import mobileapplication3.ui.Keys;
-import mobileapplication3.ui.List;
-import mobileapplication3.ui.Property;
-import mobileapplication3.ui.Slider;
+import mobileapplication3.ui.*;
 
 public class AdvancedElementEditUI extends AbstractPopupPage {
 

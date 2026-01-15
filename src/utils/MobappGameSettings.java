@@ -3,7 +3,6 @@
 package utils;
 
 import mobileapplication3.game.GraphicsWorld;
-import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.Settings;
 
