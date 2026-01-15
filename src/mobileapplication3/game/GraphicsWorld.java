@@ -1,9 +1,5 @@
-// SPDX-License-Identifier: GPL-2.0-only
+// SPDX-License-Identifier: GPL-3.0-or-later
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package mobileapplication3.game;
 
 import at.emini.physics2D.*;
