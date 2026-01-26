@@ -1,5 +1,28 @@
+### IntelliJ IDEA ###
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+proguard-local.cfg
+.idea/runConfigurations
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+bin/
+deployed/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
 /dist/
-*classes
-/bin/*
-/.mtj.tmp/
-/bin/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
