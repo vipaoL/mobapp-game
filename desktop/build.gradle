@@ -21,7 +21,6 @@ repositories {
 }
 
 dependencies {
-    implementation fileTree(dir: '../lib/', include: ['*.jar'])
     implementation 'net.sf.jopt-simple:jopt-simple:6.0-alpha-3'
 }
 
@@ -31,6 +30,12 @@ sourceSets {
             srcDirs += '../src'
             srcDirs += '../lib/mobapp-platform-desktop/src'
             srcDirs += '../lib/mobapp-framework/src'
+            srcDirs += '../lib/EminiPhysicsEngine/src'
+
+            exclude 'at/emini/physics2DDesigner/**'
+            exclude 'at/emini/physics2DSimulationTests/**'
+            exclude 'at/emini/physics2DUnitTests/**'
+            exclude 'at/emini/physics2DVisualTest/**'
         }
     }
 }
