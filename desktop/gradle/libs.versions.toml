@@ -1,0 +1,5 @@
+[versions]
+grgit = "5.3.3"
+
+[plugins]
+grgit = { id = "org.ajoberstar.grgit", version.ref = "grgit" }
