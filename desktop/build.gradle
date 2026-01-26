@@ -1,19 +1,16 @@
 plugins {
     id 'java'
+    alias(libs.plugins.grgit)
 }
 
 def getVersionName = { ->
-    try {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'describe', '--tags', '--dirty'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim()
+    def description = grgit.describe(tags: true, always: true)
+
+    if (!grgit.status().clean) {
+        return description + "-dirty"
     }
-    catch (ignored) {
-        return null
-    }
+
+    return description
 }
 
 group = 'com.vipaol'
