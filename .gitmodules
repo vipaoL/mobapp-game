@@ -13,3 +13,6 @@
 	path = lib/mobapp-platform-desktop
 	url = https://github.com/vipaoL/mobapp-platform.git
 	branch = desktop
+[submodule "lib/EminiPhysicsEngine"]
+	path = lib/EminiPhysicsEngine
+	url = git@github.com:vipaoL/EminiPhysicsEngine.git
