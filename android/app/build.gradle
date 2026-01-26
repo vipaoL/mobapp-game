@@ -45,9 +45,14 @@ android {
         main.java.srcDirs += '../../src'
         main.java.srcDirs += '../../lib/mobapp-platform-android/src'
         main.java.srcDirs += '../../lib/mobapp-framework/src'
+        main.java.srcDirs += '../../lib/EminiPhysicsEngine/src'
+
+        main.java.exclude 'at/emini/physics2DDesigner/**'
+        main.java.exclude 'at/emini/physics2DSimulationTests/**'
+        main.java.exclude 'at/emini/physics2DUnitTests/**'
+        main.java.exclude 'at/emini/physics2DVisualTest/**'
     }
 }
 
 dependencies {
-    implementation files('../../lib/PhysicsEngine_v135b.jar')
 }

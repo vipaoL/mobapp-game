@@ -3,7 +3,8 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../lib/mobapp-platform-android" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../lib/EminiPhysicsEngine" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../lib/mobapp-framework" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../lib/mobapp-platform-android" vcs="Git" />
   </component>
 </project>
