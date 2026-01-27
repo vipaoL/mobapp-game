@@ -69,12 +69,14 @@ mkdir -p bin/classes
 rm -rf bin/tmpclasses/*
 rm -rf bin/classes/*
 
-cd bin/tmpclasses
-LIB_JARS="${YOUR_LIBS}/*.jar"
-echo $LIB_JARS
-echo "Unpacking your libraries: ${LIB_JARS}"
-${JAR} xf ${LIB_JARS}
-rm -rf META-INF
+if [ -n "${LIB_JARS_DIR}" ] ; then
+  cd bin/tmpclasses
+  LIB_JARS="${LIB_JARS_DIR}/*.jar"
+  echo $LIB_JARS
+  echo "Unpacking your libraries: ${LIB_JARS}"
+  ${JAR} xf ${LIB_JARS}
+  rm -rf META-INF
+fi
 
 cd ${WORK_DIR}
 echo
@@ -87,8 +89,8 @@ ${JAVAC} \
     -target 1.3 \
     -d bin/tmpclasses \
     -classpath bin/tmpclasses${PATHSEP}${CLASSPATH} \
-	-extdirs ../lib \
-    `find ${SOURCES_PATHS} -name '*'.java`
+    -extdirs ../lib \
+    `find ${SOURCES_PATHS} -name '*.java' | grep -vE "${EXCLUDE_PATTERN}"`
 
 echo
 echo "Preverifying class files..."
