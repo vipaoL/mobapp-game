@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package com.vipaol.mobapp.android;
+package io.github.vipaol.mobapp.game;
 
 import mobileapplication3.editor.EditorSettings;
 import mobileapplication3.editor.MainMenu;

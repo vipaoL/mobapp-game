@@ -11,7 +11,7 @@ A crossplatform game on emini physics engine
 - Supports touch and keyboard controls
 - Adaptive to screen resolution.
 - Custom structures: you can create create your custom structures using [the structure editor](https://github.com/vipaoL/mobap-game/tree/android#mobapp-editor) (it is included into the android version of the game) and load them into the game by pressing the "Ext Structs" button in the game's main menu. The game will use your structures in world generation on a par with the built-in structures. Structures should be saved to a folder named "MGStructs" in the root of any drive (E:/ for example). You can also put MGStructs folder into "other", graphics or photos folder, if your phone doesn't allow creating folders in the root.
-- Custom levels which can be created with emini world designer (emini engine is the physics engine the game use). Some example levels are pinned with the first release of the game. You can put the "Levels" folder into Android/data/com.vipaol.mobapp.game.android/files/
+- Custom levels which can be created with emini world designer (emini engine is the physics engine the game use). Some example levels are pinned with the first release of the game. You can put the "Levels" folder into Android/data/io.github.vipaol.mobapp.game/files/
 
 ![gameplay](https://github.com/user-attachments/assets/94910dee-de2f-48bd-bb28-acb48cc83cb4)
 ![game over](https://github.com/user-attachments/assets/a5bde1fc-9795-4451-a23a-b8ebece28ed0)

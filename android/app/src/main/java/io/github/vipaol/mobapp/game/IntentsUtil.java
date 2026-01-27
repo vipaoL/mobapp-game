@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
-package com.vipaol.mobapp.android;
+package io.github.vipaol.mobapp.game;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

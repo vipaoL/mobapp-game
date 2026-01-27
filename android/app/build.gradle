@@ -18,11 +18,11 @@ def getVersionCode = { ->
 }
 
 android {
-    namespace 'com.vipaol.mobapp.android'
+    namespace 'io.github.vipaol.mobapp.game'
     compileSdk 35
 
     defaultConfig {
-        applicationId 'com.vipaol.mobapp.game.android'
+        applicationId 'io.github.vipaol.mobapp.game'
         minSdk 1
         targetSdk 35
         versionCode getVersionCode()
