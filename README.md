@@ -5,9 +5,9 @@
 
 
 # About
-A crossplatform game on emini physics engine (Android, J2ME and desktop Java are supported)
+A crossplatform game on Emini Physics Engine (Android, J2ME and desktop Java are supported)
 - Endless gameplay with procedural world generation (random combination of predefined or custom structures)
-- Built-in levels
+- Built-in and custom levels
 - Touchscreen and keyboard support
 - Adaptive to screen resolution
 - Custom structures: You can create create your custom structures using the built-in editor and load them into the game by pressing "Load Structures" in the game's main menu. Then the game will use your custom structures in world generation on a par with the built-in structures. You can also test structures quickly right from the editor
@@ -18,3 +18,15 @@ A crossplatform game on emini physics engine (Android, J2ME and desktop Java are
 ![Scr_176](https://github.com/user-attachments/assets/4ff3f507-2c74-4807-9bcb-b4ac9105c8ec)
 ![Scr_178](https://github.com/user-attachments/assets/31e28575-43cc-470e-a34b-0570e1919819)
 ![Scr_181](https://github.com/user-attachments/assets/37a9b5fe-5aa7-4150-afec-24bfd4c6343b)
+
+# Build
+`git clone https://github.com/vipaoL/mobapp-game.git --recursively`
+## IDE
+### Android
+Open `android/` folder in Android Studio
+### Desktop
+Open `desktop/` folder in IntelliJ IDEA
+### J2ME
+Use IntelliJ IDEA integration in KEmulator nnmod to open the project (`j2me/` folder is the project root)
+## Command-line
+See .github/workflows/
