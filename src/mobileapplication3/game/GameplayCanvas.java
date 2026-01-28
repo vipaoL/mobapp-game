@@ -41,8 +41,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int gameMode = GAME_MODE_ENDLESS;
     private static boolean isFirstStart = true; // show hints only on first start
     public boolean uninterestingDebug = false;
-    public boolean shouldWait = false;
-    public boolean isWaiting = false;
     private boolean isWorldLoaded = false;
     private int hintVisibleTimer = 120; // in ticks
     private boolean showFPS = false;
@@ -96,6 +94,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public int timeFlying = 10;
     private int ticksMotorTurnedOff = 50;
     private long lastBigTickTime;
+    private long lastWgTickTime;
     private int bgTick = 0;
     private int framesFromLastFPSMeasure = 0;
     private int ticksFromLastTPSMeasure = 0;
@@ -235,8 +234,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         try {
             log("game thread started");
 
-            shouldWait = false;
-            isWaiting = false;
             timeFlying = 10;
 
             boolean wasPaused = true;
@@ -305,13 +302,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             long lastBattUpdateTime = 0;
             int physicsIterationsUnalteredCount = 0;
 
-            Object wgLock;
-            if (worldgen != null) {
-                wgLock = worldgen.lock;
-            } else {
-                wgLock = new Object();
-            }
-
             try {
                 for (int i = 0; !hasParent() && i < 30; i++) {
                     Thread.sleep(100);
@@ -372,22 +362,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
                         // Tick and draw
                         Contact[][] carContacts = getCarContacts();
-                        synchronized (wgLock) {
-                            setSimulationArea();
+                        setSimulationArea();
 
-                            long tickStart = System.currentTimeMillis();
-                            for (int i = 0; i < physicsIterations; i++) {
-                                world.tick();
-                                // Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
-                                carContacts = getCarContacts();
-                                tickCustomBodyInteractions(carContacts);
-                                ticksFromLastTPSMeasure++;
-                            }
-                            debugTickTime = (int) (System.currentTimeMillis() - tickStart);
-                            long paintStart = System.currentTimeMillis();
-                            paint();
-                            debugPaintTime = (int) (System.currentTimeMillis() - paintStart);
+                        long tickStart = System.currentTimeMillis();
+                        for (int i = 0; i < physicsIterations; i++) {
+                            world.tick();
+                            // Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
+                            carContacts = getCarContacts();
+                            tickCustomBodyInteractions(carContacts);
+                            ticksFromLastTPSMeasure++;
                         }
+                        debugTickTime = (int) (System.currentTimeMillis() - tickStart);
+                        long paintStart = System.currentTimeMillis();
+                        paint();
+                        debugPaintTime = (int) (System.currentTimeMillis() - paintStart);
 
                         boolean leftWheelContacts = carContacts[0][0] != null;
                         boolean carBodyContacts = carContacts[1][0] != null;
@@ -583,23 +571,19 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                         prevCarX = world.carX;
                         prevCarY = world.carY;
 
-                        if (worldgen != null && world.carX + world.viewField > worldgen.lastX) {
-                            shouldWait = true;
-                            Logger.log("wg can't keep up, locking game thread...");
-                        }
+                        sleep = maxFrameTime - (System.currentTimeMillis() - start);
 
-                        if (shouldWait && !isStopping) {
-                            isWaiting = true;
-                            wasPaused = true;
-                            Logger.log("waiting for wg to get ready...");
-                            paint();
-                            synchronized (wgLock) {
-                                wgLock.wait();
+                        if (worldgen != null) {
+                            if (
+                                    sleep > 0 // skip world generator tick if the device can't keep up
+                                    || worldgen.needMoreTicks // but force it if necessary
+                                    || world.carX + world.viewField > worldgen.lastX
+                                    || System.currentTimeMillis() - lastWgTickTime > 2000
+                            ) {
+                                worldgen.tick();
+                                lastWgTickTime = System.currentTimeMillis();
                             }
-                            Logger.log("resuming");
                         }
-
-                        isWaiting = false;
 
                         Thread.yield(); // fixes input lag on Sony Ericsson phones
                         sleep = maxFrameTime - (System.currentTimeMillis() - start);
@@ -971,23 +955,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         try {
             if (DebugMenu.isDebugEnabled) {
-                switch (worldgen.currStep) {
-                    case WorldGen.STEP_IDLE:
-                        g.setColor(0, 255, 0);
-                        break;
-                    case WorldGen.STEP_ADD:
-                        g.setColor(127, 127, 255);
-                        break;
-                    case WorldGen.STEP_RES_POS:
-                        g.setColor(255, 0, 0);
-                        break;
-                    case WorldGen.STEP_CLEAN_SGS:
-                        g.setColor(127, 127, 0);
-                        break;
-                    default:
-                        break;
-                }
-                drawDebugText(g, "wg: mspt" + worldgen.mspt + " step:" + worldgen.currStep);
+                drawDebugText(g, "wg: mspt" + worldgen.mspt);
                 drawDebugText(g, "sgs" + worldgen.getSegmentCount() + " bds" + world.getBodyCount());
             }
         } catch (NullPointerException ignored) { }
@@ -1035,17 +1003,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 g.setColor(0, 255, 0);
             }
 
-            if (shouldWait) {
-                g.setColor(127, 0, 0);
-            }
             for (int i = 0; i <= scH; i++) {
                 g.drawLine(scW / 2, 0, d * i, scH);
             }
-            if (shouldWait) {
-                g.setColor(255, 0, 0);
-                g.drawString("Thread is locked", 0, 0, 0);
-                g.drawString("(WorldGen is busy)", 0, g.getFont().getHeight(), 0);
-            }
+
             setFont(largefont, g);
             g.setColor(255, 255, 255);
             g.drawString("PAUSED", scW / 2, scH / 3 + currentFontH / 2, Graphics.HCENTER | Graphics.TOP);
@@ -1185,9 +1146,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                         }
                     }, "record saver").start();
                 }
-                if (worldgen != null) {
-                    worldgen.stop();
-                }
+
                 boolean succeed = gameThread == null;
                 try {
                     while (!succeed) {
@@ -1225,16 +1184,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         stopped = false;
         gameOver = false;
         init();
-        if (worldgen != null) {
-            worldgen.start();
-        }
     }
 
     private void resume() {
         paused = false;
-        if (worldgen != null) {
-            worldgen.resume();
-        }
     }
 
     public void onPosReset(int dx) {
@@ -1247,9 +1200,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public void onHide() {
         log("onHide");
         paused = true;
-        if (worldgen != null) {
-            worldgen.pause();
-        }
         // to prevent siemens' bug that calls hideNotify right after showing canvas
         if (pauseDelay > 0) {
             if (!wasPaused) {

@@ -17,7 +17,7 @@ import java.util.Vector;
  *
  * @author vipaol
  */
-public class WorldGen implements Runnable {
+public class WorldGen {
     private static final int BUILTIN_STRUCTS_NUMBER = 6;
     private static final int FLOOR_RANDOM_WEIGHT = 4;
 
@@ -34,26 +34,15 @@ public class WorldGen implements Runnable {
     public int lastX, lastY;
     private final int POINTS_DIVIDER = 2000;
     private int nextPointsCounterTargetX;
-    int tick = 0;
     public int mspt;
 
-    private boolean paused = false;
-    private boolean needSpeed = true;
+    public boolean needMoreTicks = true;
 
     private final Random rand;
     private final GameplayCanvas game;
     private final GraphicsWorld w;
     private final Landscape landscape;
     private StructLog structLogger;
-    private Thread wgThread = null;
-
-    // wg activity indicator
-    public int currStep;
-    public static final int STEP_IDLE = 0;
-    public static final int STEP_ADD = 1;
-    public static final int STEP_RES_POS = 2;
-    public static final int STEP_CLEAN_SGS = 3;
-
 
     public WorldGen(GameplayCanvas game, GraphicsWorld w) {
         w.lowestY = 2000;
@@ -66,7 +55,6 @@ public class WorldGen implements Runnable {
         Logger.log("wg:loading mgstruct");
         new MgStruct();
         reset();
-        start();
     }
 
     public void addDeferredStructure(short[][] structureData) {
@@ -76,69 +64,38 @@ public class WorldGen implements Runnable {
         deferredStructures.addElement(structureData);
     }
 
-    public void run() {
-        Logger.log("wg:run()");
-        while(isEnabled) {
-            try {
-                tick();
-            } catch (NullPointerException ex) {
-                Logger.log(ex);
-            }
-        }
-        Logger.log("wg stopped.");
-    }
-
     public void tick() {
         long startTime = System.currentTimeMillis();
-        if (!paused || needSpeed) {
+
+        w.refreshCarPos();
+
+        if ((w.carX + w.viewField*2 > lastX)) {
+            placeNext();
+            if (w.carX + w.viewField > lastX) {
+                needMoreTicks = true;
+            }
+        } else {
+            if (!structLogger.shouldRmFirstStruct()) {
+                needMoreTicks = false;
+            }
+        }
+
+        /* World cycling
+        * The larger the coordinates, the weirder the physics engine behaves.
+        * So we need to move all structures and bodies to the left from time to time.
+        */
+        if (w.carX > 3000 && (game.timeFlying > -1 || game.uninterestingDebug)) {
+            resetPosition();
             w.refreshCarPos();
-
-            if ((w.carX + w.viewField*2 > lastX)) {
-                currStep = STEP_ADD;
-                placeNext();
-            } else {
-                if (!structLogger.shouldRmFirstStruct()) {
-                    needSpeed = false;
-                }
-                game.shouldWait = false;
-                if (game.isWaiting) {
-                    synchronized (lock) {
-                        lock.notify();
-                    }
-                }
-            }
-
-            if (tick == 0) {
-                currStep = STEP_RES_POS;
-                /* World cycling
-                * The larger the coordinates, the weirder the physics engine behaves.
-                * So we need to move all structures and bodies to the left from time to time.
-                */
-                if (w.carX > 3000 && (game.timeFlying > -1 || game.uninterestingDebug)) {
-                    resetPosition();
-                }
-
-                w.refreshCarPos();
-                if (w.carX > nextPointsCounterTargetX) {
-                    nextPointsCounterTargetX += POINTS_DIVIDER;
-                    game.points++;
-                }
-            }
-
-            currStep = STEP_CLEAN_SGS;
-            structLogger.rmFarStructures();
         }
-        currStep = STEP_IDLE;
-        tick++;
-        if (tick >= 10) {
-            tick = 0;
+
+        if (w.carX > nextPointsCounterTargetX) {
+            nextPointsCounterTargetX += POINTS_DIVIDER;
+            game.points++;
         }
-        try {
-            if (!needSpeed) {
-                Thread.yield();
-                Thread.sleep(20);
-            }
-        } catch (InterruptedException ignored) { }
+
+        structLogger.rmFarStructures();
+
         mspt = (int) (System.currentTimeMillis() - startTime);
     }
 
@@ -170,7 +127,7 @@ public class WorldGen implements Runnable {
             * 5 - slantedDottedLine, 6..9 - floor, 10 - mgstruct0, 11 - mgstruct1,
             * ...
             */
-            if (deferredStructures != null && !needSpeed && !deferredStructures.isEmpty()) {
+            if (deferredStructures != null && !needMoreTicks && !deferredStructures.isEmpty()) {
                 if (firstDeferredStructureX == -1) {
                     firstDeferredStructureX = lastX;
                 }
@@ -220,42 +177,8 @@ public class WorldGen implements Runnable {
         Logger.log("lastX=", lastX);
     }
 
-    public void start() {
-        isEnabled = true;
-        if (wgThread == null || !wgThread.isAlive()) {
-            wgThread = new Thread(this, "wg");
-            wgThread.start();
-        }
-    }
-
-    public void pause() {
-        Logger.log("wg pause");
-        needSpeed = true;
-        paused = true;
-    }
-
-    public void resume() {
-        Logger.log("wg resume");
-        paused = false;
-    }
-
-    public void stop() {
-        Logger.log("stopping wg thread...");
-        isEnabled = false;
-        boolean succeed = wgThread == null;
-        while (!succeed) {
-            try {
-                wgThread.join();
-                succeed = true;
-            } catch (InterruptedException ex) {
-                Logger.log(ex);
-            }
-        }
-        Logger.log("wg: stopped");
-    }
-
     public void reset() {
-        needSpeed = true;
+        needMoreTicks = true;
         Logger.log("wg:restart()");
         prevStructRandomId = 1;
         nextStructRandomId = 2;
@@ -525,7 +448,11 @@ public class WorldGen implements Runnable {
             }
             try {
                 if (getNumberOfLogged() > 0) {
-                    return w.carX - maxDistToRemove > getElementAt(0)[0];
+                    boolean shouldRm = w.carX - getElementAt(0)[0] > maxDistToRemove;
+                    if (shouldRm && w.carX - getElementAt(0)[0] > maxDistToRemove * 3/2) {
+                        needMoreTicks = true;
+                    }
+                    return shouldRm;
                 } else
                     return false;
             } catch(NullPointerException ex) {
