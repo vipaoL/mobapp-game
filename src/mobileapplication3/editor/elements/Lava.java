@@ -3,9 +3,10 @@
 package mobileapplication3.editor.elements;
 
 public class Lava extends AbstractRectBodyElement {
+    public static final int COLOR = 0xff5500;
 
     public Lava() {
-        super(0xff5500);
+        color = COLOR;
     }
 
     public short getID() {

@@ -76,7 +76,7 @@ public class Line extends Element {
     }
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        g.setColor(getSuitableColor(drawAsSelected));
+        g.setColor(getColor(drawAsSelected));
         g.drawLine(
                 xToPX(x1, zoomOut, offsetX),
                 yToPX(y1, zoomOut, offsetY),

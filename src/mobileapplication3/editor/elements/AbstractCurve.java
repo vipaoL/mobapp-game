@@ -29,7 +29,7 @@ public abstract class AbstractCurve extends Element {
             return;
         }
 
-        g.setColor(getSuitableColor(drawAsSelected));
+        g.setColor(getColor(drawAsSelected));
 
         short[] startPoint = pointsCache.getPoint(0);
         int arrowsDirection = getArrowsDirection();

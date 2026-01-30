@@ -88,12 +88,6 @@ public class BrokenLine extends Line {
     }
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        if (!drawAsSelected) {
-            g.setColor(0xffffff);
-        } else {
-            g.setColor(getSuitableColor(true));
-        }
-
         int dx = x2 - x1;
         int dy = y2 - y1;
 
@@ -104,6 +98,8 @@ public class BrokenLine extends Line {
 
         int platfDx = (dx+spX) / n;
         int platfDy = (dy+spY) / n;
+
+        g.setColor(getColor(drawAsSelected));
 
         for (int i = 0; i < n; i++) {
             g.drawLine(

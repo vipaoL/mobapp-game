@@ -5,11 +5,12 @@ package mobileapplication3.editor.elements;
 import mobileapplication3.ui.Property;
 
 public class Trampoline extends AbstractRectBodyElement {
+    public static final int COLOR = 0xffaa00;
 
     private short elasticity = 100;
 
     public Trampoline() {
-        super(0xffaa00);
+        color = COLOR;
     }
 
     public Element setArgs(short[] args) {
