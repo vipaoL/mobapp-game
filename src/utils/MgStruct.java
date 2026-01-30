@@ -17,22 +17,20 @@ import java.io.InputStream;
  * @author vipaol
  */
 public class MgStruct {
-
-    /*
-     * 0 - end of file
-     * 1 - end point
-     * 2 - line
-     * 3 - circle/arc
-     * 4 - breakable line
-     * 5 - breakable circle (not implemented yet)
-     * 6 - sine
-     * 7 - accelerator
-     * 8 - trampoline (not implemented yet)
-     * 9 - level start
-     * 10 - level finish
-     * 11 - lava
-     */
-    static int[] argsNumber = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10, /*6*/6, /*7*/8, /*8*/6, /*9*/2, /*10*/5, /*11*/5};
+    public static final int[] ARGS_NUMBER = {
+            0,    // id0    EOF
+            2,    // id1    END_POINT
+            4,    // id2    LINE
+            7,    // id3    CIRCLE
+            9,    // id4    BROKEN_LINE
+            10,   // id5    BROKEN_CIRCLE
+            6,    // id6    SINE
+            8,    // id7    ACCELERATOR
+            6,    // id8    TRAMPOLINE
+            2,    // id9    LEVEL_START
+            5,    // id10   LEVEL_FINISH
+            5,    // id11   LAVA
+    };
     static final int STRUCTURE_STORAGE_SIZE = 32;
 
     public static short[][][] structStorage = new short[STRUCTURE_STORAGE_SIZE][][];
@@ -150,8 +148,13 @@ public class MgStruct {
                         break;
                     }
 
-                    // reading a primitive, e.g., line or circle
-                    short[] data = new short[argsNumber[id] + 1]; // {2, 0, 0, 100, 0} // - e.g.: line
+                    /* read a primitive (e.g., line or circle)
+                     *
+                     * for example:
+                     * data = {2, 0, 0, 100, 0}:
+                     * id=2 (LINE), x1=0, y1=0, x2=100, y2=0
+                     */
+                    short[] data = new short[ARGS_NUMBER[id] + 1];
                     // first cell is ID of primitive, next cells are arguments
                     data[0] = id;
                     try {
