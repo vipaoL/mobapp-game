@@ -26,8 +26,35 @@ public abstract class Element {
     public static final short LEVEL_FINISH = 10;
     public static final short LAVA = 11;
 
-    public static final int[] ARGS_NUMBER = {0, /*1*/2, /*2*/4, /*3*/7, /*4*/9, /*5*/10, /*6*/6, /*7*/8, /*8*/6, /*9*/2, /*10*/5, /*11*/ 5};
-    public static final int[] STEPS_TO_PLACE = {0, /*1*/1, /*2*/2, /*3*/2, /*4*/2, /*5*/2, /*6*/3, /*7*/2, /*8*/2, /*9*/1, /*10*/2, /*11*/ 2};
+    public static final int[] ARGS_NUMBER = {
+            0,    // id0    EOF
+            2,    // id1    END_POINT
+            4,    // id2    LINE
+            7,    // id3    CIRCLE
+            9,    // id4    BROKEN_LINE
+            10,   // id5    BROKEN_CIRCLE
+            6,    // id6    SINE
+            8,    // id7    ACCELERATOR
+            6,    // id8    TRAMPOLINE
+            2,    // id9    LEVEL_START
+            5,    // id10   LEVEL_FINISH
+            5,    // id11   LAVA
+    };
+
+    public static final int[] STEPS_TO_PLACE = {
+            0,    // id0    EOF
+            1,    // id1    END_POINT
+            2,    // id2    LINE
+            2,    // id3    CIRCLE
+            2,    // id4    BROKEN_LINE
+            2,    // id5    BROKEN_CIRCLE
+            3,    // id6    SINE
+            2,    // id7    ACCELERATOR
+            2,    // id8    TRAMPOLINE
+            1,    // id9    LEVEL_START
+            2,    // id10   LEVEL_FINISH
+            2,    // id11   LAVA
+    };
 
     public static final int LINE_THICKNESS = 24;
 
