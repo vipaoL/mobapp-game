@@ -4,6 +4,7 @@ package mobileapplication3.editor;
 
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Mathh;
+import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.Utils;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.ui.*;
@@ -78,6 +79,12 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
             }
         }.setBindedKeyCode(Keys.KEY_NUM3);
 
+        final Button openInFileManager = new Button("Open in system file manager") {
+            public void buttonPressed() {
+                Platform.platformRequest("file://" + getPath());
+            }
+        };
+
         final BackButton backButton = new BackButton(parent);
         backButtonComponent = new ButtonRow(new Button[]{backButton}).bindToSoftButtons();
 
@@ -97,22 +104,24 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
                 break;
             case LAYOUT_LIST_OF_NAMES:
                 Button[] fileButtons = getList();
-                int topExtraButtons = 3;
+                int topExtraButtons = 4;
                 int bottomExtraButtons = 0;
                 Button[] btns = new Button[topExtraButtons + fileButtons.length + bottomExtraButtons];
                 btns[0] = createButton;
                 btns[1] = alwaysShowListSwitch;
                 btns[2] = showGridButton;
+                btns[3] = openInFileManager.setBindedKeyCode(Keys.KEY_NUM4);
                 System.arraycopy(fileButtons, 0, btns, topExtraButtons, fileButtons.length);
                 buttons.setButtons(btns);
                 setComponents(new IUIComponent[]{title, buttons, backButtonComponent});
                 break;
             case LAYOUT_GRID:
                 IUIComponent[] thumbnails = getGridContent();
-                int topExtraCells = 2;
+                int topExtraCells = 3;
                 IUIComponent[] cells = new IUIComponent[topExtraCells + thumbnails.length];
                 cells[0] = new ButtonComponent(createButton);
                 cells[1] = new ButtonComponent(alwaysShowGridSwitch);
+                cells[2] = new ButtonComponent(openInFileManager).setBindedKeyCode(Keys.KEY_NUM3);
                 for (int i = 0; i < thumbnails.length; i++) {
                     cells[topExtraCells + i] = thumbnails[i];
                 }
@@ -166,6 +175,7 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
     protected abstract Button[] getList();
     protected abstract IUIComponent[] getGridContent();
     protected abstract void createNew();
+    protected abstract String getPath();
 
     protected abstract class EditorFileListCell extends Container {
         protected String path;

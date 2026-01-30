@@ -21,7 +21,7 @@ public class StructuresMenu extends AbstractEditorMenu {
         super(parent, "Structures");
     }
 
-    private String getPath() {
+    protected String getPath() {
         if (path == null) {
             path = EditorSettings.getStructsFolderPath();
         }
