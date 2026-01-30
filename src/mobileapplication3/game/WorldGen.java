@@ -53,7 +53,7 @@ public class WorldGen {
         Logger.log("wg:start()");
         rand = new Random();
         Logger.log("wg:loading mgstruct");
-        new MgStruct();
+        MgStruct.init();
         reset();
     }
 
@@ -102,9 +102,9 @@ public class WorldGen {
     private void placeNext() {
         int idsCount;
         if (DebugMenu.mgstructOnly) {
-            idsCount = MgStruct.loadedStructsNumber;
+            idsCount = MgStruct.loadedTotal;
         } else {
-            idsCount = BUILTIN_STRUCTS_NUMBER + FLOOR_RANDOM_WEIGHT + MgStruct.loadedStructsNumber;
+            idsCount = BUILTIN_STRUCTS_NUMBER + FLOOR_RANDOM_WEIGHT + MgStruct.loadedTotal;
         }
         while (nextStructRandomId == prevStructRandomId
                 || (DebugMenu.whatTheGame && (nextStructRandomId < 6 || nextStructRandomId > 9))) {
