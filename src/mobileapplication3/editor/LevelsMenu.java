@@ -20,7 +20,7 @@ public class LevelsMenu extends AbstractEditorMenu {
         super(parent, "Levels");
     }
 
-    private String getPath() {
+    protected String getPath() {
         if (path == null) {
             path = EditorSettings.getLevelsFolderPath();
         }
