@@ -10,25 +10,11 @@ public class Accelerator extends AbstractRectBodyElement {
 
     private short directionOffset, m = 150, effectDuration = 30;
 
-    public Accelerator() {
-        super(0xff00ff);
-    }
-
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
         int dx = l * Mathh.cos(angle) / 1000;
         int dy = l * Mathh.sin(angle) / 1000;
-        int colorModifier = (m - 100) * 3;
-        int red = Math.min(255, Math.max(0, colorModifier));
-        int blue = Math.min(255, Math.max(0, -colorModifier));
-        if (red < 50 & blue < 50) {
-            red = 50;
-            blue = 50;
-        }
-        if (!drawAsSelected) {
-            g.setColor(red, blue, blue);
-        } else {
-            g.setColor(getSuitableColor(drawAsSelected));
-        }
+
+        g.setColor(getColor(drawAsSelected));
         g.drawLine(
                 xToPX(x - dx/2, zoomOut, offsetX),
                 yToPX(y - dy/2, zoomOut, offsetY),
@@ -63,6 +49,19 @@ public class Accelerator extends AbstractRectBodyElement {
         this.y = (short) (y + l * Mathh.sin(angle) / 2000);
     }
 
+    public void setModifierValue(short value) {
+        m = value;
+
+        int colorModifier = (m - 100) * 3;
+        int red = Math.min(255, Math.max(0, colorModifier));
+        int blue = Math.min(255, Math.max(0, -colorModifier));
+        if (red < 50 & blue < 50) {
+            red = 50;
+            blue = 50;
+        }
+        color = (red << 16) + blue;
+    }
+
     public Element setArgs(short[] args) {
 //      x = args[0]; // will be in the next mgstruct file format
 //      y = args[1];
@@ -71,7 +70,7 @@ public class Accelerator extends AbstractRectBodyElement {
         thickness = args[3];
         angle = args[4];
         directionOffset = args[5];
-        m = args[6];
+        setModifierValue(args[6]);
         effectDuration = args[7];
         recalcCalculatedArgs();
         return this;
@@ -105,7 +104,7 @@ public class Accelerator extends AbstractRectBodyElement {
                 },
                 new Property("Speed multiplier (percents)") {
                     public void setValue(short value) {
-                        m = value;
+                        setModifierValue(value);
                     }
 
                     public short getValue() {

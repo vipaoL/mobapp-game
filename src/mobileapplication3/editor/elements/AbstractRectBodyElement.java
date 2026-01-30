@@ -14,11 +14,6 @@ public abstract class AbstractRectBodyElement extends Element {
 
     protected short x, y, l, thickness = 20, angle;
     protected short anchorX, anchorY;
-    protected int color;
-
-    public AbstractRectBodyElement(int color) {
-        this.color = color;
-    }
 
     public PlacementStep[] getPlacementSteps() {
         return new PlacementStep[] {
@@ -62,11 +57,7 @@ public abstract class AbstractRectBodyElement extends Element {
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
         int dx = l * Mathh.cos(angle) / 1000;
         int dy = l * Mathh.sin(angle) / 1000;
-        if (!drawAsSelected) {
-            g.setColor(color);
-        } else {
-            g.setColor(getSuitableColor(true));
-        }
+        g.setColor(getColor(drawAsSelected));
         g.drawLine(
                 xToPX(x - dx/2, zoomOut, offsetX),
                 yToPX(y - dy/2, zoomOut, offsetY),

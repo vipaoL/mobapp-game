@@ -3,9 +3,10 @@
 package mobileapplication3.editor.elements;
 
 public class LevelFinish extends AbstractRectBodyElement {
+    public static final int COLOR = 0x00ff00;
 
     public LevelFinish() {
-        super(0x00ff00);
+        color = COLOR;
     }
 
     public short getID() {

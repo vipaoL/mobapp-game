@@ -10,8 +10,13 @@ import mobileapplication3.ui.Property;
  * @author vipaol
  */
 public class EndPoint extends Element {
+    public static final int COLOR = 0xff0000;
 
     private short x, y;
+
+    public EndPoint() {
+        color = COLOR;
+    }
 
     public PlacementStep[] getPlacementSteps() {
         return new PlacementStep[] {
@@ -38,10 +43,8 @@ public class EndPoint extends Element {
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
         int r = 3;
-        int prevColor = g.getColor();
-        g.setColor(0xff0000);
+        g.setColor(getColor(drawAsSelected));
         g.fillArc(xToPX(x, zoomOut, offsetX) - r, yToPX(y, zoomOut, offsetY) - r, r*2, r*2, 0, 360);
-        g.setColor(prevColor);
     }
 
     public Element setArgs(short[] args) {

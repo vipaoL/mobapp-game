@@ -10,8 +10,12 @@ import mobileapplication3.ui.Property;
  * @author vipaol
  */
 public class LevelStart extends Element {
-
+    public static final int COLOR = 0x00ff00;
     private short x, y;
+
+    public LevelStart() {
+        color = COLOR;
+    }
 
     public PlacementStep[] getPlacementSteps() {
         return new PlacementStep[] {
@@ -38,14 +42,8 @@ public class LevelStart extends Element {
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
         int r = 3;
-        int prevColor = g.getColor();
-        if (!drawAsSelected) {
-            g.setColor(0x00ff00);
-        } else {
-            g.setColor(getSuitableColor(drawAsSelected));
-        }
+        g.setColor(getColor(drawAsSelected));
         g.fillArc(xToPX(x, zoomOut, offsetX) - r, yToPX(y, zoomOut, offsetY) - r, r*2, r*2, 0, 360);
-        g.setColor(prevColor);
     }
 
     public Element setArgs(short[] args) {

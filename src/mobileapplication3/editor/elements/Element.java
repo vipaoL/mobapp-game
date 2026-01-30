@@ -35,7 +35,12 @@ public abstract class Element {
     public static final int COLOR_BODY = 0xffffff;
     public static final int COLOR_SELECTED = 0xaaffff;
 
-    protected Element() {}
+    protected int color, color_selected;
+
+    protected Element() {
+        color = isBody() ? COLOR_BODY : COLOR_LANDSCAPE;
+        color_selected = COLOR_SELECTED;
+    }
 
     public Element createTypedInstance(short id, short[] args) throws IllegalArgumentException {
         if (args.length != ARGS_NUMBER[id]) {
@@ -152,15 +157,8 @@ public abstract class Element {
         return clone;
     }
 
-    protected int getSuitableColor(boolean drawAsSelected) {
-        if (drawAsSelected) {
-            return COLOR_SELECTED;
-        }
-        if (isBody()) {
-            return COLOR_BODY;
-        } else {
-            return COLOR_LANDSCAPE;
-        }
+    protected int getColor(boolean isSelected) {
+        return isSelected ? color_selected : color;
     }
 
     public static Property[] concatArrays(Property[] arr1, Property[] arr2) {
