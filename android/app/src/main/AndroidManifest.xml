@@ -15,7 +15,7 @@
 
         <provider
             android:name=".MobappDocumentsProvider"
-            android:authorities="mobapp.documents"
+            android:authorities="io.github.vipaol.mobapp.game.documentsProvider"
             android:exported="true"
             android:grantUriPermissions="true"
             android:permission="android.permission.MANAGE_DOCUMENTS"
