@@ -34,7 +34,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     private boolean isGameStarted = false;
     private int c = 0;
 
-    private MgStruct mgStruct;
     private GameplayCanvas bg = null;
 
     private static boolean areExtStructsLoaded = false;
@@ -237,10 +236,9 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             public void run() {
                 menuOptions[2] = "Loading...";
                 setStateFor(1, 2);
-                mgStruct = new MgStruct();
-                if (mgStruct.loadFromFiles()) {
+                if (MgStruct.loadFromFiles()) {
                     areExtStructsLoaded = true;
-                    menuOptions[2] = (MgStruct.loadedStructsNumber - MgStruct.loadedFromResNumber) + " loaded";
+                    menuOptions[2] = (MgStruct.loadedTotal - MgStruct.loadedFromRes) + " loaded";
                     setColorEnabledOption(0x0099ff00);
                     try {
                         Thread.sleep(2000);
@@ -250,7 +248,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
                     menuOptions[2] = "Reload";
                 } else {
                     areExtStructsLoaded = false;
-                    if (!mgStruct.loadCancelled) {
+                    if (!MgStruct.loadCancelled) {
                         menuOptions[2] = "Nothing loaded";
                     } else {
                         menuOptions[2] = "Cancelled";

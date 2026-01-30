@@ -17,7 +17,7 @@ import java.io.InputStream;
  * @author vipaol
  */
 public class MgStruct {
-    public static final int[] ARGS_NUMBER = {
+    private static final int[] ARGS_NUMBER = {
             0,    // id0    EOF
             2,    // id1    END_POINT
             4,    // id2    LINE
@@ -31,30 +31,34 @@ public class MgStruct {
             5,    // id10   LEVEL_FINISH
             5,    // id11   LAVA
     };
-    static final int STRUCTURE_STORAGE_SIZE = 32;
+
+    private static final int STRUCTURE_STORAGE_SIZE = 32;
 
     public static short[][][] structStorage = new short[STRUCTURE_STORAGE_SIZE][][];
-    public static int loadedStructsNumber = 0;
-    static boolean isInited = false;
-    public static int loadedFromResNumber = 0;
-    public boolean loadCancelled = false;
 
-    public MgStruct() {
-        Logger.log("MGStruct constructor");
+    public static int loadedTotal = 0;
+    public static int loadedFromRes = 0;
+    public static boolean loadCancelled = false;
+
+    private static boolean isInited = false;
+
+    public static void init() {
         if (!isInited) {
             Logger.log("mgs init");
-            for (int i = 1; readRes("/s" + i + ".mgstruct"); i++) {
+            loadedFromRes = 0;
+            for (int i = 1; readFromRes("/s" + i + ".mgstruct"); i++) {
                 Logger.log(i + ".mgstruct");
+                loadedFromRes++;
             }
 
-            Logger.log("MGStruct:loaded " + loadedStructsNumber);
-            loadedFromResNumber = loadedStructsNumber;
+            Logger.log("MGStruct:loaded " + loadedTotal);
+            loadedFromRes = loadedTotal;
         }
         Logger.log("inited");
         isInited = true;
     }
 
-    public boolean readRes(String path) {
+    private static boolean readFromRes(String path) {
         InputStream is = null;
         try {
             is = Platform.getResource(path);
@@ -72,17 +76,22 @@ public class MgStruct {
             return false;
         } finally {
             try {
-                is.close();
-            } catch (Exception ex) { }
+                if (is != null) {
+                    is.close();
+                }
+            } catch (Exception ignored) { }
         }
     }
 
-    public boolean loadFromFiles() {
+    public static boolean loadFromFiles() {
         Logger.log("mgs load()");
-        loadCancelled = false;
+        init();
         String[] paths = GameFileUtils.listFilesInAllPlaces("MobappGame/MGStructs");
+
+        loadCancelled = false;
+        loadedTotal = loadedFromRes;
+
         int loadedFromFiles = 0;
-        loadedStructsNumber = loadedFromResNumber;
         for (int i = 0; i < paths.length; i++) {
             String path = paths[i];
             DataInputStream dis = null;
@@ -111,14 +120,9 @@ public class MgStruct {
                 }
                 try {
                     dis.close();
-                } catch (Exception ignored) { }
+                } catch (Exception ignored) {
+                }
             }
-        }
-        if (loadedFromFiles > 0) {
-            loadCancelled = false;
-            loadedStructsNumber = loadedFromResNumber + loadedFromFiles;
-        } else {
-            loadedStructsNumber = loadedFromResNumber;
         }
         Logger.log("mg:loaded: " + loadedFromFiles);
         return loadedFromFiles > 0;
@@ -130,20 +134,20 @@ public class MgStruct {
         }
 
         try {
-            short fileFormatVersion = dis.readShort(); // read file format version
-            if (Utils.isArrContain(GameFileUtils.SUPPORTED_FILE_FORMAT_VERSIONS, fileFormatVersion)) {
-                // number of primitives in the structure
-                int length = 16;
+            short fileFormatVersion = dis.readShort();
+            if (Utils.isArrContain(new short[]{0, 1}, fileFormatVersion)) {
+                // number of elements in the structure
+                int count = 16;
                 if (fileFormatVersion > 0) {
-                    length = dis.readShort();
+                    count = dis.readShort();
                 }
-                Logger.log("read: ver=" + fileFormatVersion + " length=" + length);
+                Logger.log("read: ver=" + fileFormatVersion + " count=" + count);
 
-                short[][] structure = new short[length][];
+                short[][] structure = new short[count][];
                 for (int c = 0; true; c++) {
                     short id = dis.readShort();
 
-                    // structID 0 is end of file
+                    // structID 0 means end of file
                     if (id == 0) {
                         break;
                     }
@@ -164,7 +168,7 @@ public class MgStruct {
                     } catch (EOFException ex) {
                         try {
                             dis.close();
-                        } catch (Exception e) { }
+                        } catch (Exception ignored) { }
                         throw ex;
                     }
                     structure[c] = data;
@@ -172,33 +176,33 @@ public class MgStruct {
 
                 try {
                     dis.close();
-                } catch (Exception e) { }
+                } catch (Exception ignored) { }
                 return structure;
             } else {
                 Logger.log("Unsupported file format version: " + fileFormatVersion);
                 try {
                     dis.close();
-                } catch (Exception e) { }
+                } catch (Exception ignored) { }
                 return null;
             }
-        } catch(ArrayIndexOutOfBoundsException ex) {
+        } catch (ArrayIndexOutOfBoundsException ex) {
             Logger.log("error parsing file " + ex);
             ex.printStackTrace();
             try {
                 dis.close();
-            } catch (Exception e) { }
+            } catch (Exception ignored) { }
             return null;
         }
     }
 
-    void saveStructToStorage(short[][] data) {
-        Logger.log("savivg new structure, id=" + loadedStructsNumber);
-        structStorage = increaseArrayIfNeeded(structStorage, loadedStructsNumber, 8);
-        structStorage[loadedStructsNumber] = data;
-        loadedStructsNumber++;
+    private static void saveStructToStorage(short[][] data) {
+        Logger.log("saving new structure, i=" + loadedTotal);
+        structStorage = ensureCapacity(structStorage, loadedTotal, 8);
+        structStorage[loadedTotal] = data;
+        loadedTotal++;
     }
 
-    short[][][] increaseArrayIfNeeded(short[][][] array, int newElementIndex, int inc) {
+    private static short[][][] ensureCapacity(short[][][] array, int newElementIndex, int inc) {
         if (newElementIndex >= array.length) {
             short[][][] newArray = new short[array.length + inc][][];
             System.arraycopy(array, 0, newArray, 0, array.length);
