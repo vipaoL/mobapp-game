@@ -53,12 +53,30 @@ public class AdvancedElementEditUI extends AbstractPopupPage {
     }
 
     private void refreshList() {
-        Property[] args = element.getArgs();
-        IUIComponent[] rows = new IUIComponent[args.length + 1];
-        for (int i = 0; i < args.length; i++) {
-            rows[i] = new Slider(args[i]);
+        Property[] properties = element.getArgs();
+        IUIComponent[] rows = new IUIComponent[properties.length + 1];
+        for (int i = 0; i < properties.length; i++) {
+            final Property property = properties[i];
+            if (property.getMinValue() != 0 || property.getMaxValue() != 1) {
+                rows[i] = new Slider(property);
+            } else {
+                rows[i] = new ButtonComponent(new Switch(property.getName()) {
+                    public boolean getValue() {
+                        return property.getValue() == 1;
+                    }
+
+                    public void setValue(boolean value) {
+                        property.setValue(value ? 1 : 0);
+                        refreshList();
+                    }
+
+                    public boolean isActive() {
+                        return property.isActive();
+                    }
+                });
+            }
         }
-        rows[args.length] = new ButtonComponent(new Button ("Refresh this list") {
+        rows[properties.length] = new ButtonComponent(new Button ("Refresh values") {
             public void buttonPressed() {
                 element.recalcCalculatedArgs();
                 refreshList();
