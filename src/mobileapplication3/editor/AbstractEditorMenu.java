@@ -63,7 +63,7 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
             }
         }.setBindedKeyCode(Keys.KEY_NUM2);
 
-        final Switch alwaysShowGridSwitch = new Switch("Always show thumbnails") {
+        final Button alwaysShowGridSwitch = new Switch("Always show thumbnails") {
             public void setValue(boolean value) {
                 EditorSettings.setWhatToLoadAutomatically(value ? EditorSettings.OPTION_ALWAYS_LOAD_THUMBNAILS : EditorSettings.OPTION_ALWAYS_LOAD_LIST);
             }
@@ -71,7 +71,7 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
             public boolean getValue() {
                 return EditorSettings.getWhatToLoadAutomatically() >= EditorSettings.OPTION_ALWAYS_LOAD_THUMBNAILS;
             }
-        };
+        }.setBindedKeyCode(Keys.KEY_NUM2);
 
         final Button showGridButton = new Button("Show thumbnails") {
             public void buttonPressed() {
