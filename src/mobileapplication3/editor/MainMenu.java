@@ -17,11 +17,12 @@ public class MainMenu extends Container {
     private static boolean autoSaveCheckDone = false;
 
     public MainMenu(IPopupFeedback parent) {
-        boolean gameIncluded = false;
+        boolean included = false;
         try {
             Class.forName("mobileapplication3.game.MenuCanvas");
-            gameIncluded = true;
+            included = true;
         } catch (ClassNotFoundException ignored) { }
+        final boolean gameIncluded = included;
 
         final MainMenu inst = this;
         title = new TextComponent("Mobapp Editor");
@@ -38,19 +39,18 @@ public class MainMenu extends Container {
                         showPopup(new LevelsMenu(inst));
                     }
                 }.setBgColor(BG_COLOR_HIGHLIGHTED).setBindedKeyCode(c++),
-                new Button("Open Game") {
+                new Button(gameIncluded ? "Open Game" : "About") {
                     public void buttonPressed() {
-                        RootContainer.setRootUIComponent(new mobileapplication3.game.MenuCanvas());
+                        if (gameIncluded) {
+                            RootContainer.setRootUIComponent(new mobileapplication3.game.MenuCanvas());
+                        } else {
+                            showPopup(new About(inst));
+                        }
                     }
-                }.setBgColor(BG_COLOR_HIGHLIGHTED).setIsActive(gameIncluded).setBindedKeyCode(c++),
+                }.setBgColor(gameIncluded ? BG_COLOR_HIGHLIGHTED : COLOR_ACCENT_MUTED).setBindedKeyCode(c++),
                 new Button("Settings") {
                     public void buttonPressed() {
                         showPopup(new SettingsUI(inst));
-                    }
-                }.setBindedKeyCode(c++),
-                new Button("About") {
-                    public void buttonPressed() {
-                        showPopup(new About(inst));
                     }
                 }.setBindedKeyCode(c++),
                 new BackButton(parent).setBindedKeyCodes(new int[] {Keys.KEY_SOFT_RIGHT, Keys.KEY_NUM0})
