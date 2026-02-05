@@ -1,0 +1,3 @@
+* text=auto
+
+*.java text diff=java
