@@ -128,8 +128,7 @@ public class EditorQuickMenu extends AbstractPopupPage {
 
     public void setPageContentBounds(IUIComponent pageContent, int x0, int y0, int w, int h) {
         if (pageContent != null) {
-            ((ButtonCol) pageContent)
-                    .setButtonsBgPadding(margin/8)
+            pageContent
                     .setSize(w - margin*2, h - margin*2)
                     .setPos(x0 + w/2, y0 + h - margin, BOTTOM | HCENTER);
         }
