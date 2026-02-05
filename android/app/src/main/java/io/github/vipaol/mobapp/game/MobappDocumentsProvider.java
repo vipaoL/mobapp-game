@@ -63,7 +63,7 @@ public class MobappDocumentsProvider extends DocumentsProvider {
         row.add(Root.COLUMN_ROOT_ID, ROOT_NAME);
         row.add(Root.COLUMN_SUMMARY, "Custom game content");
         row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_SEARCH);
-        row.add(Root.COLUMN_TITLE, "mobapp-game");
+        row.add(Root.COLUMN_TITLE, "mobapp-game " + Platform.getAppVersion(getContext()));
         row.add(Root.COLUMN_DOCUMENT_ID, getDocIdForFile(ROOT));
         row.add(Root.COLUMN_AVAILABLE_BYTES, ROOT.getFreeSpace());
         row.add(Root.COLUMN_ICON, R.mipmap.ic_launcher);
