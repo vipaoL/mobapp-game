@@ -200,7 +200,11 @@ public class EditorUI extends Container {
             public void buttonPressed() {
                 placedElementsList.setVisible(false);
                 placementButtonPanel.toggleIsVisible();
-                placementButtonPanel.setFocused(placementButtonPanel.getIsVisible());
+                placementButtonPanel.setFocused(placementButtonPanel.isVisible());
+            }
+
+            public int getBgColor() {
+                return placementButtonPanel.isVisible() ? COLOR_ACCENT_MUTED : bgColor;
             }
         };
 
@@ -226,7 +230,11 @@ public class EditorUI extends Container {
             public void buttonPressed() {
                 placementButtonPanel.setVisible(false);
                 placedElementsList.toggleIsVisible();
-                placedElementsList.setFocused(placedElementsList.getIsVisible());
+                placedElementsList.setFocused(placedElementsList.isVisible());
+            }
+
+            public int getBgColor() {
+                return placedElementsList.isVisible() ? COLOR_ACCENT_MUTED : bgColor;
             }
         };
 
