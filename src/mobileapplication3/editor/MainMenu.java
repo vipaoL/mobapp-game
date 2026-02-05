@@ -109,7 +109,7 @@ public class MainMenu extends Container {
         final int mode;
         try {
             AutoSaveData data = AutoSaveUI.autoSaveRead(AutoSaveUI.STRUCTURE);
-            if (data != null) {
+            if (data != null && data.getElements().length > 2) {
                 mode = AutoSaveUI.STRUCTURE;
             } else {
                 data = AutoSaveUI.autoSaveRead(AutoSaveUI.LEVEL);
