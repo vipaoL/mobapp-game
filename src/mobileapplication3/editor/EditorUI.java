@@ -86,18 +86,18 @@ public class EditorUI extends Container {
         bottomButtonPanel
                 .setButtonsBgPadding(BTN_H/32)
                 .setSize(w, BTN_H)
-                .setPos(x0, y0 + h, BOTTOM | LEFT);
+                .setPos(x0, getBottomY(), BOTTOM | LEFT);
         editorCanvas
-                .setSize(w, h - bottomButtonPanel.h)
+                .setSize(w, h)
                 .setPos(x0, y0, TOP | LEFT);
         placementButtonPanel
                 .setSizes(w, ButtonPanelHorizontal.H_AUTO, BTN_H)
-                .setPos(x0, y0 + h - bottomButtonPanel.h, BOTTOM | LEFT);
+                .setPos(x0, bottomButtonPanel.getTopY(), BOTTOM | LEFT);
         placementButtonPanel
                 .setButtonsBgPadding(BTN_H/32);
         placedElementsList
                 .setSizes(w/3, bottomButtonPanel.getTopY() - y0 - BTN_H / 4, FONT_H * 3)
-                .setPos(x0 + w, y0 + h - bottomButtonPanel.h, RIGHT | BOTTOM)
+                .setPos(getRightX(), bottomButtonPanel.getTopY(), RIGHT | BOTTOM)
                 .setPadding(BTN_H/32);
         if (startPointWarning != null) {
             startPointWarning
@@ -246,7 +246,8 @@ public class EditorUI extends Container {
                 new Button[] {placeButton, menuButton, zoomInButton, zoomOutButton, editButton};
         bottomButtonPanel = (ButtonRow) new ButtonRow()
                 .setButtons(bottomButtons)
-                .setButtonsBgColor(BG_COLOR_HIGHLIGHTED);
+                .setButtonsBgColor(BG_COLOR_HIGHLIGHTED)
+                .setBgColor(IUIComponent.COLOR_TRANSPARENT);
         bottomButtonPanel.bindToSoftButtons();
     }
 
@@ -322,16 +323,35 @@ public class EditorUI extends Container {
             }
         };
 
-        Button[] placementButtons;
-        if (mode == MODE_STRUCTURE) {
-            placementButtons = new Button[] {btnLine, btnCircle, btnSine, btnBrLine, btnBrCircle.setIsActive(false), btnAccel, btnTrampoline, btnLava};
-        } else {
-            placementButtons = new Button[] {btnLine, btnCircle, btnSine, btnBrLine, btnBrCircle.setIsActive(false), btnAccel, btnTrampoline, btnLava, btnFinish};
+        Button[] placementButtons = new Button[] {
+                btnLine,
+                btnCircle,
+                btnSine,
+                btnBrLine,
+                btnBrCircle.setIsActive(false),
+                btnAccel,
+                btnTrampoline,
+                btnLava,
+        };
+        if (mode == MODE_LEVEL) {
+            placementButtons = concatArrays(
+                    placementButtons,
+                    new Button[] {
+                            btnFinish,
+                    }
+                    );
         }
         placementButtonPanel = (ButtonPanelHorizontal) new ButtonPanelHorizontal(placementButtons)
                 .setBtnsInRowCount(BUTTONS_IN_ROW)
                 .setIsSelectionEnabled(true)
                 .setVisible(false);
+    }
+
+    public static Button[] concatArrays(Button[] arr1, Button[] arr2) {
+        Button[] result = new Button[arr1.length + arr2.length];
+        System.arraycopy(arr1, 0, result, 0, arr1.length);
+        System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
+        return result;
     }
 
     private void place(int id, int x, int y) {
@@ -368,6 +388,7 @@ public class EditorUI extends Container {
                 .setButtons(listButtons)
                 .setSelected(Mathh.constrain(0, placedElementsList.getSelected(), listButtons.length - 1))
                 .setIsSelectionVisible(true)
+                .setBgColor(COLOR_ACCENT_MUTED)
                 .setVisible(false);
     }
 
