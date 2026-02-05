@@ -47,6 +47,9 @@ public class EditorUI extends Container {
                     editorCanvas.onUpdate();
                 } catch (NullPointerException ignored) { }
             }
+            public void setSelectedInList(int i) {
+                placedElementsList.setSelected(i);
+            }
         };
     }
 

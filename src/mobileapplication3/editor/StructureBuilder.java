@@ -50,7 +50,6 @@ public abstract class StructureBuilder {
         nextPointHandler = new NextPointHandler();
         handleNextPoint(x, y, false);
         add(placingNow);
-        onUpdate();
         handleNextPoint(x, y, true);
     }
 
@@ -95,6 +94,8 @@ public abstract class StructureBuilder {
     public void add(Element element) {
         if (element != null && !(element instanceof EndPoint)) {
             buffer.addElement(element);
+            onUpdate();
+            setSelectedInList(buffer.size() - 1);
         }
     }
 
@@ -258,6 +259,7 @@ public abstract class StructureBuilder {
     }
 
     public abstract void onUpdate();
+    public abstract void setSelectedInList(int i);
 
     private class NextPointHandler {
         public int step;
