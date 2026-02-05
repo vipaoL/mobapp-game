@@ -139,7 +139,7 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
         switch (layout) {
             case LAYOUT_MINIMIZED:
                 buttons
-                        .setButtonsBgPadding(w/128)
+                        .setButtonsBgPadding(w/512)
                         .setSize(w/2, (y0 + h - title.getBottomY()))
                         .setPos(x0 + w/2, y0 + h, BOTTOM | HCENTER);
                 break;
@@ -148,7 +148,7 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
                         .setSize(w, ButtonRow.H_AUTO)
                         .setPos(x0 + w/2, y0 + h, HCENTER | BOTTOM);
                 buttons
-                        .setButtonsBgPadding(w/128)
+                        .setButtonsBgPadding(w/512)
                         .setSize(w, backButtonComponent.getTopY() - title.getBottomY())
                         .setPos(x0 + w/2, backButtonComponent.getTopY(), BOTTOM | HCENTER);
                 break;

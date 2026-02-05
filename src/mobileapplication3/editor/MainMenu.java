@@ -70,7 +70,6 @@ public class MainMenu extends Container {
             title
                     .setSize(w, TextComponent.HEIGHT_AUTO)
                     .setPos(x0, y0, TOP | LEFT);
-            buttons.setButtonsBgPadding(w/128);
             buttons
                     .setSizes(w/2, h/2, Font.getDefaultFontHeight() * 2)
                     .setPos(x0 + w/2, y0 + h - margin, BOTTOM | HCENTER);
@@ -89,7 +88,6 @@ public class MainMenu extends Container {
                     .setPos(x0, y0, TOP | LEFT);
             buttons
                     .setIsSelectionEnabled(true)
-                    .setButtonsBgPadding(w/128)
                     .setSize(w/2 - margin, h - title.h - margin * 2)
                     .setPos(x0 + w - margin, (title.getBottomY() + y0 + h) / 2, VCENTER | RIGHT);
 

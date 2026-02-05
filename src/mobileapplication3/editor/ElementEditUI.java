@@ -82,11 +82,6 @@ public class ElementEditUI extends AbstractPopupPage {
         rows[rows.length - 2] = (advancedEditButton);
         rows[rows.length - 1] = (deleteButton);
 
-        return new ButtonCol(rows) {
-            public void onSetBounds(int x0, int y0, int w, int h) {
-                setButtonsBgPadding(getBtnH()/16);
-                super.onSetBounds(x0, y0, w, h);
-            }
-        };
+        return new ButtonCol(rows);
     }
 }

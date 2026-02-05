@@ -81,7 +81,7 @@ public class EditorUI extends Container {
 
     public void onSetBounds(int x0, int y0, int w, int h) {
         bottomButtonPanel
-                .setButtonsBgPadding(BTN_H/16)
+                .setButtonsBgPadding(BTN_H/32)
                 .setSize(w, BTN_H)
                 .setPos(x0, y0 + h, BOTTOM | LEFT);
         editorCanvas
@@ -90,9 +90,12 @@ public class EditorUI extends Container {
         placementButtonPanel
                 .setSizes(w, ButtonPanelHorizontal.H_AUTO, BTN_H)
                 .setPos(x0, y0 + h - bottomButtonPanel.h, BOTTOM | LEFT);
+        placementButtonPanel
+                .setButtonsBgPadding(BTN_H/32);
         placedElementsList
                 .setSizes(w/3, bottomButtonPanel.getTopY() - y0 - BTN_H / 4, FONT_H * 3)
-                .setPos(x0 + w, y0 + h - bottomButtonPanel.h, RIGHT | BOTTOM);
+                .setPos(x0 + w, y0 + h - bottomButtonPanel.h, RIGHT | BOTTOM)
+                .setPadding(BTN_H/32);
         if (startPointWarning != null) {
             startPointWarning
                     .setSize(startPointWarning.getOptimalW(w/3), startPointWarning.getOptimalH(bottomButtonPanel.getTopY() - y0))
