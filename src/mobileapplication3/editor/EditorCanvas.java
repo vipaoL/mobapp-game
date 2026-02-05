@@ -246,20 +246,6 @@ public class EditorCanvas extends StructureViewerComponent {
         if (gridStep > 1) {
             cursorX = (cursorX + gridStep * Mathh.sign(cursorX) / 2) / gridStep * gridStep;
             cursorY = (cursorY + gridStep * Mathh.sign(cursorY) / 2) / gridStep * gridStep;
-            if (Math.abs(cursorX) % 1000 == 300) {
-                if (cursorX > 0) {
-                    cursorX -= 8;
-                } else {
-                    cursorX += 8;
-                }
-            }
-            if (Math.abs(cursorY) % 1000 == 300) {
-                if (cursorY > 0) {
-                    cursorY -= 8;
-                } else {
-                    cursorY += 8;
-                }
-            }
         }
     }
 
