@@ -281,14 +281,14 @@ public class EditorUI extends Container {
             }
         };
 
-        Button btnBrLine = new Button("Broken\nline") {
+        Button btnBrLine = new Button("Broken line") {
             public void buttonPressed() {
                 place(Element.BROKEN_LINE, editorCanvas.getCursorX(), editorCanvas.getCursorY());
                 placementButtonPanel.setVisible(false);
             }
         };
 
-        Button btnBrCircle = new Button("Broken\ncircle") {
+        Button btnBrCircle = new Button("Broken circle") {
             public void buttonPressed() {
                 place(Element.BROKEN_CIRCLE, editorCanvas.getCursorX(), editorCanvas.getCursorY());
                 placementButtonPanel.setVisible(false);
@@ -302,7 +302,7 @@ public class EditorUI extends Container {
             }
         };
 
-        Button btnFinish = new Button("Level-\nFinish") {
+        Button btnFinish = new Button("Level Finish") {
             public void buttonPressed() {
                 place(Element.LEVEL_FINISH, editorCanvas.getCursorX(), editorCanvas.getCursorY());
                 placementButtonPanel.setVisible(false);
