@@ -87,7 +87,6 @@ public class MainMenu extends Container {
                     .setSize(w, TextComponent.HEIGHT_AUTO)
                     .setPos(x0, y0, TOP | LEFT);
             buttons
-                    .setIsSelectionEnabled(true)
                     .setSize(w/2 - margin, h - title.h - margin * 2)
                     .setPos(x0 + w - margin, (title.getBottomY() + y0 + h) / 2, VCENTER | RIGHT);
 

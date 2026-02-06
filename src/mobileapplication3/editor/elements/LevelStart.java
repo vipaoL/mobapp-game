@@ -85,7 +85,7 @@ public class LevelStart extends Element {
     }
 
     public int getStepsToPlace() {
-        return STEPS_TO_PLACE[getID()];
+        return 1;
     }
 
     public String getName() {
