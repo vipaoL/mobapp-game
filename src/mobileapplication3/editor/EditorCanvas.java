@@ -15,7 +15,6 @@ import mobileapplication3.ui.Keys;
  */
 public class EditorCanvas extends StructureViewerComponent {
     public static final int MODE_STRUCTURE = EditorUI.MODE_STRUCTURE, MODE_LEVEL = EditorUI.MODE_LEVEL;
-    private static final int COL_BG = 0x000000;
 
     private int cursorX, cursorY;
     private int gridStep;
@@ -34,6 +33,7 @@ public class EditorCanvas extends StructureViewerComponent {
         this.structureBuilder = structureBuilder;
         editMode = structureBuilder.getMode();
         this.viewMode = viewMode;
+        bgColor = 0x000000;
     }
 
     public void onUpdate() {
@@ -58,7 +58,7 @@ public class EditorCanvas extends StructureViewerComponent {
     }
 
     public void drawBg(Graphics g, int x0, int y0, int w, int h, boolean isActive) {
-        g.setColor(COL_BG);
+        g.setColor(bgColor);
         g.fillRect(x0, y0, w, h);
 
         int step = gridStep * 1000/zoomOut;
@@ -271,7 +271,7 @@ public class EditorCanvas extends StructureViewerComponent {
             int rwY = y0 + yToPX(carY + wr / 2);
 
             int wrScaled = wr * 1000 / zoomOut;
-            g.setColor(COL_BG);
+            g.setColor(bgColor);
             g.fillArc(lwX - wrScaled, lwY - wrScaled, wrScaled*2, wrScaled*2, 0, 360);
             g.fillArc(rwX - wrScaled, rwY - wrScaled, wrScaled*2, wrScaled*2, 0, 360);
             g.setColor(0x444444);
