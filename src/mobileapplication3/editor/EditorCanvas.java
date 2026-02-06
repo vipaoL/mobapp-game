@@ -77,6 +77,11 @@ public class EditorCanvas extends StructureViewerComponent {
                 g.drawLine(x0 + x, y0, x0 + x, y0 + h);
             }
         }
+
+        g.setColor(0xff0000);
+        g.drawArrow(x0 + xToPX(0), y0 + yToPX(0), x0 + xToPX(100), y0 + yToPX(0), 3, zoomOut, zoomOut > zoomOutMacroModeThreshold);
+        g.setColor(0x00ff00);
+        g.drawArrow(x0 + xToPX(0), y0 + yToPX(0), x0 + xToPX(0), y0 + yToPX(100), 3, zoomOut, zoomOut > zoomOutMacroModeThreshold);
     }
 
     private void drawCursor(Graphics g, int x0, int y0) {
