@@ -12,7 +12,6 @@ import mobileapplication3.ui.Property;
  * @author vipaol
  */
 public abstract class Element {
-
     public static final short EOF = 0;
     public static final short END_POINT = 1;
     public static final short LINE = 2;
@@ -26,55 +25,18 @@ public abstract class Element {
     public static final short LEVEL_FINISH = 10;
     public static final short LAVA = 11;
 
-    public static final int[] ARGS_NUMBER = {
-            0,    // id0    EOF
-            2,    // id1    END_POINT
-            4,    // id2    LINE
-            7,    // id3    CIRCLE
-            9,    // id4    BROKEN_LINE
-            10,   // id5    BROKEN_CIRCLE
-            6,    // id6    SINE
-            8,    // id7    ACCELERATOR
-            6,    // id8    TRAMPOLINE
-            2,    // id9    LEVEL_START
-            5,    // id10   LEVEL_FINISH
-            5,    // id11   LAVA
-    };
-
-    public static final int[] STEPS_TO_PLACE = {
-            0,    // id0    EOF
-            1,    // id1    END_POINT
-            2,    // id2    LINE
-            2,    // id3    CIRCLE
-            2,    // id4    BROKEN_LINE
-            2,    // id5    BROKEN_CIRCLE
-            3,    // id6    SINE
-            2,    // id7    ACCELERATOR
-            2,    // id8    TRAMPOLINE
-            1,    // id9    LEVEL_START
-            2,    // id10   LEVEL_FINISH
-            2,    // id11   LAVA
-    };
-
     public static final int LINE_THICKNESS = 24;
 
     public static final int COLOR_LANDSCAPE = 0x4444ff;
     public static final int COLOR_BODY = 0xffffff;
     public static final int COLOR_SELECTED = 0xaaffff;
 
-    protected int color, color_selected;
+    protected int color;
+    protected int colorSelected;
 
     protected Element() {
         color = isBody() ? COLOR_BODY : COLOR_LANDSCAPE;
-        color_selected = COLOR_SELECTED;
-    }
-
-    public Element createTypedInstance(short id, short[] args) throws IllegalArgumentException {
-        if (args.length != ARGS_NUMBER[id]) {
-            throw new IllegalArgumentException("Element with id=" + id + " can't have " + args.length + " args");
-        }
-
-        return createTypedInstance(id).setArgs(args);
+        colorSelected = COLOR_SELECTED;
     }
 
     public static Element createTypedInstance(short id) throws IllegalArgumentException {
@@ -119,22 +81,6 @@ public abstract class Element {
             sb.append(" " + args[i]);
         }
         Logger.log(sb.toString());
-    }
-
-    public static Element readFromData(short[] data) {
-        short id = data[0];
-        short[] args = new short[data.length - 1];
-        System.arraycopy(data, 1, args, 0, args.length);
-
-        if (id < 1) {
-            throw new IllegalArgumentException("Element id can't be < 1");
-        }
-
-        if (args.length != ARGS_NUMBER[id]) {
-            throw new IllegalArgumentException("Element with id=" + id + " can't have " + args.length + " args");
-        }
-
-        return createTypedInstance(id).setArgs(args);
     }
 
     public int xToPX(int c, int zoomOut, int offsetX) {
@@ -185,7 +131,7 @@ public abstract class Element {
     }
 
     protected int getColor(boolean isSelected) {
-        return isSelected ? color_selected : color;
+        return isSelected ? colorSelected : color;
     }
 
     public static Property[] concatArrays(Property[] arr1, Property[] arr2) {

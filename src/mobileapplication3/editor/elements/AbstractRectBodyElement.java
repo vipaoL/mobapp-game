@@ -154,7 +154,7 @@ public abstract class AbstractRectBodyElement extends Element {
     }
 
     public int getStepsToPlace() {
-        return STEPS_TO_PLACE[getID()];
+        return 2;
     }
 
     public void move(short dx, short dy) {

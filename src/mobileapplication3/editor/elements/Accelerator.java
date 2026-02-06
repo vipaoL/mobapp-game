@@ -7,7 +7,6 @@ import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
 
 public class Accelerator extends AbstractRectBodyElement {
-
     private short directionOffset, m = 150, effectDuration = 30;
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
@@ -141,10 +140,6 @@ public class Accelerator extends AbstractRectBodyElement {
 
     public short getID() {
         return ACCELERATOR;
-    }
-
-    public int getStepsToPlace() {
-        return STEPS_TO_PLACE[ACCELERATOR];
     }
 
     public String getName() {
