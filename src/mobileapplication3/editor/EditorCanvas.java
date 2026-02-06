@@ -64,13 +64,17 @@ public class EditorCanvas extends StructureViewerComponent {
         int step = gridStep * 1000/zoomOut;
         if (step > 10) {
             g.setColor(0x000077);
-            int gridOffsetX = y0 + (w / 2) % step + offsetX % step;
-            int gridOffsetY = x0 + (h / 2) % step + offsetY % step;
-            for (int y = gridOffsetY - step; y < h; y += step) {
-                g.drawLine(0, y, w, y);
+
+            int minVisibleWorldY = -offsetY * zoomOut / 1000;
+            int gridStartY = (minVisibleWorldY / gridStep) * gridStep;
+            for (int y, wy = gridStartY; (y = yToPX(wy)) < h; wy += gridStep) {
+                g.drawLine(x0, y0 + y, x0 + w, y0 + y);
             }
-            for (int x = gridOffsetX - step; x < w; x += step) {
-                g.drawLine(x, 0, x, h);
+
+            int minVisibleWorldX = -offsetX * zoomOut / 1000;
+            int gridStartX = (minVisibleWorldX / gridStep) * gridStep;
+            for (int x, wx = gridStartX; (x = xToPX(wx)) < w; wx += gridStep) {
+                g.drawLine(x0 + x, y0, x0 + x, y0 + h);
             }
         }
     }
