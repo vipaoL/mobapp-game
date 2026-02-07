@@ -174,87 +174,87 @@ public class Sine extends AbstractCurve {
     public Property[] getArgs() {
         return new Property[] {
                 new Property("X0") {
-                    public void setValue(short value) {
+                    public void setValue(int value) {
                         if (x0 != value) {
                             pointsCache = null;
                         }
-                        x0 = value;
+                        x0 = (short) value;
                         calcAnchorPoint();
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return x0;
                     }
                 },
                 new Property("Y0") {
-                    public void setValue(short value) {
+                    public void setValue(int value) {
                         if (y0 != value) {
                             pointsCache = null;
                         }
-                        y0 = value;
+                        y0 = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return y0;
                     }
                 },
                 new Property("Length") {
-                    public void setValue(short value) {
-                        setLength(value);
+                    public void setValue(int value) {
+                        setLength((short) value);
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return l;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return (short) -x0;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return (short) (Short.MAX_VALUE - x0);
                     }
                 },
                 new Property("Halfperiods") {
-                    public void setValue(short value) {
-                        setHalfperiodsNumber(value);
+                    public void setValue(int value) {
+                        setHalfperiodsNumber((short) value);
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return halfperiods;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 1;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return (short) (l / 64);
                     }
                 },
                 new Property("Phase shift") {
-                    public void setValue(short value) {
-                        setOffset(value);
+                    public void setValue(int value) {
+                        setOffset((short) value);
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return offset;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 360;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
                 },
                 new Property("Amplitude") {
-                    public void setValue(short value) {
-                        setAmplitude(value);
+                    public void setValue(int value) {
+                        setAmplitude((short) value);
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return amp;
                     }
                 }

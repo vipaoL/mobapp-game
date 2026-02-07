@@ -177,122 +177,122 @@ public class Circle extends AbstractCurve {
     public Property[] getArgs() {
         return new Property[] {
                 new Property("X") {
-                    public void setValue(short value) {
+                    public void setValue(int value) {
                         if (x != value) {
                             pointsCache = null;
                         }
-                        x = value;
+                        x = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return x;
                     }
                 },
                 new Property("Y") {
-                    public void setValue(short value) {
+                    public void setValue(int value) {
                         if (y != value) {
                             pointsCache = null;
                         }
-                        y = value;
+                        y = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return y;
                     }
                 },
                 new Property("R") {
-                    public void setValue(short value) {
+                    public void setValue(int value) {
                         if (r != value) {
                             pointsCache = null;
                         }
-                        r = value;
+                        r = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return r;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 1;
                     }
                 },
                 new Property("Arc angle") {
-                    public void setValue(short value) {
+                    public void setValue(int value) {
                         if (arcAngle != value) {
                             pointsCache = null;
                         }
-                        arcAngle = value;
+                        arcAngle = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return arcAngle;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return -360;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 360;
                     }
                 },
                 new Property("Start angle") {
-                    public void setValue(short value) {
+                    public void setValue(int value) {
                         if (startAngle != value) {
                             pointsCache = null;
                         }
-                        startAngle = value;
+                        startAngle = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return startAngle;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 360;
                     }
                 },
                 new Property("X-axis scale") {
-                    public void setValue(short value) {
+                    public void setValue(int value) {
                         if (kx != value) {
                             pointsCache = null;
                         }
-                        kx = value;
+                        kx = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return kx;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 1;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 2048;
                     }
                 },
                 new Property("Y-axis scale") {
-                    public void setValue(short value) {
+                    public void setValue(int value) {
                         if (ky != value) {
                             pointsCache = null;
                         }
-                        ky = value;
+                        ky = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return ky;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 1;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 2048;
                     }
                 }

@@ -85,53 +85,53 @@ public class Accelerator extends AbstractRectBodyElement {
     public Property[] getArgs() {
         return concatArrays(super.getArgs(), new Property[] {
                 new Property("Speed direction offset") {
-                    public void setValue(short value) {
-                        directionOffset = value;
+                    public void setValue(int value) {
+                        directionOffset = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return directionOffset;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 360;
                     }
                 },
                 new Property("Speed multiplier (percents)") {
-                    public void setValue(short value) {
-                        setModifierValue(value);
+                    public void setValue(int value) {
+                        setModifierValue((short) value);
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return m;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 1000;
                     }
                 },
                 new Property("Effect duration (ticks)") {
-                    public void setValue(short value) {
-                        effectDuration = value;
+                    public void setValue(int value) {
+                        effectDuration = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return effectDuration;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     };
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 1200;
                     }
                 }

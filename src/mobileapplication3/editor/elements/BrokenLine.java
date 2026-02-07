@@ -137,75 +137,83 @@ public class BrokenLine extends Line {
         Property[] superArgs = super.getArgs();
         Property[] thisArgs = {
                 new Property("Thickness") {
-                    public void setValue(short value) {
-                        thickness = value;
+                    public void setValue(int value) {
+                        thickness = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return thickness;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 1;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return (short) (platformLength * 2);
                     }
                 },
-                new Property("Platform length", true) {
-                    public void setValue(short value) {
-                        platformLength = value;
+                new Property("Platform length") {
+                    public void setValue(int value) {
+                        platformLength = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return platformLength;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
+                    }
+
+                    public boolean isActive() {
+                        return false;
                     }
                 },
                 new Property("Spacing") {
-                    public void setValue(short value) {
-                        spacing = value;
+                    public void setValue(int value) {
+                        spacing = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return spacing;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
                 },
-                new Property("Length", true) {
-                    public void setValue(short value) {
-                        l = value;
+                new Property("Length") {
+                    public void setValue(int value) {
+                        l = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return l;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
+
+                    public boolean isActive() {
+                        return false;
+                    }
                 },
-                new Property("Angle", true) {
-                    public void setValue(short value) {
-                        ang = value;
+                new Property("Angle") {
+                    public void setValue(int value) {
+                        ang = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return ang;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 360;
                     }
                 }

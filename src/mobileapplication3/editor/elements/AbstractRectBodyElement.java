@@ -86,67 +86,67 @@ public abstract class AbstractRectBodyElement extends Element {
     public Property[] getArgs() {
         return new Property[] {
                 new Property("X") {
-                    public void setValue(short value) {
-                        x = value;
+                    public void setValue(int value) {
+                        x = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return x;
                     }
                 },
                 new Property("Y") {
-                    public void setValue(short value) {
-                        y = value;
+                    public void setValue(int value) {
+                        y = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return y;
                     }
                 },
                 new Property("L") {
-                    public void setValue(short value) {
-                        l = value;
+                    public void setValue(int value) {
+                        l = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return l;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
                 },
                 new Property("Thickness") {
-                    public void setValue(short value) {
-                        thickness = value;
+                    public void setValue(int value) {
+                        thickness = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return thickness;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 1;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return (short) (l*2);
                     }
                 },
-                new Property("Angle", true) {
-                    public void setValue(short value) {
-                        angle = value;
+                new Property("Angle") {
+                    public void setValue(int value) {
+                        angle = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return angle;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 360;
                     }
                 }
