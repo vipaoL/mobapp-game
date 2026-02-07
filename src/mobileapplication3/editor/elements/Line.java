@@ -103,38 +103,38 @@ public class Line extends Element {
     public Property[] getArgs() {
         return new Property[] {
                 new Property("X1") {
-                    public void setValue(short value) {
-                        x1 = value;
+                    public void setValue(int value) {
+                        x1 = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return x1;
                     }
                 },
                 new Property("Y1") {
-                    public void setValue(short value) {
-                        y1 = value;
+                    public void setValue(int value) {
+                        y1 = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return y1;
                     }
                 },
                 new Property("X2") {
-                    public void setValue(short value) {
-                        x2 = value;
+                    public void setValue(int value) {
+                        x2 = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return x2;
                     }
                 },
                 new Property("Y2") {
-                    public void setValue(short value) {
-                        y2 = value;
+                    public void setValue(int value) {
+                        y2 = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return y2;
                     }
                 }

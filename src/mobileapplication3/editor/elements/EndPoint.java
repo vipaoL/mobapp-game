@@ -61,20 +61,20 @@ public class EndPoint extends Element {
     public Property[] getArgs() {
         return new Property[] {
                 new Property("X") {
-                    public void setValue(short value) {
-                        x = value;
+                    public void setValue(int value) {
+                        x = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return x;
                     }
                 },
                 new Property("Y") {
-                    public void setValue(short value) {
-                        y = value;
+                    public void setValue(int value) {
+                        y = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return y;
                     }
                 }

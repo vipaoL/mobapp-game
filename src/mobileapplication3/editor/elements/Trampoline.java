@@ -25,19 +25,19 @@ public class Trampoline extends AbstractRectBodyElement {
     public Property[] getArgs() {
         return concatArrays(super.getArgs(), new Property[] {
                 new Property("Elasticity") {
-                    public void setValue(short value) {
-                        elasticity = value;
+                    public void setValue(int value) {
+                        elasticity = (short) value;
                     }
 
-                    public short getValue() {
+                    public int getValue() {
                         return elasticity;
                     }
 
-                    public short getMinValue() {
+                    public int getMinValue() {
                         return 0;
                     }
 
-                    public short getMaxValue() {
+                    public int getMaxValue() {
                         return 1000;
                     }
                 }
