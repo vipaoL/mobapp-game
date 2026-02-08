@@ -160,6 +160,7 @@ public abstract class AbstractRectBodyElement extends Element {
     public void move(short dx, short dy) {
         x += dx;
         y += dy;
+        calcAnchorPoint();
     }
 
     public short[] getStartPoint() {
