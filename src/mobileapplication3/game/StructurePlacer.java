@@ -103,7 +103,7 @@ public class StructurePlacer {
     public static int[] sinStruct(GraphicsWorld world, boolean skipPlacingBodies, int x, int y, int l, int halfPeriods, int offset, int amp) { // id1
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
 
-        elementPlacer.sin(x, y, l, halfPeriods, offset, amp);
+        elementPlacer.sin(x, y, l, halfPeriods, offset, amp, 0);
         x += l;
         if (amp != 0) {
             y = y + amp*Mathh.sin(180*halfPeriods+offset)/1000;

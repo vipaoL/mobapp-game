@@ -18,6 +18,7 @@ public class Sine extends AbstractCurve {
     //  @       "@" - (anchorX;anchorY)
 
     private final static int STEP = 30;
+    private short id = SINE;
     private short x0, y0, l, halfperiods = 1, offset = 270, amp;
     private short anchorX, anchorY;
 
@@ -29,7 +30,7 @@ public class Sine extends AbstractCurve {
                 }
 
                 public String getName() {
-                    return "Move start point";
+                    return "Move";
                 }
 
                 public String getCurrentStepInfo() {
@@ -215,7 +216,7 @@ public class Sine extends AbstractCurve {
                         return (short) (Short.MAX_VALUE - x0);
                     }
                 },
-                new Property("Halfperiods") {
+                new Property("Half-periods") {
                     public void setValue(int value) {
                         setHalfperiodsNumber((short) value);
                     }
@@ -257,12 +258,55 @@ public class Sine extends AbstractCurve {
                     public int getValue() {
                         return amp;
                     }
-                }
+                },
+                new Property("Two-sided") {
+                    public void setValue(int value) {
+                        id = value == 1 ? SINE : SINE_FACE_UP;
+                    }
+
+                    public int getValue() {
+                        return id == SINE ? 1 : 0;
+                    }
+
+                    public int getMinValue() {
+                        return 0;
+                    }
+
+                    public int getMaxValue() {
+                        return 1;
+                    }
+                },
+                new Property("Flip collision side") {
+                    public void setValue(int value) {
+                        id = value == 1 ? SINE_FACE_DOWN : SINE_FACE_UP;
+                    }
+
+                    public int getValue() {
+                        return id == SINE_FACE_DOWN ? 1 : 0;
+                    }
+
+                    public int getMinValue() {
+                        return 0;
+                    }
+
+                    public int getMaxValue() {
+                        return 1;
+                    }
+
+                    public boolean isActive() {
+                        return id != SINE;
+                    }
+                },
         };
     }
 
+    public Sine setID(short id) {
+        this.id = id;
+        return this;
+    }
+
     public short getID() {
-        return Element.SINE;
+        return id;
     }
 
     public int getStepsToPlace() {
@@ -333,6 +377,12 @@ public class Sine extends AbstractCurve {
     }
 
     protected int getArrowsDirection() {
-        return ARROWS_NORMAL;
+        if (id == SINE_FACE_UP) {
+            return ARROWS_NORMAL;
+        } else if (id == SINE_FACE_DOWN) {
+            return ARROWS_INVERTED;
+        } else {
+            return NO_ARROWS;
+        }
     }
 }

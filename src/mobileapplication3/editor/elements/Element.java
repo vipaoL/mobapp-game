@@ -26,6 +26,8 @@ public abstract class Element {
     public static final short LAVA = 11;
     public static final short SQUARE_BODY = 12;
     public static final short ROUND_BODY = 13;
+    public static final short SINE_FACE_UP = 14;
+    public static final short SINE_FACE_DOWN = 15;
 
     public static final int LINE_THICKNESS = 24;
 
@@ -58,7 +60,9 @@ public abstract class Element {
             case Element.BROKEN_CIRCLE:
                 return new BrokenCircle();
             case Element.SINE:
-                return new Sine();
+            case Element.SINE_FACE_UP:
+            case Element.SINE_FACE_DOWN:
+                return new Sine().setID(id);
             case Element.ACCELERATOR:
                 return new Accelerator();
             case Element.TRAMPOLINE:
