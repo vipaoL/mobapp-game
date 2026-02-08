@@ -18,7 +18,8 @@ import java.util.Vector;
  * @author vipaol
  */
 public class GraphicsWorld extends World {
-
+    public static final int THICKNESS_BODIES = 10;
+    public static final int THICKNESS_LANDSCAPE = 24;
     public static int DEFAULT_LANDSCAPE_COLOR = 0x4444ff;
     private static final int BIG_SCREEN_SIDE = 480;
     private static final int CAR_COLLISION_LAYER = 1;
@@ -61,7 +62,6 @@ public class GraphicsWorld extends World {
 
     // list of all bodies car touched (for falling platforms)
     public Vector waitingForDynamic = new Vector();
-    public Vector waitingTime = new Vector();
     long prevBodyTickTime = System.currentTimeMillis();
     public int barrierX = Integer.MIN_VALUE;
     public int lowestY;
@@ -196,16 +196,13 @@ public class GraphicsWorld extends World {
         // for falling platforms
         for (int i = 0; i < waitingForDynamic.size(); i++) {
             try {
-                int intValue = ((Integer) waitingTime.elementAt(i)).intValue();
-                intValue -= diffTime;
-                // The constructor Integer(int) was deprecated in Java 9
-                // Integer.valueOf() accepts only String in Java 1.3
-                // So this is the only way?
-                waitingTime.setElementAt(Integer.valueOf(String.valueOf(intValue)), i);
-                if (intValue <= 0) {
-                    ((Body) waitingForDynamic.elementAt(i)).setDynamic(true);
+                Body body = (Body) waitingForDynamic.elementAt(i);
+                MUserData userData = (MUserData) body.getUserData();
+                userData.setFallDelay(userData.getFallDelay() - diffTime);
+                if (userData.getFallDelay() <= 0) {
+                    userData.setFallDelay(Integer.MIN_VALUE);
+                    body.setDynamic(true);
                     waitingForDynamic.removeElementAt(i);
-                    waitingTime.removeElementAt(i);
                 }
             } catch (ArrayIndexOutOfBoundsException ignored) { }
         }
@@ -325,93 +322,76 @@ public class GraphicsWorld extends World {
         int bodyCount = getBodyCount();
         for (int i = 0; i < bodyCount; i++) {
             if (bodies[i] != leftWheel && bodies[i] != rightWheel) {
-                UserData userData = bodies[i].getUserData();
-                if (userData instanceof MUserData) {
-                    MUserData mUserData = (MUserData) userData;
-                    int bodyType = mUserData.bodyType;
-                    switch (bodyType) {
-                        case MUserData.TYPE_ACCELERATOR:
-                            g.setColor(mUserData.color);
-                            break;
-                        case MUserData.TYPE_TRAMPOLINE:
-                            g.setColor(0xffaa00);
-                            break;
-                        case MUserData.TYPE_LEVEL_FINISH:
-                            g.setColor(0x00ff00);
-                            break;
-                        case MUserData.TYPE_LAVA:
-                            g.setColor(0xff5500);
-                            break;
-                        default:
-                            g.setColor(currColBodies);
-                            break;
-                    }
-                } else {
-                    g.setColor(currColBodies);
-                }
                 drawBody(g, bodies[i]);
             }
         }
     }
 
     private void drawBody(Graphics g, Body b) {
-        FXVector[] positions = b.getVertices();
+        FXVector[] vertices = b.getVertices();
 
-        if (positions.length == 1) { // if shape of the body is circle
+        int colorFill = currColBodies;
+        int colorStroke = currColBodies;
+        int thickness = THICKNESS_BODIES * 500 / zoomOut * 2;
+
+        UserData userData = b.getUserData();
+        if (userData instanceof MUserData) {
+            MUserData mUserData = (MUserData) userData;
+            colorFill = mUserData.getColor();
+            colorStroke = mUserData.getColorStroke();
+            if (colorFill == MUserData.COLOR_DEFAULT) {
+                colorFill = currColBodies;
+            }
+            if (colorStroke == MUserData.COLOR_DEFAULT) {
+                colorStroke = colorFill;
+            }
+        }
+
+        if (vertices.length == 1) { // if shape of the body is circle
             int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
+            g.setColor(colorStroke);
             drawArc(g,
                     xToPX(b.positionFX().xAsInt() - radius),
                     yToPX(b.positionFX().yAsInt() - radius),
                     radius * 2000 / zoomOut,
                     radius * 2000 / zoomOut,
-                    0, 360, 10, currColBg);
+                    0, 360, thickness, colorFill
+            );
         }
         else { // if not a circle, then a polygon
-            if (b == carbody) {
-                int prevColor = g.getColor();
-                g.setColor(currColBg);
-                if (DebugMenu.whatTheGame) {
-                    g.setColor(0xff0000);
-                }
-
-                g.fillTriangle(xToPX(positions[0].xAsInt()),
-                        yToPX(positions[0].yAsInt()),
-                        xToPX(positions[1].xAsInt()),
-                        yToPX(positions[1].yAsInt()),
-                        xToPX(positions[2].xAsInt()),
-                        yToPX(positions[2].yAsInt()));
-                g.fillTriangle(xToPX(positions[0].xAsInt()),
-                        yToPX(positions[0].yAsInt()),
-                        xToPX(positions[3].xAsInt()),
-                        yToPX(positions[3].yAsInt()),
-                        xToPX(positions[2].xAsInt()),
-                        yToPX(positions[2].yAsInt()));
-                g.setColor(prevColor);
-            }
-
-            for (int i = 0; i < positions.length - 1; i++) {
-                drawLine(g,
-                        xToPX(positions[i].xAsInt()),
-                        yToPX(positions[i].yAsInt()),
-                        xToPX(positions[i + 1].xAsInt()),
-                        yToPX(positions[i + 1].yAsInt()),
-                        10);
+            // fill
+            g.setColor(colorFill);
+            for (int i = 0; i < vertices.length - 1; i++) {
                 if (b != carbody) {
                     g.fillTriangle(
-                            xToPX(positions[0].xAsInt()),
-                            yToPX(positions[0].yAsInt()),
-                            xToPX(positions[i].xAsInt()),
-                            yToPX(positions[i].yAsInt()),
-                            xToPX(positions[i + 1].xAsInt()),
-                            yToPX(positions[i + 1].yAsInt()));
+                            xToPX(vertices[0].xAsInt()),
+                            yToPX(vertices[0].yAsInt()),
+                            xToPX(vertices[i].xAsInt()),
+                            yToPX(vertices[i].yAsInt()),
+                            xToPX(vertices[i + 1].xAsInt()),
+                            yToPX(vertices[i + 1].yAsInt())
+                    );
                 }
             }
+
+            // stroke
+            g.setColor(colorStroke);
+            for (int i = 0; i < vertices.length - 1; i++) {
+                drawLine(g,
+                        xToPX(vertices[i].xAsInt()),
+                        yToPX(vertices[i].yAsInt()),
+                        xToPX(vertices[i + 1].xAsInt()),
+                        yToPX(vertices[i + 1].yAsInt()),
+                        THICKNESS_BODIES
+                );
+            }
             drawLine(g,
-                    xToPX(positions[positions.length - 1].xAsInt()),
-                    yToPX(positions[positions.length - 1].yAsInt()),
-                    xToPX(positions[0].xAsInt()),
-                    yToPX(positions[0].yAsInt()),
-                    10);
+                    xToPX(vertices[vertices.length - 1].xAsInt()),
+                    yToPX(vertices[vertices.length - 1].yAsInt()),
+                    xToPX(vertices[0].xAsInt()),
+                    yToPX(vertices[0].yAsInt()),
+                    THICKNESS_BODIES
+            );
         }
     }
 
@@ -440,7 +420,8 @@ public class GraphicsWorld extends World {
                             stPointY,
                             endPointX,
                             endPointY,
-                            24);
+                            THICKNESS_LANDSCAPE
+                    );
                 } else {
                     drawLine(
                             g,
@@ -448,7 +429,8 @@ public class GraphicsWorld extends World {
                             stPointY,
                             endPointX,
                             endPointY,
-                            24);
+                            THICKNESS_LANDSCAPE
+                    );
                 }
                 g.setColor(0xff0000);
                 if (DebugMenu.showLinePoints) {
@@ -494,21 +476,21 @@ public class GraphicsWorld extends World {
                     case ElementPlacer.DRAWING_DATA_ID_LINE:
                         int x1 = xToPX(structureData[c++]);
                         int y1 = yToPX(structureData[c++]);
-                        drawLine(g, x1, y1, xToPX(structureData[c++]), yToPX(structureData[c++]), 24);
+                        drawLine(g, x1, y1, xToPX(structureData[c++]), yToPX(structureData[c++]), THICKNESS_LANDSCAPE);
                         break;
                     case ElementPlacer.DRAWING_DATA_ID_PATH:
                         int pointsCount = structureData[c++];
                         int prevX = xToPX(structureData[c++]);
                         int prevY = yToPX(structureData[c++]);
                         for (int j = 1; j < pointsCount; j++) {
-                            drawLine(g, prevX, prevY, prevX = xToPX(structureData[c++]), prevY = yToPX(structureData[c++]), 24);
+                            drawLine(g, prevX, prevY, prevX = xToPX(structureData[c++]), prevY = yToPX(structureData[c++]), THICKNESS_LANDSCAPE);
                         }
                         break;
                     case ElementPlacer.DRAWING_DATA_ID_CIRCLE: {
                         int x = structureData[c++];
                         int y = structureData[c++];
                         int r = structureData[c++];
-                        g.drawArc(xToPX(x - r), yToPX(y - r), r * 2 * 1000 / zoomOut, r * 2 * 1000 / zoomOut, 0, 360, 24, zoomOut, betterGraphics, true, true);
+                        g.drawArc(xToPX(x - r), yToPX(y - r), r * 2 * 1000 / zoomOut, r * 2 * 1000 / zoomOut, 0, 360, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
                         break;
                     }
                     case ElementPlacer.DRAWING_DATA_ID_ARC: {
@@ -528,7 +510,7 @@ public class GraphicsWorld extends World {
                                 g.drawString("arcAngle=" + arcAngle, xToPX(x), yToPX(y), Graphics.TOP | Graphics.HCENTER);
                             }
                         }
-                        g.drawArc(xToPX(x - r * kx / 10), yToPX(y - r * ky / 10), r*2 * kx * 100 / zoomOut, r*2 * ky * 100 / zoomOut, startAngle, arcAngle, 24, zoomOut, betterGraphics, true, true);
+                        g.drawArc(xToPX(x - r * kx / 10), yToPX(y - r * ky / 10), r*2 * kx * 100 / zoomOut, r*2 * ky * 100 / zoomOut, startAngle, arcAngle, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
                         break;
                     }
                 }
@@ -584,21 +566,14 @@ public class GraphicsWorld extends World {
             }
         }
 
-        g.setColor(currColWheel);
-        g.fillArc(
-                xToPX(b.positionFX().xAsInt() - radius),
-                yToPX(b.positionFX().yAsInt() - radius),
-                radius * 2000 / zoomOut,
-                radius * 2000 / zoomOut,
-                0, 360);
-
         g.setColor(currColBodies);
         drawArc(g,
                 xToPX(b.positionFX().xAsInt() - radius),
                 yToPX(b.positionFX().yAsInt() - radius),
                 radius * 2000 / zoomOut,
                 radius * 2000 / zoomOut,
-                0, 360, 10, currColWheel);
+                0, 360, THICKNESS_BODIES * 500 / zoomOut * 2, currColWheel
+        );
     }
 
     private void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
@@ -632,7 +607,6 @@ public class GraphicsWorld extends World {
 
     private void drawArc(Graphics g, int x, int y, int w, int h, int startAngle, int arcAngle, int thickness, int fillColor) {
         int prevColor = g.getColor();
-        thickness = thickness * 500 / zoomOut * 2;
 
         if (thickness > 1 && betterGraphics) {
             g.fillArc(x - thickness / 2, y - thickness / 2, w + thickness, h + thickness, startAngle, arcAngle);
@@ -640,6 +614,9 @@ public class GraphicsWorld extends World {
             g.fillArc(x + thickness / 2, y + thickness / 2, w - thickness, h - thickness, startAngle, arcAngle);
             g.setColor(prevColor);
         } else {
+            g.setColor(fillColor);
+            g.fillArc(x + thickness / 2, y + thickness / 2, w - thickness, h - thickness, startAngle, arcAngle);
+            g.setColor(prevColor);
             g.drawArc(x, y, w, h, startAngle, arcAngle);
         }
     }

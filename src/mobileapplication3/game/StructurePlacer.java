@@ -75,7 +75,7 @@ public class StructurePlacer {
             for (int i = f0off+sl/2; i < 60; i+=sl) {
                 Body fallingPlatform = new Body(x+r+Mathh.cos(i+f0off)*(r+platformHeight/2)/1000, y-r+Mathh.sin(i+f0off)*(r+platformHeight/2)/1000, rect, true);
                 fallingPlatform.setDynamic(false);
-                fallingPlatform.setUserData(new MUserData(MUserData.TYPE_FALLING_PLATFORM, new short[] {20}));
+                fallingPlatform.setUserData(new MUserData().setFallDelay(600));
                 fallingPlatform.setRotationDeg(i+f0off-90);
                 world.addBody(fallingPlatform);
             }
@@ -86,7 +86,7 @@ public class StructurePlacer {
             for (int i = 0; i < 2; i++) {
                 Body fallingPlatform = new Body(x+r-r2+i*l2+l2/2, y+platformHeight/2, rect, true);
                 fallingPlatform.setDynamic(false);
-                fallingPlatform.setUserData(new MUserData(MUserData.TYPE_FALLING_PLATFORM, new short[] {20}));
+                fallingPlatform.setUserData(new MUserData().setFallDelay(600));
                 world.addBody(fallingPlatform);
             }
         }
