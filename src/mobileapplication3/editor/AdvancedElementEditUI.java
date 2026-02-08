@@ -22,7 +22,6 @@ public class AdvancedElementEditUI extends AbstractPopupPage {
         return new Button[] {
             new Button("OK") {
                 public void buttonPressed() {
-                    element.recalcCalculatedArgs();
                     if (element.getID() != Element.END_POINT) {
                         sb.recalculateEndPoint();
                     }
@@ -76,7 +75,7 @@ public class AdvancedElementEditUI extends AbstractPopupPage {
                 });
             }
         }
-        rows[properties.length] = new ButtonComponent(new Button ("Refresh values") {
+        rows[properties.length] = new ButtonComponent(new Button ("Refresh and recalculate values") {
             public void buttonPressed() {
                 element.recalcCalculatedArgs();
                 refreshList();
