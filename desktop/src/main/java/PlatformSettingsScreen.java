@@ -8,6 +8,8 @@ import mobileapplication3.ui.*;
 
 public class PlatformSettingsScreen extends Page {
     private static final String TITLE = "Desktop settings";
+    public static final String OVERRIDDEN_BY_COMMAND_LINE_ARGUMENTS = "\n(Overridden by command line arguments)";
+
     private Button fontSizeButton = null;
 
     public PlatformSettingsScreen() {
@@ -36,7 +38,7 @@ public class PlatformSettingsScreen extends Page {
     protected IUIComponent initAndGetPageContent() {
         return new ButtonCol(new Button[]{
                 new Switch("Fullscreen mode"
-                        + (PlatformSettings.fullscreenModeOverride == PlatformSettings.UNDEF ? "" : "\n(Is set by command line arguments)")) {
+                        + (PlatformSettings.fullscreenModeOverride == PlatformSettings.UNDEF ? "" : OVERRIDDEN_BY_COMMAND_LINE_ARGUMENTS)) {
                     @Override
                     public boolean getValue() {
                         return PlatformSettings.getFullscreenMode();
@@ -56,11 +58,11 @@ public class PlatformSettingsScreen extends Page {
                     @Override
                     public String getTitle() {
                         return "Font size: " + PlatformSettings.getFontSize()
-                                + (PlatformSettings.fontSizeOverride == PlatformSettings.UNDEF ? "" : "\n(Is set by command line arguments)");
+                                + (PlatformSettings.fontSizeOverride == PlatformSettings.UNDEF ? "" : OVERRIDDEN_BY_COMMAND_LINE_ARGUMENTS);
                     }
                 }.setIsActive(PlatformSettings.fontSizeOverride == PlatformSettings.UNDEF),
-                new Switch("Black and white mode"
-                        + (PlatformSettings.blackAndWhiteModeOverride == PlatformSettings.UNDEF ? "" : "\n(Is set by command line arguments)")) {
+                new Switch("Black & White mode"
+                        + (PlatformSettings.blackAndWhiteModeOverride == PlatformSettings.UNDEF ? "" : OVERRIDDEN_BY_COMMAND_LINE_ARGUMENTS)) {
                     @Override
                     public boolean getValue() {
                         return PlatformSettings.getBlackAndWhiteMode();
@@ -72,7 +74,7 @@ public class PlatformSettingsScreen extends Page {
                         Platform.refreshPlatformSettings();
                     }
                 }.setIsActive(PlatformSettings.blackAndWhiteModeOverride == PlatformSettings.UNDEF),
-                new Button("Reset desktop settings") {
+                new Button("Restore defaults") {
                     @Override
                     public void buttonPressed() {
                         PlatformSettings.reset();
