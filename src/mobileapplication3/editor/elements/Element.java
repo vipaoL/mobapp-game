@@ -24,6 +24,8 @@ public abstract class Element {
     public static final short LEVEL_START = 9;
     public static final short LEVEL_FINISH = 10;
     public static final short LAVA = 11;
+    public static final short SQUARE_BODY = 12;
+    public static final short ROUND_BODY = 13;
 
     public static final int LINE_THICKNESS = 24;
 
@@ -67,6 +69,10 @@ public abstract class Element {
                 return new LevelFinish();
             case Element.LAVA:
                 return new Lava();
+            case Element.SQUARE_BODY:
+                return new SquareBody();
+            case Element.ROUND_BODY:
+                return new RoundBody();
             default:
                 Logger.log("Unknown id: " + id);
                 return null;
@@ -132,6 +138,13 @@ public abstract class Element {
 
     protected int getColor(boolean isSelected) {
         return isSelected ? colorSelected : color;
+    }
+
+    public static short[] concatArrays(short[] arr1, short[] arr2) {
+        short[] result = new short[arr1.length + arr2.length];
+        System.arraycopy(arr1, 0, result, 0, arr1.length);
+        System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
+        return result;
     }
 
     public static Property[] concatArrays(Property[] arr1, Property[] arr2) {
