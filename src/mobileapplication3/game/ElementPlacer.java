@@ -26,6 +26,8 @@ public class ElementPlacer {
     public static final short LAVA = 11;
     public static final short SQUARE_BODY = 12;
     public static final short ROUND_BODY = 13;
+    public static final short SINE_FACE_UP = 14;
+    public static final short SINE_FACE_DOWN = 15;
 
     public static final int DRAWING_DATA_ID_LINE = 1, DRAWING_DATA_ID_PATH = 2, DRAWING_DATA_ID_CIRCLE = 3, DRAWING_DATA_ID_ARC = 4;
 
@@ -99,7 +101,17 @@ public class ElementPlacer {
                 arc(originX + data[1], originY + data[2], data[3], 360, 0);
                 break;
             case SINE:
-                sin(originX + data[1], originY + data[2], data[3], data[4], data[5], data[6]);
+            case SINE_FACE_UP:
+            case SINE_FACE_DOWN:
+                int face; // collision side
+                if (id == SINE_FACE_UP) {
+                    face = Landscape.FACE_LEFT;
+                } else if (id == SINE_FACE_DOWN) {
+                    face = Landscape.FACE_RIGHT;
+                } else {
+                    face = Landscape.FACE_NONE;
+                }
+                sin(originX + data[1], originY + data[2], data[3], data[4], data[5], data[6], face);
                 break;
             case ACCELERATOR: {
                 int x = originX + data[1];
@@ -311,10 +323,10 @@ public class ElementPlacer {
         return body;
     }
 
-    public void sin(int x, int y, int l, int halfPeriods, int startAngle, int amp) {    //3
+    public void sin(int x, int y, int l, int halfPeriods, int startAngle, int amp, int face) {    //3
         int pointCount = 0;
         if (amp == 0) {
-            line(x, y, x + l, y);
+            line(x, y, x + l, y, face);
         } else {
             int step = 30 / DETAIL_LEVEL;
             int endAngle = startAngle + halfPeriods * 180;
@@ -334,7 +346,7 @@ public class ElementPlacer {
             for (int i = startAngle; i <= endAngle; i+=step) {
                 nextPointX = x + (i - startAngle)*l/a;
                 nextPointY = y + amp*Mathh.sin(i)/1000;
-                line(prevPointX, prevPointY, nextPointX, nextPointY, 1, false);
+                line(prevPointX, prevPointY, nextPointX, nextPointY, face, false);
                 prevPointX = nextPointX;
                 prevPointY = nextPointY;
                 points[pointCount * 2] = prevPointX;
@@ -344,7 +356,7 @@ public class ElementPlacer {
             if (a % step != 0) {
                 nextPointX = x + l;
                 nextPointY = y + amp*Mathh.sin(endAngle)/1000;
-                line(prevPointX, prevPointY, nextPointX, nextPointY, 1, false);
+                line(prevPointX, prevPointY, nextPointX, nextPointY, face, false);
                 prevPointX = nextPointX;
                 prevPointY = nextPointY;
                 points[2 + pointCount * 2] = prevPointX;

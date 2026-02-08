@@ -32,6 +32,8 @@ public class MgStruct {
             5,    // id11   LAVA
             10,   // id12   SQUARE_BODY
             8,    // id13   ROUND_BODY
+            6,    // id14   SINE_FACE_UP
+            6,    // id15   SINE_FACE_DOWN
     };
 
     private static final int STRUCTURE_STORAGE_SIZE = 32;
