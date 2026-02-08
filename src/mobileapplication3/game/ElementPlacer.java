@@ -24,6 +24,8 @@ public class ElementPlacer {
     public static final short LEVEL_START = 9;
     public static final short LEVEL_FINISH = 10;
     public static final short LAVA = 11;
+    public static final short SQUARE_BODY = 12;
+    public static final short ROUND_BODY = 13;
 
     public static final int DRAWING_DATA_ID_LINE = 1, DRAWING_DATA_ID_PATH = 2, DRAWING_DATA_ID_CIRCLE = 3, DRAWING_DATA_ID_ARC = 4;
 
@@ -176,6 +178,108 @@ public class ElementPlacer {
                 w.addBody(body);
 
                 updateLowestY(y + Math.max(l, thickness));
+                break;
+            }
+            case SQUARE_BODY: {
+                int x = originX + data[1];
+                int y = originY + data[2];
+                int l = data[3];
+                int thickness = data[4];
+                int ang = data[5];
+
+                int elasticity = data[6];
+                int mass = data[7];
+                int friction = data[8];
+
+                int fallDelay = data[9];
+                int colorRGB565 = data[10] & 0xFFFF;
+
+                int r5 = (colorRGB565 >> 11) & 0x1F;
+                int g6 = (colorRGB565 >> 5) & 0x3F;
+                int b5 = colorRGB565 & 0x1F;
+
+                // use the sign bit as a boolean
+                boolean gravityAffected = mass >= 0;
+                if (mass < 0) mass = -mass;
+
+                boolean isLava = friction < 0;
+                if (friction < 0) {
+                    friction = -friction - 1;
+                }
+
+                MUserData mUserData = new MUserData();
+                mUserData.setColor(
+                        r5 * 255 / 31,
+                        g6 * 255 / 63,
+                        b5 * 255 / 31
+                );
+                mUserData.setFallDelay(fallDelay);
+                mUserData.setIsLava(isLava);
+
+                Body body = squareBody(
+                        x,
+                        y,
+                        l,
+                        thickness,
+                        ang,
+                        elasticity,
+                        mass,
+                        friction,
+                        gravityAffected,
+                        fallDelay < MUserData.STATIC,
+                        mUserData
+                );
+                w.addBody(body);
+
+                updateLowestY(y + Math.max(l, thickness));
+                break;
+            }
+            case ROUND_BODY: {
+                int x = originX + data[1];
+                int y = originY + data[2];
+                int r = data[3];
+
+                int elasticity = data[4];
+                int mass = data[5];
+                int friction = data[6];
+
+                int fallDelay = data[7];
+                int colorRGB565 = data[8] & 0xFFFF;
+
+                int r5 = (colorRGB565 >> 11) & 0x1F;
+                int g6 = (colorRGB565 >> 5) & 0x3F;
+                int b5 = colorRGB565 & 0x1F;
+
+                // use the sign bit as a boolean
+                boolean gravityAffected = mass >= 0;
+                if (mass < 0) mass = -mass;
+
+                boolean isLava = friction < 0;
+                if (friction < 0) {
+                    friction = -friction - 1;
+                }
+
+                MUserData mUserData = new MUserData();
+                mUserData.setColor(
+                        ((r5 * 255 / 31) << 16) |
+                        ((g6 * 255 / 63) << 8) |
+                        (b5 * 255 / 31)
+                );
+                mUserData.setFallDelay(fallDelay);
+                mUserData.setIsLava(isLava);
+
+                Body body = roundBody(
+                        x, y, r,
+                        elasticity,
+                        mass,
+                        friction,
+                        gravityAffected,
+                        fallDelay < MUserData.STATIC,
+                        mUserData
+                );
+                w.addBody(body);
+
+                updateLowestY(y + r);
                 break;
             }
         }

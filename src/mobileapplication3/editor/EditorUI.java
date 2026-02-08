@@ -323,6 +323,20 @@ public class EditorUI extends Container {
             }
         };
 
+        Button btnSquareBody = new Button("Square body") {
+            public void buttonPressed() {
+                place(Element.SQUARE_BODY, editorCanvas.getCursorX(), editorCanvas.getCursorY());
+                placementButtonPanel.setVisible(false);
+            }
+        };
+
+        Button btnRoundBody = new Button("Round body") {
+            public void buttonPressed() {
+                place(Element.ROUND_BODY, editorCanvas.getCursorX(), editorCanvas.getCursorY());
+                placementButtonPanel.setVisible(false);
+            }
+        };
+
         Button[] placementButtons = new Button[] {
                 btnLine,
                 btnCircle,
@@ -332,6 +346,8 @@ public class EditorUI extends Container {
                 btnAccel,
                 btnTrampoline,
                 btnLava,
+                btnSquareBody,
+                btnRoundBody,
         };
         if (mode == MODE_LEVEL) {
             placementButtons = concatArrays(
