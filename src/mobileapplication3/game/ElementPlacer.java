@@ -84,10 +84,10 @@ public class ElementPlacer {
                     int offsetY = platfL / 2 * Mathh.sin(ang) / 1000;
 
                     for (int i = 0; i < n; i++) {
-                        Body fallinPlatf = new Body(originX + x1 + i * (dx + spX) + offsetX, originY + y1 + i * (dy + spY) + offsetY, rect, false);
-                        fallinPlatf.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
-                        fallinPlatf.setUserData(new MUserData(MUserData.TYPE_FALLING_PLATFORM, new short[]{20}));
-                        w.addBody(fallinPlatf);
+                        Body body = new Body(originX + x1 + i * (dx + spX) + offsetX, originY + y1 + i * (dy + spY) + offsetY, rect, false);
+                        body.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
+                        body.setUserData(new MUserData().setFallDelay(600));
+                        w.addBody(body);
                     }
                     updateLowestY(Math.max(y1, y2) + platfH);
                 }
@@ -120,14 +120,14 @@ public class ElementPlacer {
                 int green = blue;
 
                 int color = ((red & 0xff) << 16) | ((green & 0xff) << 8) | (blue & 0xff);
-                Shape plate = Shape.createRectangle(l, thickness);
-                Body pressurePlate = new Body(centerX, centerY, plate, false);
-                MUserData mUserData = new MUserData(MUserData.TYPE_ACCELERATOR, new short[]{effectID, effectDuration, directionOffset, speedMultiplier});
-                mUserData.color = color;
-                pressurePlate.setUserData(mUserData);
-                //Main.log(pressurePlate.getUserData().bodyType);
-                pressurePlate.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
-                w.addBody(pressurePlate);
+
+                MUserData mUserData = new MUserData();
+                mUserData.setEffect(new short[]{effectID, effectDuration, directionOffset, speedMultiplier});
+                mUserData.setColor(color);
+                mUserData.setColorStroke(color);
+
+                w.addBody(squareBody(centerX, centerY, l, thickness, ang, 0, 1, 0, true, false, mUserData));
+
                 updateLowestY(y + Math.max(l, thickness));
                 break;
             }
@@ -139,13 +139,12 @@ public class ElementPlacer {
                 int ang = data[5];
                 int elasticity = data[6];
 
-                Shape plate = Shape.createRectangle(l, thickness);
-                plate.setElasticity(elasticity);
-                Body pressurePlate = new Body(x, y, plate, false);
-                MUserData mUserData = new MUserData(MUserData.TYPE_TRAMPOLINE, null);
-                pressurePlate.setUserData(mUserData);
-                pressurePlate.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
-                w.addBody(pressurePlate);
+                MUserData mUserData = new MUserData();
+                mUserData.setColor(0xffaa00);
+
+                Body body = squareBody(x, y, l, thickness, ang, elasticity, 1, 100, true, false, mUserData);
+                w.addBody(body);
+
                 updateLowestY(y + Math.max(l, thickness));
                 break;
             }
@@ -156,13 +155,11 @@ public class ElementPlacer {
                 int thickness = data[4];
                 int ang = data[5];
 
-                Shape plate = Shape.createRectangle(l, thickness);
-                Body pressurePlate = new Body(x, y, plate, false);
-                MUserData mUserData = new MUserData(MUserData.TYPE_LEVEL_FINISH, null);
-                pressurePlate.setUserData(mUserData);
-                //Main.log(pressurePlate.getUserData().bodyType);
-                pressurePlate.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
-                w.addBody(pressurePlate);
+                MUserData mUserData = new MUserData(MUserData.TYPE_LEVEL_FINISH);
+
+                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData);
+                w.addBody(body);
+
                 updateLowestY(y + Math.max(l, thickness));
                 break;
             }
@@ -173,12 +170,11 @@ public class ElementPlacer {
                 int thickness = data[4];
                 int ang = data[5];
 
-                Shape plate = Shape.createRectangle(l, thickness);
-                Body pressurePlate = new Body(x, y, plate, false);
-                MUserData mUserData = new MUserData(MUserData.TYPE_LAVA, null);
-                pressurePlate.setUserData(mUserData);
-                pressurePlate.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * ang);
-                w.addBody(pressurePlate);
+                MUserData mUserData = new MUserData().setIsLava(true);
+
+                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData);
+                w.addBody(body);
+
                 updateLowestY(y + Math.max(l, thickness));
                 break;
             }
@@ -186,6 +182,29 @@ public class ElementPlacer {
         if (w.lowestY != prevLowestY) {
             Logger.log("lowestY=", w.lowestY);
         }
+    }
+
+    public Body squareBody(int x, int y, int w, int h, int rotationDeg, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data) {
+        Body body = body(Shape.createRectangle(w, h), x, y, elasticity, mass, friction, gravityAffected, dynamic, data);
+        body.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * rotationDeg);
+        return body;
+    }
+
+    public Body roundBody(int x, int y, int r, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data) {
+        return body(Shape.createCircle(r), x, y, elasticity, mass, friction, gravityAffected, dynamic, data);
+    }
+
+    public Body body(Shape shape, int x, int y, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data) {
+        shape.setElasticity(elasticity);
+        shape.setMass(mass);
+        shape.setFriction(friction);
+        Body body = new Body(x, y, shape, dynamic);
+        body.setGravityAffected(gravityAffected);
+        body.setUserData(data);
+        if (data != null && data.isLava()) {
+            data.setColor(MUserData.COLOR_LAVA);
+        }
+        return body;
     }
 
     public void sin(int x, int y, int l, int halfPeriods, int startAngle, int amp) {    //3

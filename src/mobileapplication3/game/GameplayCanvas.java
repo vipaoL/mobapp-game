@@ -553,10 +553,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                                         body = carContacts[i][j].body2();
                                         userData = body.getUserData();
                                     }
-                                    if (userData instanceof MUserData &&
-                                            ((MUserData) userData).bodyType == MUserData.TYPE_FALLING_PLATFORM &&
-                                            !body.isDynamic()) {
-                                        timeStuck = 0;
+                                    if (userData instanceof MUserData) {
+                                        boolean staticForever = ((MUserData) userData).getFallDelay() == MUserData.STATIC;
+                                        if (!staticForever && !body.isDynamic()) {
+                                            timeStuck = 0;
+                                        }
                                     }
                                 }
                             }
@@ -713,29 +714,33 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     int bodyType = bodyUserData.bodyType;
                     switch (bodyType) {
                         // add fall countdown timer on falling platform
-                        case MUserData.TYPE_FALLING_PLATFORM:
+                        case MUserData.TYPE_BODY:
                             if (!world.waitingForDynamic.contains(body)) {
-                                world.waitingForDynamic.addElement(body);
-                                // The constructor Integer(int) was deprecated in Java 9
-                                // Integer.valueOf() only accepts String in Java 1.3
-                                // So this is the only way?
-                                world.waitingTime.addElement(Integer.valueOf(String.valueOf(600)));
-                                if (uninterestingDebug) world.removeBody(body);
+                                if (bodyUserData.getFallDelay() != MUserData.STATIC) {
+                                    if (bodyUserData.getFallDelay() <= 0) {
+                                        body.setDynamic(true);
+                                    } else {
+                                        if (uninterestingDebug) {
+                                            world.removeBody(body);
+                                        } else {
+                                            world.waitingForDynamic.addElement(body);
+                                        }
+                                    }
+                                }
                             }
-                            break;
-                        // apply effect if touched an effect plate
-                        case MUserData.TYPE_ACCELERATOR:
-                            giveEffect(bodyUserData.data);
-                            world.setWheelColor(bodyUserData.color);
+                            if (bodyUserData.getEffect() != null) {
+                                giveEffect(bodyUserData.getEffect());
+                                world.setWheelColor(bodyUserData.getColor());
+                            }
+                            if (bodyUserData.isLava()) {
+                                world.destroyCar();
+                                stop(true, false);
+                            }
                             break;
                         case MUserData.TYPE_LEVEL_FINISH:
                             if (!isPopupShown()) {
                                 showPopup(new LevelCompletedScreen(this));
                             }
-                            break;
-                        case MUserData.TYPE_LAVA:
-                            world.destroyCar();
-                            stop(true, false);
                             break;
                     }
                 }
