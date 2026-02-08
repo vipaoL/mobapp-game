@@ -42,6 +42,7 @@ public class MainMenu extends Container {
                 new Button(gameIncluded ? "Open Game" : "About") {
                     public void buttonPressed() {
                         if (gameIncluded) {
+                            autoSaveCheckDone = false;
                             RootContainer.setRootUIComponent(new mobileapplication3.game.MenuCanvas());
                         } else {
                             showPopup(new About(inst));
