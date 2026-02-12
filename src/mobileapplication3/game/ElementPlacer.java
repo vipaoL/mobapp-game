@@ -420,7 +420,7 @@ public class ElementPlacer {
             }
         }
 
-        updateLowestY(y + r);
+        updateLowestY(y + r * ky / 10);
 
         if (angle == 360 && startAngle == 0 && kx == 10 && ky == 10) {
             appendDrawingData(new int[] {DRAWING_DATA_ID_CIRCLE, x, y, r});
@@ -456,7 +456,7 @@ public class ElementPlacer {
             line((int) (x+Math.cos(lastAng+startAngleD)*kx*r/10), (int) (y+Math.sin(lastAng+startAngleD)*ky*r/10), (int) (x+Math.cos(angleD+startAngleD)*kx*r/10), (int) (y+Math.sin(angleD+startAngleD)*ky*r/10), linesFacing, false);
         }
 
-        updateLowestY(y + r);
+        updateLowestY(y + r * ky / 10);
 
         if (angle == 360 && startAngle == 0 && kx == 10 && ky == 10) {
             appendDrawingData(new int[] {DRAWING_DATA_ID_CIRCLE, x, y, r});
