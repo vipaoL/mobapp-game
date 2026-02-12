@@ -28,12 +28,18 @@ public abstract class Element {
     public static final short ROUND_BODY = 13;
     public static final short SINE_FACE_UP = 14;
     public static final short SINE_FACE_DOWN = 15;
+    public static final short LINE_FACE_UP = 16;
+    public static final short LINE_FACE_DOWN = 17;
 
     public static final int LINE_THICKNESS = 24;
 
     public static final int COLOR_LANDSCAPE = 0x4444ff;
     public static final int COLOR_BODY = 0xffffff;
     public static final int COLOR_SELECTED = 0xaaffff;
+
+    protected static final int NO_ARROWS = 0;
+    protected static final int ARROWS_NORMAL = 1;
+    protected static final int ARROWS_INVERTED = -1;
 
     protected int color;
     protected int colorSelected;
@@ -52,7 +58,9 @@ public abstract class Element {
             case Element.END_POINT:
                 return new EndPoint();
             case Element.LINE:
-                return new Line();
+            case Element.LINE_FACE_UP:
+            case Element.LINE_FACE_DOWN:
+                return new Line().setID(id);
             case Element.CIRCLE:
                 return new Circle();
             case Element.BROKEN_LINE:
@@ -161,6 +169,23 @@ public abstract class Element {
     public static void move(Element[] elements, int dx, int dy) {
         for (int i = 0; i < elements.length; i++) {
             elements[i].move((short) dx, (short) dy);
+        }
+    }
+
+    protected static void drawLineWithArrow(Graphics g, int x1, int y1, int x2, int y2, int arrowsDirection, int zoomOut, boolean drawThickness) {
+        g.drawLine(x1, y1, x2, y2, LINE_THICKNESS, zoomOut, drawThickness, true, true, true);
+        if (arrowsDirection != NO_ARROWS) {
+            int dx = x2 - x1;
+            int dy = y2 - y1;
+            if (arrowsDirection == ARROWS_INVERTED) {
+                dx = -dx;
+                dy = -dy;
+            }
+            int l = Mathh.calcDistance(dx, dy);
+            int centerX = (x1 + x2) / 2;
+            int centerY = (y1 + y2) / 2;
+            int lzoomout = l * zoomOut;
+            g.drawArrow(centerX, centerY, centerX + dy * 50000 / lzoomout, centerY - dx * 50000 / lzoomout, LINE_THICKNESS/6, zoomOut, drawThickness);
         }
     }
 

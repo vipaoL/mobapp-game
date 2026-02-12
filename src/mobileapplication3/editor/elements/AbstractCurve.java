@@ -2,7 +2,6 @@
 
 package mobileapplication3.editor.elements;
 
-import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Graphics;
 
 /**
@@ -10,8 +9,6 @@ import mobileapplication3.platform.ui.Graphics;
  * @author vipaol
  */
 public abstract class AbstractCurve extends Element {
-    protected static final int NO_ARROWS = 0, ARROWS_NORMAL = 1, ARROWS_INVERTED = -1;
-
     protected PointsCache pointsCache;
 
     public AbstractCurve() {
@@ -39,20 +36,14 @@ public abstract class AbstractCurve extends Element {
             int y1 = yToPX(startPoint[1], zoomOut, offsetY);
             int x2 = xToPX(endPoint[0], zoomOut, offsetX);
             int y2 = yToPX(endPoint[1], zoomOut, offsetY);
-            g.drawLine(x1, y1, x2, y2, LINE_THICKNESS, zoomOut, drawThickness, true, true, true);
-            if (arrowsDirection != NO_ARROWS && i % 2 == 0) {
-                int dx = x2 - x1;
-                int dy = y2 - y1;
-                if (arrowsDirection == ARROWS_INVERTED) {
-                    dx = -dx;
-                    dy = -dy;
-                }
-                int l = Mathh.calcDistance(dx, dy);
-                int centerX = (x1 + x2) / 2;
-                int centerY = (y1 + y2) / 2;
-                int lzoomout = l * zoomOut;
-                g.drawArrow(centerX, centerY, centerX + dy * 50000 / lzoomout, centerY - dx * 50000 / lzoomout, LINE_THICKNESS/6, zoomOut, drawThickness);
+            int arrows = arrowsDirection;
+            if (i % 2 == 0) {
+                // draw arrows only from every second line
+                // so that there aren't too many of them
+                arrows = NO_ARROWS;
             }
+            drawLineWithArrow(g, x1, y1, x2, y2, arrows, zoomOut, drawThickness);
+
             startPoint = endPoint;
         }
     }

@@ -10,7 +10,7 @@ import mobileapplication3.ui.Property;
  * @author vipaol
  */
 public class Line extends Element {
-
+    private short id = LINE;
     protected short x1, y1, x2, y2;
 
     public PlacementStep[] getPlacementSteps() {
@@ -76,15 +76,23 @@ public class Line extends Element {
     }
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
+        int x1 = xToPX(this.x1, zoomOut, offsetX);
+        int y1 = yToPX(this.y1, zoomOut, offsetY);
+        int x2 = xToPX(this.x2, zoomOut, offsetX);
+        int y2 = yToPX(this.y2, zoomOut, offsetY);
+
+        // collision side indicator
+        int arrowsSide;
+        if (id == LINE_FACE_UP) {
+            arrowsSide = ARROWS_NORMAL;
+        } else if (id == LINE_FACE_DOWN) {
+            arrowsSide = ARROWS_INVERTED;
+        } else {
+            arrowsSide = NO_ARROWS;
+        }
+
         g.setColor(getColor(drawAsSelected));
-        g.drawLine(
-                xToPX(x1, zoomOut, offsetX),
-                yToPX(y1, zoomOut, offsetY),
-                xToPX(x2, zoomOut, offsetX),
-                yToPX(y2, zoomOut, offsetY),
-                LINE_THICKNESS,
-                zoomOut, drawThickness, true, true, true
-                );
+        drawLineWithArrow(g, x1, y1, x2, y2, arrowsSide, zoomOut, drawThickness);
     }
 
     public Element setArgs(short[] args) {
@@ -137,12 +145,55 @@ public class Line extends Element {
                     public int getValue() {
                         return y2;
                     }
-                }
+                },
+                new Property("Two-sided") {
+                    public void setValue(int value) {
+                        id = value == 1 ? LINE : LINE_FACE_UP;
+                    }
+
+                    public int getValue() {
+                        return id == LINE ? 1 : 0;
+                    }
+
+                    public int getMinValue() {
+                        return 0;
+                    }
+
+                    public int getMaxValue() {
+                        return 1;
+                    }
+                },
+                new Property("Flip collision side") {
+                    public void setValue(int value) {
+                        id = value == 1 ? LINE_FACE_DOWN : LINE_FACE_UP;
+                    }
+
+                    public int getValue() {
+                        return id == LINE_FACE_DOWN ? 1 : 0;
+                    }
+
+                    public int getMinValue() {
+                        return 0;
+                    }
+
+                    public int getMaxValue() {
+                        return 1;
+                    }
+
+                    public boolean isActive() {
+                        return id != LINE;
+                    }
+                },
         };
     }
 
+    public Line setID(short id) {
+        this.id = id;
+        return this;
+    }
+
     public short getID() {
-        return Element.LINE;
+        return id;
     }
 
     public int getStepsToPlace() {
