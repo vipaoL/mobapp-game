@@ -28,6 +28,8 @@ public class ElementPlacer {
     public static final short ROUND_BODY = 13;
     public static final short SINE_FACE_UP = 14;
     public static final short SINE_FACE_DOWN = 15;
+    public static final short LINE_FACE_UP = 16;
+    public static final short LINE_FACE_DOWN = 17;
 
     public static final int DRAWING_DATA_ID_LINE = 1, DRAWING_DATA_ID_PATH = 2, DRAWING_DATA_ID_CIRCLE = 3, DRAWING_DATA_ID_ARC = 4;
 
@@ -56,8 +58,19 @@ public class ElementPlacer {
         short id = data[0];
         switch (id) {
             case LINE:
-                line(originX + data[1], originY + data[2], originX + data[3], originY + data[4]);
+            case LINE_FACE_UP:
+            case LINE_FACE_DOWN: {
+                int face; // collision side
+                if (id == LINE_FACE_UP) {
+                    face = Landscape.FACE_LEFT;
+                } else if (id == LINE_FACE_DOWN) {
+                    face = Landscape.FACE_RIGHT;
+                } else {
+                    face = Landscape.FACE_NONE;
+                }
+                line(originX + data[1], originY + data[2], originX + data[3], originY + data[4], face);
                 break;
+            }
             case CIRCLE:
                 arc(originX + data[1], originY + data[2], data[3], data[4], data[5], data[6] / 10, data[7] / 10);
                 break;
