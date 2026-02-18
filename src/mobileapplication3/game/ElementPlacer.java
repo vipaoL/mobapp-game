@@ -390,33 +390,34 @@ public class ElementPlacer {
     }
     public void arc(int x, int y, int r, int angle, int startAngle, int kx, int ky) { //k: 10 = 1.0
         // calculated formula. r=20: sn=5,step=72; r=1000: sn=36,step=10
-        int step = 10000/(140+r);
-        if ((step = step / DETAIL_LEVEL) <= 2) {
+        int step = 10000 / (140 + r) / DETAIL_LEVEL;
+        if (step <= 2) {
             arcSmooth(x, y, r, angle, startAngle, kx, ky);
-        }
-        step = Mathh.constrain( 10 / DETAIL_LEVEL, step, 72 / DETAIL_LEVEL);
+        } else {
+            step = Mathh.constrain(10 / DETAIL_LEVEL, step, 72 / DETAIL_LEVEL);
 
-        while (startAngle < 0) {
-            startAngle += 360;
-        }
+            int linesFacing = 0;
+            if (Math.abs(angle) == 360) {
+                linesFacing = 1; // these lines push bodies only in one direction
+            }
 
-        int linesFacing = 0;
-        if (Math.abs(angle) == 360) {
-            linesFacing = 1; // these lines push bodies only in one direction
-        }
+            while (startAngle < 0) {
+                startAngle += 360;
+            }
 
-        int lastAng = 0;
-        if (angle < 0) {
-            step = -step;
-        }
-        for(int i = 0; (i <= angle - step && angle > 0) || (i >= angle - step && angle < 0); i+=step) {
-            line(x+Mathh.cos(i+startAngle)*kx*r/10000, y+Mathh.sin(i+startAngle)*ky*r/10000, x+Mathh.cos(i+step+startAngle)*kx*r/10000,y+Mathh.sin(i+step+startAngle)*ky*r/10000, linesFacing, false);
-            lastAng = i + step;
-        }
+            int lastAng = 0;
+            if (angle < 0) {
+                step = -step;
+            }
+            for (int i = 0; (i <= angle - step && angle > 0) || (i >= angle - step && angle < 0); i += step) {
+                line(x + Mathh.cos(i + startAngle) * kx * r / 10000, y + Mathh.sin(i + startAngle) * ky * r / 10000, x + Mathh.cos(i + step + startAngle) * kx * r / 10000, y + Mathh.sin(i + step + startAngle) * ky * r / 10000, linesFacing, false);
+                lastAng = i + step;
+            }
 
-        // close the circle if the angle is not multiple of the step (step)
-        if (Math.abs(angle) % Math.abs(step) != 0) {
-            line(x+Mathh.cos(lastAng+startAngle)*kx*r/10000, y+Mathh.sin(lastAng+startAngle)*ky*r/10000, x+Mathh.cos(angle+startAngle)*kx*r/10000,y+Mathh.sin(angle+startAngle)*ky*r/10000, linesFacing, false);
+            // close the circle if the angle is not multiple of the step (step)
+            if (Math.abs(angle) % Math.abs(step) != 0) {
+                line(x + Mathh.cos(lastAng + startAngle) * kx * r / 10000, y + Mathh.sin(lastAng + startAngle) * ky * r / 10000, x + Mathh.cos(angle + startAngle) * kx * r / 10000, y + Mathh.sin(angle + startAngle) * ky * r / 10000, linesFacing, false);
+            }
         }
 
         updateLowestY(y + r);
