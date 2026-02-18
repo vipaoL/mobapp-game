@@ -11,7 +11,7 @@ import mobileapplication3.ui.Property;
  * @author vipaol
  */
 public class Circle extends AbstractCurve {
-
+    private short id = CIRCLE;
     private short x, y, r = 1, arcAngle = 360, startAngle, kx = 100, ky = 100;
 
     public PlacementStep[] getPlacementSteps() {
@@ -295,12 +295,55 @@ public class Circle extends AbstractCurve {
                     public int getMaxValue() {
                         return 2048;
                     }
-                }
+                },
+                new Property("Two-sided") {
+                    public void setValue(int value) {
+                        id = value == 1 ? CIRCLE : CIRCLE_FACE_OUTSIDE;
+                    }
+
+                    public int getValue() {
+                        return id == CIRCLE ? 1 : 0;
+                    }
+
+                    public int getMinValue() {
+                        return 0;
+                    }
+
+                    public int getMaxValue() {
+                        return 1;
+                    }
+                },
+                new Property("Flip collision side") {
+                    public void setValue(int value) {
+                        id = value == 1 ? CIRCLE_FACE_INSIDE : CIRCLE_FACE_OUTSIDE;
+                    }
+
+                    public int getValue() {
+                        return id == CIRCLE_FACE_INSIDE ? 1 : 0;
+                    }
+
+                    public int getMinValue() {
+                        return 0;
+                    }
+
+                    public int getMaxValue() {
+                        return 1;
+                    }
+
+                    public boolean isActive() {
+                        return id != CIRCLE;
+                    }
+                },
         };
     }
 
+    public Circle setID(short id) {
+        this.id = id;
+        return this;
+    }
+
     public short getID() {
-        return Element.CIRCLE;
+        return id;
     }
 
     public int getStepsToPlace() {
@@ -364,8 +407,10 @@ public class Circle extends AbstractCurve {
     }
 
     protected int getArrowsDirection() {
-        if (arcAngle == 360 || arcAngle == -360) {
+        if (id == CIRCLE_FACE_OUTSIDE) {
             return ARROWS_NORMAL;
+        } else if (id == CIRCLE_FACE_INSIDE) {
+            return ARROWS_INVERTED;
         } else {
             return NO_ARROWS;
         }

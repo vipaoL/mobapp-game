@@ -30,6 +30,8 @@ public abstract class Element {
     public static final short SINE_FACE_DOWN = 15;
     public static final short LINE_FACE_UP = 16;
     public static final short LINE_FACE_DOWN = 17;
+    public static final short CIRCLE_FACE_OUTSIDE = 18;
+    public static final short CIRCLE_FACE_INSIDE = 19;
 
     public static final int LINE_THICKNESS = 24;
 
@@ -62,7 +64,9 @@ public abstract class Element {
             case Element.LINE_FACE_DOWN:
                 return new Line().setID(id);
             case Element.CIRCLE:
-                return new Circle();
+            case Element.CIRCLE_FACE_OUTSIDE:
+            case Element.CIRCLE_FACE_INSIDE:
+                return new Circle().setID(id);
             case Element.BROKEN_LINE:
                 return new BrokenLine();
             case Element.BROKEN_CIRCLE:
