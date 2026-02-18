@@ -97,6 +97,9 @@ public class Levels extends GenericMenu implements Runnable {
         InputStream is = null;
         try {
             is = Platform.getResource(path);
+            if (is == null) {
+                return false;
+            }
             DataInputStream dis = new DataInputStream(is);
             dis.readShort();
             return true;
