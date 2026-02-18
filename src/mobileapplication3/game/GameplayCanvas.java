@@ -98,6 +98,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int bgTick = 0;
     private int framesFromLastFPSMeasure = 0;
     private int ticksFromLastTPSMeasure = 0;
+    private boolean fpsCounterReady = false;
 
     public short[][] currentEffects = new short[1][];
     private short[][] level = null;
@@ -237,6 +238,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             timeFlying = 10;
 
             boolean wasPaused = true;
+            fpsCounterReady = false;
             tickTime = TICK_DURATION;
             int physicsIterationsSetting = MobappGameSettings.DEFAULT_PHYSICS_PRECISION;
             boolean lockPhysicsPrecision;
@@ -320,10 +322,13 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                         int dtFromLastFPSMeasure = (int) (System.currentTimeMillis() - lastFPSMeasureTime);
                         if (dtFromLastFPSMeasure > 1000) {
                             lastFPSMeasureTime = System.currentTimeMillis();
-                            fps = framesFromLastFPSMeasure * 1000 / dtFromLastFPSMeasure;
-                            framesFromLastFPSMeasure = 0;
-                            tps = ticksFromLastTPSMeasure * 1000 / dtFromLastFPSMeasure;
-                            ticksFromLastTPSMeasure = 0;
+                            if (!wasPaused) {
+                                fps = framesFromLastFPSMeasure * 1000 / dtFromLastFPSMeasure;
+                                framesFromLastFPSMeasure = 0;
+                                tps = ticksFromLastTPSMeasure * 1000 / dtFromLastFPSMeasure;
+                                ticksFromLastTPSMeasure = 0;
+                                fpsCounterReady = true;
+                            }
                         }
 
                         if (!lockPhysicsPrecision) {
@@ -346,7 +351,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                             }
                         }
 
-                        if (fps < 20) {
+                        if (fpsCounterReady && fps < 20) {
                             tryReduceLags();
                         }
 
@@ -592,6 +597,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     } else {
                         // Pause screen
                         wasPaused = true;
+                        fpsCounterReady = false;
                         sleep = 200;
                         if (isVisible) {
                             paint();
@@ -955,7 +961,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     g.setColor(255, 0, 0);
                 }
             }
-            drawDebugText(g, "FPS:" + fps + " TPS:" + tps + " m=" + physicsIterations);
+            drawDebugText(g, "FPS:" + (fpsCounterReady ? String.valueOf(fps) : " -") + " TPS:" + tps + " m=" + physicsIterations);
         }
 
         try {
