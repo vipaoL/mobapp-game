@@ -189,7 +189,7 @@ public abstract class Element {
             int centerX = (x1 + x2) / 2;
             int centerY = (y1 + y2) / 2;
             int lzoomout = l * zoomOut;
-            g.drawArrow(centerX, centerY, centerX + dy * 50000 / lzoomout, centerY - dx * 50000 / lzoomout, LINE_THICKNESS/6, zoomOut, drawThickness);
+            g.drawArrow(centerX, centerY, centerX + dy * 100000 / lzoomout, centerY - dx * 100000 / lzoomout, LINE_THICKNESS/6, zoomOut, drawThickness);
         }
     }
 
