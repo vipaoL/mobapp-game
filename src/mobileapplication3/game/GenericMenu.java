@@ -16,9 +16,10 @@ import mobileapplication3.ui.Keys;
  * @author vipaol
  */
 public abstract class GenericMenu extends CanvasComponent {
+    protected static final int MIN_FRAME_TIME = 8; // limit menu refresh rate to 125 FPS
     private static final int PAUSE_DELAY = 5;
     public int x0, y0, w, h;
-    private int fontH, tick = 0, k = 10, keyPressDelay = 0,
+    private int fontH, k = 10, keyPressDelay = 0,
             keyPressDelayAfterShowing = 5, firstReachable = 0, lastReachable = NOT_SET,
             firstDrawable = 0, specialOption = -1, pauseDelay = PAUSE_DELAY, lastKeyCode = 0;
 
@@ -63,7 +64,7 @@ public abstract class GenericMenu extends CanvasComponent {
                 int offset = 0;
 
                 if (i == selected) { // highlighting selected option
-                    offset = Mathh.sin(tick * 360 / 10); // waving animation
+                    offset = Mathh.sin((int) ((System.currentTimeMillis() % 450) * 800 / 1000)); // waving animation
                     g.setColor(selectedColor);
                     if (isPressedByPointerNow) {
                         g.setColor(pressedColor);
@@ -465,11 +466,6 @@ public abstract class GenericMenu extends CanvasComponent {
         }
     }
     public void tick() {
-        if (tick > 9) {
-            tick = 0;
-        } else {
-            tick++;
-        }
         if (pauseDelay > 0) {
             pauseDelay--;
         }

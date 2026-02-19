@@ -87,7 +87,8 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             if (!isPaused && hasParent()) {
                 start = System.currentTimeMillis();
                 repaint(); // refresh picture on screen
-                sleep = GameplayCanvas.TICK_DURATION - (System.currentTimeMillis() - start);
+                int min_frame_time = bg != null ? GameplayCanvas.TICK_DURATION : MIN_FRAME_TIME;
+                sleep = min_frame_time - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
             } else {
                 sleep = 100;

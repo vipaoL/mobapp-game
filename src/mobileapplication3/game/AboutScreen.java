@@ -101,7 +101,7 @@ public class AboutScreen extends GenericMenu implements Runnable {
             if (!isPaused) {
                 start = System.currentTimeMillis();
                 repaint();
-                sleep = GameplayCanvas.TICK_DURATION - (System.currentTimeMillis() - start);
+                sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
             } else {
                 sleep = 200;
