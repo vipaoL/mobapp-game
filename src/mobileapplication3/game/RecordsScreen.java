@@ -56,7 +56,7 @@ public class RecordsScreen extends GenericMenu implements Runnable {
                 repaint();
                 tick();
 
-                sleep = GameplayCanvas.TICK_DURATION - (System.currentTimeMillis() - start);
+                sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
             } else {
                 sleep = 100;
