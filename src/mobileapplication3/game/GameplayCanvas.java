@@ -24,8 +24,10 @@ import java.util.Vector;
  */
 public class GameplayCanvas extends CanvasComponent implements Runnable {
     public static final int TICK_DURATION = 50;
-    private static final String[] MENU_HINT = {"MENU", "(LSoft, #, 9)"};
-    private static final String[] PAUSE_HINT = {"PAUSE", "(RSoft, *, 3)"};
+    public static final String MENU_HINT = "MENU";
+    public static final String MENU_HINT_KB = "(LSoft, #, 9)";
+    public static final String PAUSE_HINT = "PAUSE";
+    public static final String PAUSE_HINT_KB = "(RSoft, *, 3)";
     public static final short EFFECT_SPEED = 0;
     private static final int BATT_UPD_PERIOD = 10000;
     private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2, GAME_MODE_EMINI_WORLD = 3;
@@ -867,6 +869,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     // point counter, very beautiful pause menu,
     // debug info, on-screen log, game over screen
     private void drawHUD(Graphics g) {
+        int centerAnchor = Graphics.HCENTER | Graphics.VCENTER;
         // show hint on first start
         if (isFirstStart && hintVisibleTimer > 0) {
             int color = 255 * hintVisibleTimer / 120;
@@ -878,13 +881,19 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 g.fillRoundRect(0, 0, btnW, btnH, btnRoundingD, btnRoundingD);
                 g.fillRoundRect(w - btnW, 0, btnW, btnH, btnRoundingD, btnRoundingD);
             }
+            int xLeft = scW / 6;
+            int xRight = scW - xLeft;
+            int y = scH / 12;
             g.setColor(color/2, color/2, color);
             setFont(new Font(Font.SIZE_MEDIUM), g);
-            for (int i = 0; i < MENU_HINT.length; i++) {
-                g.drawString(MENU_HINT[i], scW/6, i * currentFontH + scH / 12 - currentFontH*MENU_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
-            }
-            for (int i = 0; i < PAUSE_HINT.length; i++) {
-                g.drawString(PAUSE_HINT[i], scW*5/6, i * currentFontH + scH / 12 - currentFontH*PAUSE_HINT.length/2, Graphics.HCENTER | Graphics.TOP);
+            if (RootContainer.displayKbHints) {
+                g.drawString(MENU_HINT, xLeft, y - currentFontH / 2, centerAnchor);
+                g.drawString(MENU_HINT_KB, xLeft, y + currentFontH / 2, centerAnchor);
+                g.drawString(PAUSE_HINT, xRight, y - currentFontH / 2, centerAnchor);
+                g.drawString(PAUSE_HINT_KB, xRight, y + currentFontH / 2, centerAnchor);
+            } else {
+                g.drawString(MENU_HINT, xLeft, y, centerAnchor);
+                g.drawString(PAUSE_HINT, xRight, y, centerAnchor);
             }
         }
 
