@@ -121,6 +121,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private Vector deferredStructures = null;
 
     private Thread delayedStopThread;
+    private Thread delayedRestartThread;
 
     public GameplayCanvas() {
         log("game: constructor");
@@ -742,12 +743,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                                 world.setWheelColor(bodyUserData.getColor());
                             }
                             if (bodyUserData.isLava()) {
-                                world.destroyCar();
-                                stop(true, false);
+                                gameOver();
                             }
                             break;
                         case MUserData.TYPE_LEVEL_FINISH:
-                            if (!isPopupShown()) {
+                            if (!isPopupShown() && !gameOver) {
                                 showPopup(new LevelCompletedScreen(this));
                             }
                             break;
@@ -828,13 +828,13 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private synchronized void paint() {
-        if (!gameOver) {
-            try {
-                Graphics g = getUGraphics();
-                paint(g);
-                flushGraphics();
-                framesFromLastFPSMeasure++;
-            } catch (Exception ignored) { }
+        try {
+            Graphics g = getUGraphics();
+            paint(g);
+            flushGraphics();
+            framesFromLastFPSMeasure++;
+        } catch (Exception ex) {
+            Logger.log(ex);
         }
     }
 
@@ -1110,17 +1110,32 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         if (gameOver) {
             return;
         }
-
-        if (feltUnderTheWorld) {
-            stop(true, false);
-            return;
-        }
-
         gameOver = true;
+
         motorTurnedOn = false;
         world.destroyCar();
         dimColors();
-        stop(true, false);
+
+        if (gameMode == GAME_MODE_LEVEL) {
+            final int restartDelay = feltUnderTheWorld ? 0 : 1000;
+            if (delayedRestartThread == null) {
+                delayedRestartThread = new Thread(new Runnable() {
+                    public void run() {
+                        if (restartDelay > 0) {
+                            try {
+                                Thread.sleep(restartDelay);
+                            } catch (InterruptedException ignored) { }
+                        }
+                        if (delayedRestartThread == Thread.currentThread()) {
+                            restart();
+                        }
+                    }
+                }, "level restart");
+            }
+            delayedRestartThread.start();
+        } else {
+            stop(true, false);
+        }
     }
 
     private void dimColors() {
@@ -1173,7 +1188,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             return;
         }
 
-        final GameplayCanvas inst = this;
+        if (delayedRestartThread != null) {
+            Thread restartThread = delayedRestartThread;
+            delayedRestartThread = null;
+            restartThread.interrupt();
+        }
+
+        final Thread initiatorThread = Thread.currentThread();
+
         Runnable stopperRunnable = new Runnable() {
             public void run() {
                 if (!blockUntilCompleted) {
@@ -1182,6 +1204,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     } catch (InterruptedException ex) {
                         Logger.log(ex);
                     }
+                }
+
+                if (Thread.currentThread() != delayedStopThread && Thread.currentThread() != initiatorThread) {
+                    return;
                 }
 
                 isStopping = true;
@@ -1292,13 +1318,17 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private void restart() {
+        delayedRestartThread = null;
         stop(false, true);
+        if (!hasParent()) {
+            return;
+        }
         if (worldgen != null) {
             worldgen.reset();
         } else {
             world.cleanWorld();
         }
-        reset();
+        world.resetColors();
         if (level != null) {
             loadLevel(level);
         }
@@ -1318,10 +1348,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     // keyboard events
     public boolean handleKeyReleased(int keyCode, int count) {
-        if (gameOver) {
-            return false;
-        }
-
         // turn off motor
         motorTurnedOn = false;
         if (timeFlying > 0) {
@@ -1331,10 +1357,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     public boolean handleKeyPressed(int keyCode, int count) {
-        if (gameOver) {
-            return false;
-        }
-
         switch (keyCode) {
             case Keys.KEY_SOFT_LEFT:
             case Keys.KEY_POUND:
@@ -1362,7 +1384,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     pauseButtonPressed();
                 } else {
                     // any other button turns the motor on
-                    motorTurnedOn = true;
+                    if (!gameOver) {
+                        motorTurnedOn = true;
+                    }
                 }
                 break;
         }
