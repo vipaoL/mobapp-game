@@ -44,6 +44,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public boolean uninterestingDebug = false;
     private boolean isWorldLoaded = false;
     private static int hintVisibleTimer = 1; // the real value will be (re)set on start if >0
+    private int levelIdVisibleTimer;
     private boolean showFPS = false;
     private boolean battIndicator = false;
     private int batLevel;
@@ -293,6 +294,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 disablePointCounter();
             }
 
+            if (gameMode == GAME_MODE_LEVEL) {
+                levelIdVisibleTimer = 40;
+            }
+
             setLoadingProgress(80);
 
             // init music player if enabled
@@ -417,7 +422,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
                             // Hide keyboard/touch buttons hint
                             if (isWorldLoaded) {
-                                hintVisibleTimer--;
+                                if (levelIdVisibleTimer <= 0) {
+                                    hintVisibleTimer--;
+                                }
+                                levelIdVisibleTimer--;
                             }
 
                             // Prevent pause right after resume to work around some Siemens bug
@@ -888,7 +896,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private void drawHUD(Graphics g) {
         int centerAnchor = Graphics.HCENTER | Graphics.VCENTER;
         // show hint on first start
-        if (hintVisibleTimer > 0) {
+        if (hintVisibleTimer > 0 && levelIdVisibleTimer <= 0) {
             int btnW = scW/3;
             int btnH = scH/6;
             int btnRoundingD = Math.min(btnW, btnH) / 4;
@@ -913,6 +921,24 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 g.drawString(MENU_HINT, xLeft, y, centerAnchor);
                 g.drawString(PAUSE_HINT, xRight, y, centerAnchor);
             }
+        }
+
+        if (currentLevelId >= 0 && levelIdVisibleTimer > 0) {
+            int x = scW / 2;
+            int y = scH / 8;
+            String str = "Level " + currentLevelId;
+            int landscapeColor = getLandscapeColor();
+            int buttonBgColor = dimColor(landscapeColor, Math.min(25, (25 * levelIdVisibleTimer / 10)));
+            if (getLuma(buttonBgColor) / 2 > getLuma(world.currColBg)) {
+                int bgW = g.getFont().stringWidth(str) + g.getFontHeight() * 2;
+                int bgH = g.getFontHeight() * 3;
+                int d = g.getFontHeight() * 4;
+                g.setColor(buttonBgColor);
+                g.fillRoundRect(x - bgW / 2, y - bgH / 2, bgW, bgH, d, d);
+            }
+            g.setColor(dimColor(landscapeColor, Math.min(100, (100 * levelIdVisibleTimer / 10))));
+            setFont(new Font(Font.SIZE_MEDIUM), g);
+            g.drawString(str, x, y, centerAnchor);
         }
 
         // draw some debug info if debug is enabled
