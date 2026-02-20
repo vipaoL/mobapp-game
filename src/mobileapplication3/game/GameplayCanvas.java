@@ -41,10 +41,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     // state and mode
     private int gameMode = GAME_MODE_ENDLESS;
-    private static boolean isFirstStart = true; // show hints only on first start
     public boolean uninterestingDebug = false;
     private boolean isWorldLoaded = false;
-    private int hintVisibleTimer = 120; // in ticks
+    private static int hintVisibleTimer = 1; // the real value will be (re)set on start if >0
     private boolean showFPS = false;
     private boolean battIndicator = false;
     private int batLevel;
@@ -297,6 +296,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             setLoadingProgress(100);
 
             log("starting game cycle");
+
+            if (hintVisibleTimer > 0) {
+                hintVisibleTimer = 120; // ticks
+            }
 
             Logger.setLogMessageDelay(0);
             if (baseTimestepFX == 0) {
@@ -871,7 +874,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private void drawHUD(Graphics g) {
         int centerAnchor = Graphics.HCENTER | Graphics.VCENTER;
         // show hint on first start
-        if (isFirstStart && hintVisibleTimer > 0) {
+        if (hintVisibleTimer > 0) {
             int color = 255 * hintVisibleTimer / 120;
             g.setColor(0, 0, color/4);
             int btnW = scW/3;
@@ -1153,7 +1156,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
                 isStopping = true;
                 stopped = true;
-                isFirstStart = false;
 
                 if (gameMode == GAME_MODE_ENDLESS && countPoints) {
                     new Thread(new Runnable() {
