@@ -1194,7 +1194,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
 
-    private int dimColor(int color, int percent) {
+    public static int dimColor(int color, int percent) {
         int r = getColorRedComponent(color) * percent / 100;
         int g = getColorGreenComponent(color) * percent / 100;
         int b = getColorBlueComponent(color) * percent / 100;
@@ -1204,15 +1204,15 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         return (r << 16) + (g << 8) + b;
     }
 
-    private int getColorRedComponent(int color) {
+    private static int getColorRedComponent(int color) {
         return (color >> 16) & 0xff;
     }
 
-    private int getColorGreenComponent(int color) {
+    private static int getColorGreenComponent(int color) {
         return (color >> 8) & 0xff;
     }
 
-    private int getColorBlueComponent(int color) {
+    private static int getColorBlueComponent(int color) {
         return color & 0xff;
     }
 
