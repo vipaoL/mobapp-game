@@ -1384,6 +1384,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             return true;
         } else if (event == MOUSE_WHEEL_RELEASED) {
             stop(true, false);
+            return true;
         }
         return false;
     }
