@@ -29,7 +29,7 @@ public class GraphicsWorld extends World {
     int colBodies = 0xffffff;
     int currColBg;
     int currColWheel;
-    int currColLandscape = colLandscape;
+    int currColLandscape;
     int currColBodies;
 
     public static int scWidth = 200;
@@ -67,15 +67,15 @@ public class GraphicsWorld extends World {
     public int lowestY;
 
     public GraphicsWorld() {
-        init();
+        resetColors();
     }
 
     public GraphicsWorld(World w) {
         super(w);
-        init();
+        resetColors();
     }
 
-    private void init() {
+    public void resetColors() {
         if (DebugMenu.whatTheGame) {
             currColWheel = 0x888888;
             colBg = 0x001155;
@@ -84,6 +84,7 @@ public class GraphicsWorld extends World {
         currColWheel = colBg;
         currColBg = colBg;
         currColBodies = colBodies;
+        currColLandscape = colLandscape;
     }
 
     public void setGame(GameplayCanvas game) {
