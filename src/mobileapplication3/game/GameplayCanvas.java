@@ -120,9 +120,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     private Vector deferredStructures = null;
 
-    // a thread to stop the game and open menu after a delay
-    private Thread stopperThread;
-    private boolean openMenu;
+    private Thread delayedStopThread;
 
     public GameplayCanvas() {
         log("game: constructor");
@@ -1166,13 +1164,12 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     public void stop(final boolean openMenu, final boolean blockUntilCompleted, final int delay) {
-        this.openMenu = openMenu;
         log("stopping game thread");
         if (isStopping) {
             return;
         }
 
-        if (stopperThread != null) {
+        if (delayedStopThread != null) {
             return;
         }
 
@@ -1212,12 +1209,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 } catch (InterruptedException ex) {
                     Logger.log(ex);
                 }
-                if (GameplayCanvas.this.openMenu) {
-                    if (prevScreen == null) {
-                        RootContainer.setRootUIComponent(new MenuCanvas(inst));
-                    } else {
-                        RootContainer.setRootUIComponent(prevScreen);
-                    }
+                if (openMenu) {
+                    backToPreviousScreen();
                 }
             }
         };
@@ -1225,16 +1218,25 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         if (blockUntilCompleted) {
             stopperRunnable.run();
         } else {
-            stopperThread = new Thread(stopperRunnable);
-            stopperThread.start();
+            delayedStopThread = new Thread(stopperRunnable);
+            delayedStopThread.start();
+        }
+    }
+
+    private void backToPreviousScreen() {
+        setParent(null);
+        if (prevScreen == null) {
+            RootContainer.setRootUIComponent(new MenuCanvas(this));
+        } else {
+            RootContainer.setRootUIComponent(prevScreen);
         }
     }
 
     public void startAgain() {
-        if (stopperThread != null && stopperThread.isAlive()) {
-            stopperThread.interrupt();
+        if (delayedStopThread != null && delayedStopThread.isAlive()) {
+            delayedStopThread.interrupt();
         }
-        stopperThread = null;
+        delayedStopThread = null;
         isStopping = false;
         stopped = false;
         gameOver = false;

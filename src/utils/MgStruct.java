@@ -149,7 +149,7 @@ public class MgStruct {
                 if (fileFormatVersion > 0) {
                     count = dis.readShort();
                 }
-                Logger.log("read: ver=" + fileFormatVersion + " count=" + count);
+                Logger.log("reading: ver=" + fileFormatVersion + " count=" + count);
 
                 short[][] structure = new short[count][];
                 for (int c = 0; true; c++) {

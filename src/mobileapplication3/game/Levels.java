@@ -69,12 +69,12 @@ public class Levels extends GenericMenu implements Runnable {
             for (int i = 0; i < levelPaths.length; i++) {
                 buttons[1 + i] = getLevelName(levelPaths[i]);
             }
-        } catch (SecurityException e) {
-            e.printStackTrace();
+        } catch (SecurityException ex) {
+            Logger.log(ex);
             buttons[0] = "no read permission";
-        } catch (Exception e) {
-            e.printStackTrace();
-            buttons[0] = e.toString();
+        } catch (Exception ex) {
+            Logger.log(ex);
+            buttons[0] = ex.toString();
         }
         buttons[0] = "Load custom level or emini world";
         refreshButtons();
@@ -89,7 +89,7 @@ public class Levels extends GenericMenu implements Runnable {
         return c;
     }
 
-    private String getLevelResPath(int i) {
+    private static String getLevelResPath(int i) {
         return "/l" + i + ".mglvl";
     }
 
@@ -109,7 +109,7 @@ public class Levels extends GenericMenu implements Runnable {
         } finally {
             try {
                 is.close();
-            } catch (Exception ex) { }
+            } catch (Exception ignored) { }
         }
     }
 
@@ -130,7 +130,7 @@ public class Levels extends GenericMenu implements Runnable {
         } finally {
             try {
                 is.close();
-            } catch (Exception ex) { }
+            } catch (Exception ignored) { }
         }
     }
 
@@ -229,8 +229,8 @@ public class Levels extends GenericMenu implements Runnable {
 
     public void run() {
         Logger.log("Levels:run()");
-        long sleep = 0;
-        long start = 0;
+        long sleep;
+        long start;
 
         isPaused = false;
         while (!isStopped) {
@@ -247,9 +247,7 @@ public class Levels extends GenericMenu implements Runnable {
             }
             try {
                 Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            } catch (InterruptedException ignored) { }
         }
     }
 }
