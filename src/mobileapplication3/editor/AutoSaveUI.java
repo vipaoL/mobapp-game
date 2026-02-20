@@ -3,6 +3,7 @@
 package mobileapplication3.editor;
 
 import mobileapplication3.editor.elements.Element;
+import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.ui.AbstractPopupPage;
 import mobileapplication3.ui.Button;
@@ -87,6 +88,7 @@ public abstract class AutoSaveUI extends AbstractPopupPage {
         if (elements != null) {
             return new AutoSaveData(elements, path);
         } else {
+            Logger.log("No " + storeName + " auto save");
             return null;
         }
     }
