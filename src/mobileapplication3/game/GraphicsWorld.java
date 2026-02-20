@@ -25,7 +25,7 @@ public class GraphicsWorld extends World {
     private static final int CAR_COLLISION_LAYER = 1;
 
     public int colBg = 0x000000;
-    public int colLandscape = DEFAULT_LANDSCAPE_COLOR;
+    public int colLandscape = MobappGameSettings.getLandscapeColor();
     int colBodies = 0xffffff;
     int currColBg;
     int currColWheel;

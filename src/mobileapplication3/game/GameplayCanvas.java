@@ -875,19 +875,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         int centerAnchor = Graphics.HCENTER | Graphics.VCENTER;
         // show hint on first start
         if (hintVisibleTimer > 0) {
-            int color = 255 * hintVisibleTimer / 120;
-            g.setColor(0, 0, color/4);
             int btnW = scW/3;
             int btnH = scH/6;
             int btnRoundingD = Math.min(btnW, btnH) / 4;
-            if (color / 4 > 7) {
+            int landscapeColor = getLandscapeColor();
+            int buttonBgColor = dimColor(landscapeColor, Math.min(200, hintVisibleTimer) / 5);
+            if (getLuma(buttonBgColor) / 2 > getLuma(world.currColBg)) {
+                g.setColor(buttonBgColor);
                 g.fillRoundRect(0, 0, btnW, btnH, btnRoundingD, btnRoundingD);
                 g.fillRoundRect(w - btnW, 0, btnW, btnH, btnRoundingD, btnRoundingD);
             }
             int xLeft = scW / 6;
             int xRight = scW - xLeft;
             int y = scH / 12;
-            g.setColor(color/2, color/2, color);
+            g.setColor(dimColor(landscapeColor, Math.min(200, hintVisibleTimer)));
             setFont(new Font(Font.SIZE_MEDIUM), g);
             if (RootContainer.displayKbHints) {
                 g.drawString(MENU_HINT, xLeft, y - currentFontH / 2, centerAnchor);
@@ -988,7 +989,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             g.setFont(largefont);
             g.setColor(255, 0, 0);
             g.drawString("!", scW / 2, scH / 3 + currentFontH / 2, Graphics.HCENTER | Graphics.TOP);
-            g.setColor(0, 0, Math.min(127 * (GAME_OVER_DAMAGE - damage) / GAME_OVER_DAMAGE, 255));
+            g.setColor(dimColor(world.currColLandscape, 50 * (GAME_OVER_DAMAGE - damage) / GAME_OVER_DAMAGE));
             g.fillRect(0, 0, scW, scH* damage / GAME_OVER_DAMAGE /2 + 1);
             g.fillRect(0, scH - scH* damage / GAME_OVER_DAMAGE /2, scW, scH - 1);
         }
@@ -1021,7 +1022,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             int d = scH / 40;
             // change color if debug enabled
             if (!DebugMenu.isDebugEnabled) {
-                g.setColor(0, 0, 255);
+                g.setColor(getLandscapeColor());
             } else {
                 g.setColor(0, 255, 0);
             }
@@ -1036,19 +1037,47 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
     }
 
+    private int getLandscapeColor() {
+        return world != null ? world.currColLandscape : MobappGameSettings.getLandscapeColor();
+    }
+
+    private static double getLuma(int color) {
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = color & 0xFF;
+
+        return (0.299 * r) + (0.587 * g) + (0.114 * b);
+    }
+
     private void drawDebugText(Graphics g, String str) {
         g.drawString(str, 0, debugTextOffset, 0);
         debugTextOffset += currentFontH;
     }
 
     private void drawLoading(Graphics g) {
-        g.setColor(255, 255, 255);
         int l = scW * 2 / 3;
-        int h = scH / 24;
-        g.drawRect(scW / 2 - l / 2, scH * 2 / 3, l, h);
-        g.fillRect(scW / 2 - l / 2, scH * 2 / 3, l*loadingProgress/100, h);
+        int h = g.getFontHeight() * 2;
+        int x = scW / 2;
+        int y = scH - h * 2;
+        int x1 = x - l / 2;
+        int y1 = y - h / 2;
+        int loadingProgressPx = l * loadingProgress / 100;
+        int d = h / 2;
+
+        g.setColor(getLandscapeColor());
+        g.drawRoundRect(x1, y1, l, h, d, d);
+        g.fillRoundRect(x1, y1, loadingProgressPx, h, d, d);
+
         if (statusMessage != null) {
-            g.drawString(statusMessage, this.w/2, this.h, HCENTER | BOTTOM);
+            g.drawString(statusMessage, x, y, HCENTER | VCENTER);
+            int prevClipX = g.getClipX();
+            int prevClipY = g.getClipY();
+            int prevClipW = g.getClipWidth();
+            int prevClipH = g.getClipHeight();
+            g.setClip(x1, y1, loadingProgressPx, h);
+            g.setColor(0x000000);
+            g.drawString(statusMessage, x, y, HCENTER | VCENTER);
+            g.setClip(prevClipX, prevClipY, prevClipW, prevClipH);
         }
     }
     private void setLoadingProgress(int percents) {
@@ -1100,7 +1129,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         world.currColLandscape = dimColor(world.currColLandscape, 80);
         world.currColBodies = dimColor(world.currColBodies, 80);
         if (world.currColBodies > 0) {
-            world.currColBg = dimColor(Math.max(0x000015, world.currColBg), 105);
+            int baseColor = dimColor(world.currColLandscape, 8);
+            world.currColBg = dimColor(getLuma(baseColor) > getLuma(world.currColBg) ? baseColor : world.currColBg, 108);
+            if (getLuma(world.currColBg) > getLuma(world.currColLandscape)) {
+                world.currColBg = world.currColLandscape;
+            }
         } else {
             world.currColBg = dimColor(world.currColBg, 70);
         }
