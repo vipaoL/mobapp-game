@@ -103,6 +103,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     public short[][] currentEffects = new short[1][];
     private short[][] level = null;
+    private int currentLevelId = -1;
 
     // fonts
     private Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
@@ -154,6 +155,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         return this;
     }
 
+    public GameplayCanvas loadLevel(short[][] levelData, int i) {
+        this.currentLevelId = i;
+        return loadLevel(levelData);
+    }
+
     public GameplayCanvas loadLevel(short[][] levelData) {
         this.level = levelData;
         gameMode = GAME_MODE_LEVEL;
@@ -164,6 +170,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
         world.removeBodies = false;
         return this;
+    }
+
+    public void tryLoadNextLevel() {
+        stop(false, true);
+
+        boolean success = currentLevelId >= 0 && Levels.openBuiltinLevel(currentLevelId + 1);
+
+        if (!success) {
+            backToPreviousScreen();
+        }
     }
 
     public GameplayCanvas disablePointCounter() {
