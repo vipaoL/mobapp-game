@@ -113,25 +113,23 @@ public class Levels extends GenericMenu implements Runnable {
         }
     }
 
-    private synchronized void openFromRes(String path) {
-        if (isStopped || loadingLevel) {
-            return;
-        }
-        loadingLevel = true;
-
+    public static synchronized boolean openBuiltinLevel(int i) {
         InputStream is = null;
         try {
-            is = Platform.getResource(path);
-            RootContainer.setRootUIComponent(openLevel(new DataInputStream(is)));
-            isStopped = true;
+            is = Platform.getResource(getLevelResPath(i));
+            if (is == null) {
+                return false;
+            }
+            RootContainer.setRootUIComponent(openLevel(new DataInputStream(is), i));
+            return true;
         } catch (Exception ex) {
             Platform.showError("Can't open level!", ex);
-            loadingLevel = false;
         } finally {
             try {
                 is.close();
             } catch (Exception ignored) { }
         }
+        return false;
     }
 
     public void init() {
@@ -181,14 +179,14 @@ public class Levels extends GenericMenu implements Runnable {
     }
 
     private static GameplayCanvas openLevel(String path) {
-        return openLevel(FileUtils.fileToDataInputStream(path));
+        return openLevel(FileUtils.fileToDataInputStream(path), -1);
     }
 
-    private static GameplayCanvas openLevel(DataInputStream dis) {
+    private static GameplayCanvas openLevel(DataInputStream dis, int i) {
         try {
             short[][] level = MgStruct.readFromDataInputStream(dis);
             if (level != null) {
-                return new GameplayCanvas(new GraphicsWorld()).loadLevel(level);
+                return new GameplayCanvas(new GraphicsWorld()).loadLevel(level, i);
             }
         } catch (IOException ex) {
             Platform.showError(ex);
@@ -205,7 +203,7 @@ public class Levels extends GenericMenu implements Runnable {
         return w;
     }
 
-    public void selectPressed() {
+    public synchronized void selectPressed() {
         defaultSelected = selected;
         if (selected == buttons.length - 1) {
             isStopped = true;
@@ -215,7 +213,15 @@ public class Levels extends GenericMenu implements Runnable {
                 if (selected == buttons.length - 2) {
                     seekForLevelsInFS();
                 } else {
-                    openFromRes(getLevelResPath(selected));
+                    if (!isStopped && !loadingLevel) {
+                        loadingLevel = true;
+                        boolean success = openBuiltinLevel(selected);
+                        if (success) {
+                            isStopped = true;
+                        } else {
+                            loadingLevel = false;
+                        }
+                    }
                 }
             } else {
                 try {

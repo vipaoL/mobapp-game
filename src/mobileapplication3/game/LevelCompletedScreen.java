@@ -30,13 +30,13 @@ public class LevelCompletedScreen extends CanvasComponent {
 
     public boolean handlePointerClicked(int x, int y) {
         closePopup();
-        game.stop(true, false);
+        game.tryLoadNextLevel();
         return true;
     }
 
     public boolean handleKeyPressed(int keyCode, int count) {
         closePopup();
-        game.stop(true, false);
+        game.tryLoadNextLevel();
         return true;
     }
 
