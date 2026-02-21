@@ -1460,7 +1460,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             return false;
         }
         if (pauseTouched || menuTouched) {
-            if (x - pointerX > 3 || y - pointerY > 3) {
+            int t = Font.getDefaultFontHeight() / 2;
+            if (Math.abs(x - pointerPressedX) > t || Math.abs(y - pointerPressedY) > t) {
                 pauseTouched = false;
                 menuTouched = false;
             }
