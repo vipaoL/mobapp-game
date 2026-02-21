@@ -2,13 +2,18 @@
 
 package mobileapplication3.game;
 
+import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
+import mobileapplication3.platform.ui.Image;
 import mobileapplication3.ui.CanvasComponent;
 import utils.MobappGameSettings;
 
+import java.util.Random;
+
 public class LevelCompletedScreen extends CanvasComponent {
     private final GameplayCanvas game;
+    private Image fadingLine;
     private final int accentColor;
 
     public LevelCompletedScreen(GameplayCanvas game) {
@@ -18,11 +23,37 @@ public class LevelCompletedScreen extends CanvasComponent {
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
-        g.setColor(GameplayCanvas.dimColor(accentColor, 10));
-        g.fillTriangle(x0, y0, x0+w, y0+h, x0+w/2, y0);
-        g.setColor(accentColor);
+        int textX = x0 + w / 2;
+        int textY = y0 + h / 3;
+
+        Image fadingLine = getFadingLine(w);
+
         g.setFontSize(Font.SIZE_LARGE);
-        g.drawString("Level completed!", x0 + w/2, y0 + h/3, VCENTER | HCENTER);
+
+        for (int y = 0; y < g.getFontHeight(); y++) {
+            int dy = y / 4;
+            if (dy > 0) {
+                y += dy;
+            }
+            g.drawImage(fadingLine, x0, textY - y, TOP | LEFT);
+            g.drawImage(fadingLine, x0, textY + y, TOP | LEFT);
+        }
+        g.setColor(accentColor);
+        g.drawString("Level completed", textX, textY, VCENTER | HCENTER);
+    }
+
+    private Image getFadingLine(int w) {
+        if (fadingLine != null && fadingLine.getWidth() == w) {
+            return fadingLine;
+        }
+        int[] rgb = new int[w];
+        int accentColor = GameplayCanvas.dimColor(this.accentColor, 70);
+        for (int x = 0; x < w / 2; x++) {
+            int color = accentColor + (((1000 - Mathh.cos(x * 180 / w)) * 255 / 1000) << 24);
+            rgb[x] = color;
+            rgb[w - 1 - x] = color;
+        }
+        return fadingLine = Image.createRGBImage(rgb, w, 1, true);
     }
 
     public boolean canBeFocused() {
