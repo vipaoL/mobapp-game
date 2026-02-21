@@ -18,7 +18,6 @@ public class DebugMenu extends GenericMenu implements Runnable {
         "Structure debug",
         "Simulation mode",
         "GAMING MODE",
-        "What?",
         "Physics precision",
         "Music",
         "Back"
@@ -37,7 +36,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
     public static boolean showAngle = false;
     public static boolean showLinePoints = false;
     public static boolean simulationMode = false;
-    public static boolean whatTheGame = false;
+    public static final boolean whatTheGame = false;
     public static boolean showContacts = false;
     public static boolean structureDebug = false;
 
@@ -105,9 +104,6 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 GraphicsWorld.bgOverride = discoMode;
                 break;
             case 5:
-                whatTheGame = !whatTheGame;
-                break;
-            case 6:
                 int value = MobappGameSettings.getPhysicsPrecision();
                 if (value == MobappGameSettings.AUTO_PHYSICS_PRECISION) {/*
                     value = MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
@@ -121,7 +117,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 }
                 MobappGameSettings.setPhysicsPrecision(value);
                 break;
-            case 7:
+            case 6:
                 music = !music;
                 if (music) {
                     Sound sound = new Sound();
@@ -139,21 +135,20 @@ public class DebugMenu extends GenericMenu implements Runnable {
     }
     void refreshStates() {
         int physicsPrecision = MobappGameSettings.getPhysicsPrecision();
-        MENU_OPTS[6] = "Physics precision: ";
+        MENU_OPTS[5] = "Physics precision: ";
         if (physicsPrecision == MobappGameSettings.AUTO_PHYSICS_PRECISION) {
-            MENU_OPTS[6] += "Auto";
+            MENU_OPTS[5] += "Auto";
         } else if (physicsPrecision == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION) {
-            MENU_OPTS[6] += "Dynamic";
+            MENU_OPTS[5] += "Dynamic";
         } else {
-            MENU_OPTS[6] += String.valueOf(physicsPrecision);
+            MENU_OPTS[5] += String.valueOf(physicsPrecision);
         }
         setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
         setEnabledFor(RootContainer.enableOnScreenLog, 1);
         setEnabledFor(structureDebug, 2);
         setEnabledFor(simulationMode, 3);
         setEnabledFor(discoMode, 4);
-        setEnabledFor(whatTheGame, 5);
-        setEnabledFor(physicsPrecision != MobappGameSettings.DEFAULT_PHYSICS_PRECISION, 6);
-        setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 7); // disable this option. it's not ready yet
+        setEnabledFor(physicsPrecision != MobappGameSettings.DEFAULT_PHYSICS_PRECISION, 5);
+        setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 6); // disable this option. it's not ready yet
     }
 }
