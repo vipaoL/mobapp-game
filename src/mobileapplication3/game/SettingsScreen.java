@@ -80,20 +80,18 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
-        if (selected == LANDSCAPE_COLOR) {
-            // show landscape color
-            int color = MobappGameSettings.getLandscapeColor();
-            Random random = new Random(color);
-            int minScreenSide = Math.min(w, h);
-            int d = minScreenSide / 16 + random.nextInt(minScreenSide / 8);
-            int x;
-            do {
-                x = random.nextInt(w - d);
-            } while (Mathh.strictIneq(w / 3, x + d / 2, w * 2 / 3));
-            int y = random.nextInt(h - d);
-            g.setColor(color);
-            g.fillArc(x, y, d, d, 0, 360);
-        }
+        // show landscape color
+        int color = MobappGameSettings.getLandscapeColor();
+        Random random = new Random(color);
+        int minScreenSide = Math.min(w, h);
+        int d = minScreenSide / 16 + random.nextInt(minScreenSide / 8);
+        int x;
+        do {
+            x = random.nextInt(w - d);
+        } while (Mathh.strictIneq(w / 3, x + d / 2, w * 2 / 3));
+        int y = random.nextInt(h - d);
+        g.setColor(color);
+        g.fillArc(x, y, d, d, 0, 360);
         super.onPaint(g, x0, y0, w, h, forceInactive);
     }
 
