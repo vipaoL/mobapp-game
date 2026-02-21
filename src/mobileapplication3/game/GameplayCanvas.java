@@ -28,11 +28,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public static final String MENU_HINT_KB = "(LSoft, #, 9)";
     public static final String PAUSE_HINT = "PAUSE";
     public static final String PAUSE_HINT_KB = "(RSoft, *, 3)";
+    public static final String RESTART_HINT = "Swipe to restart";
+    public static final String RESTART_HINT_KB = "(7, Right mouse click)";
     public static final short EFFECT_SPEED = 0;
     private static final int BATT_UPD_PERIOD = 10000;
     private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2, GAME_MODE_EMINI_WORLD = 3;
     private static final int GAME_OVER_DAMAGE = 8;
     private static final int GAME_OVER_STUCK_TIME = 1000; // ms
+
+    public static final int RESTART_HINT_TIME = 40;
+    public static final int CIRCLE_ANIM_TIME = 25;
 
     // to prevent siemens' bug which calls hideNotify right after showing canvas
     private static final int PAUSE_DELAY = 5;
@@ -85,6 +90,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     // touchscreen
     private int pointerX = 0, pointerY = 0;
+    private int pointerPressedX, pointerPressedY;
     private boolean pauseTouched = false;
     private boolean menuTouched = false;
 
@@ -923,6 +929,37 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             }
         }
 
+        // restart gesture hint
+        if (hintVisibleTimer > 0 && levelIdVisibleTimer <= 0 && !isRestartGestureStarted()) {
+            int y = scH * 7 / 8;
+            int xLeft = scW / 6;
+            int xRight = scW - xLeft;
+            int x = (RESTART_HINT_TIME - hintVisibleTimer) * w / CIRCLE_ANIM_TIME;
+            int xConstrained = Mathh.constrain(xLeft, x, xRight);
+            int landscapeColor = getLandscapeColor();
+            int buttonBgColor = dimColor(landscapeColor, Math.min(25, (25 * hintVisibleTimer / 10)));
+            if (hintVisibleTimer <= RESTART_HINT_TIME && getLuma(buttonBgColor) / 2 > getLuma(world.currColBg)) {
+                int d = g.getFontHeight() * 2;
+                g.setColor(buttonBgColor);
+                g.fillArc(xConstrained - d / 2, y - d / 2, d, d, 0, 360);
+            }
+            if (hintVisibleTimer <= RESTART_HINT_TIME) {
+                g.setColor(dimColor(landscapeColor, Math.min(100, (100 * hintVisibleTimer / 10))));
+                setFont(new Font(Font.SIZE_MEDIUM), g);
+                if (RootContainer.displayKbHints) {
+                    g.drawString(RESTART_HINT, w / 2, y, HCENTER | BOTTOM);
+                    g.drawString(RESTART_HINT_KB, w / 2, y, HCENTER | TOP);
+                } else {
+                    g.drawString(RESTART_HINT, w / 2, y, centerAnchor);
+                }
+            }
+        }
+
+        // restart gesture visualisation
+        if (isRestartGestureStarted()) {
+            drawRestartGesture(g);
+        }
+
         if (currentLevelId >= 0 && levelIdVisibleTimer > 0) {
             int x = scW / 2;
             int y = scH / 8;
@@ -1035,7 +1072,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
 
         // score counter and debug posReset indicator
-        if (WorldGen.isEnabled && world != null) {
+        if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || hintVisibleTimer > RESTART_HINT_TIME + 10) && !isRestartGestureStarted()) {
             if (countPoints || flipIndicator < 127) {
                 g.setColor(flipIndicator, flipIndicator, 255);
             } else {
@@ -1092,6 +1129,65 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private void drawDebugText(Graphics g, String str) {
         g.drawString(str, 0, debugTextOffset, 0);
         debugTextOffset += currentFontH;
+    }
+
+    private void drawRestartGesture(Graphics g) {
+        int dx = pointerX - pointerPressedX;
+        boolean invert = dx < 0;
+        int fontHeight = Font.getDefaultFontHeight();
+
+        int landscapeColor = getLandscapeColor();
+        boolean gestureCompleted = isRestartGestureCompleted();
+
+        int circleColor;
+        int arrowColor;
+
+        if (gestureCompleted) {
+            circleColor = dimColor(landscapeColor, 200);
+            arrowColor = dimColor(landscapeColor, 25);
+        } else {
+            int mCircleColor = dimColor(landscapeColor, 5 * dx * dx / Font.getDefaultFontHeight() / Font.getDefaultFontHeight());
+            if (getLuma(mCircleColor) > getLuma(world.currColBg)) {
+                circleColor = mCircleColor;
+            } else {
+                circleColor = world.currColBg;
+            }
+
+            int mArrowColor = dimColor(landscapeColor, 5 * dx * dx * dx / Font.getDefaultFontHeight() / Font.getDefaultFontHeight() / Font.getDefaultFontHeight());
+            if (getLuma(mArrowColor) > getLuma(circleColor)) {
+                arrowColor = mArrowColor;
+            } else {
+                arrowColor = circleColor;
+            }
+        }
+
+        int w = fontHeight * 2 + Math.abs(dx) / 10;
+        int h = fontHeight * 2;
+        int arcR = fontHeight / 2;
+        int x = pointerX;
+        int y = pointerPressedY;
+
+        // circle
+        if (getLuma(circleColor) > getLuma(world.currColBg) * 2) {
+            g.setColor(circleColor);
+            g.fillArc(x - w / 2, y - h / 2, w, h, 0, 360);
+        }
+
+        int arrowAngle = (invert ? -1000 : 1000) * dx / scW * dx / scW;
+        int arcAngle = invert ? -270 : 270;
+        int totalAngle = arrowAngle + arcAngle;
+        int arrowTipOffset = invert ? -30 : 30;
+
+        // arrow
+        g.setColor(arrowColor);
+        g.drawArc(x - arcR, y - arcR, arcR * 2, arcR * 2, arrowAngle, arcAngle, fontHeight / 5, 1000, true, false, true);
+        int x1 = x + (arcR + fontHeight / 15) * Mathh.cos(totalAngle + arrowTipOffset) / 1000;
+        int y1 = y + (arcR + fontHeight / 15) * Mathh.sin(totalAngle + arrowTipOffset) / 1000;
+        int x2 = x + (arcR + fontHeight / 5)  * Mathh.cos(totalAngle) / 1000;
+        int y2 = y + (arcR + fontHeight / 5)  * Mathh.sin(totalAngle) / 1000;
+        int x3 = x + (arcR - fontHeight / 5)  * Mathh.cos(totalAngle) / 1000;
+        int y3 = y + (arcR - fontHeight / 5)  * Mathh.sin(totalAngle) / 1000;
+        g.fillTriangle(x1, y1, x2, y2, x3, y3);
     }
 
     private void drawLoading(Graphics g) {
@@ -1441,24 +1537,20 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     // touch events
     public boolean handlePointerPressed(int x, int y) {
+        pointerPressedX = pointerX = x;
+        pointerPressedY = pointerY = y;
+
         if (x > scW * 2 / 3 && y < scH / 6) {
             pauseTouched = true;
         } else if (x < scW / 3 && y < scH / 6) {
             menuTouched = true;
-        } else {
-            // if not on buttons, turn on the motor
-            if (!gameOver) {
-                motorTurnedOn = true;
-            }
+        } else if (!gameOver) {
+            motorTurnedOn = true;
         }
-        pointerX = x;
-        pointerY = y;
-        return !gameOver;
+
+        return true;
     }
     public boolean handlePointerDragged(int x, int y) {
-        if (gameOver) {
-            return false;
-        }
         if (pauseTouched || menuTouched) {
             int t = Font.getDefaultFontHeight() / 2;
             if (Math.abs(x - pointerPressedX) > t || Math.abs(y - pointerPressedY) > t) {
@@ -1466,22 +1558,52 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 menuTouched = false;
             }
         }
+
         pointerX = x;
         pointerY = y;
+
         return true;
     }
     public boolean handlePointerReleased(int x, int y) {
+        if (isRestartGestureCompleted()) {
+            restart();
+        }
         if (pauseTouched) {
             pauseButtonPressed();
         }
         if (menuTouched) {
             stop(true, false);
         }
+
         pauseTouched = false;
         menuTouched = false;
-        // turn off the motor
         motorTurnedOn = false;
-        return !gameOver;
+
+        pointerPressedX = pointerX = 0;
+        pointerPressedY = pointerY = 0;
+
+        return true;
+    }
+
+    private boolean isRestartGestureStarted() {
+        int dx = Math.abs(pointerX - pointerPressedX);
+        int marginX = scW / 32;
+        int marginY = scH / 32;
+
+        //noinspection SuspiciousNameCombination
+        boolean notFromScreenEdge = Mathh.strictIneq(marginX, pointerPressedX, (scW - marginX))
+                && Mathh.strictIneq(marginY, pointerPressedY,  (scH - marginY));
+
+        return dx > Font.getDefaultFontHeight() && notFromScreenEdge;
+    }
+
+    private boolean isRestartGestureCompleted() {
+        if (!isRestartGestureStarted()) {
+            return false;
+        }
+        int dx = Math.abs(pointerX - pointerPressedX);
+        int dy = Math.abs(pointerY - pointerPressedY);
+        return dx > dy && dx > Font.getDefaultFontHeight() * 4;
     }
 
     public boolean canBeFocused() {
