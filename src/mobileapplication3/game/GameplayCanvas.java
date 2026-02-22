@@ -54,6 +54,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private boolean battIndicator = false;
     private int batLevel;
     private boolean restartGestureStarted = false;
+    private boolean restartGestureCompleted = false;
 
     private boolean paused = false;
     private boolean stopped = false;
@@ -1139,12 +1140,11 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         int fontHeight = Font.getDefaultFontHeight();
 
         int landscapeColor = getLandscapeColor();
-        boolean gestureCompleted = isRestartGestureCompleted();
 
         int circleColor;
         int arrowColor;
 
-        if (gestureCompleted) {
+        if (restartGestureCompleted) {
             circleColor = dimColor(landscapeColor, 200);
             arrowColor = dimColor(landscapeColor, 25);
         } else {
@@ -1567,11 +1567,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         restartGestureStarted = isRestartGestureStarted();
 
+        if (restartGestureCompleted != (restartGestureCompleted = isRestartGestureCompleted())) {
+            Platform.vibrate(1);
+        }
+
         return true;
     }
     public boolean handlePointerReleased(int x, int y) {
         if (isRestartGestureCompleted()) {
             restart();
+            Platform.vibrate(1);
         }
         if (pauseTouched) {
             pauseButtonPressed();
