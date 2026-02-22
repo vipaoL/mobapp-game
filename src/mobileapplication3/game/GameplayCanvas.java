@@ -39,6 +39,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public static final int RESTART_HINT_TIME = 40;
     public static final int CIRCLE_ANIM_TIME = 25;
 
+    public static final int FLIP_INDICATOR_IDLE_VALUE = 255;
+
     // to prevent siemens' bug which calls hideNotify right after showing canvas
     private static final int PAUSE_DELAY = 5;
     private int pauseDelay = PAUSE_DELAY;
@@ -76,7 +78,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private boolean motorTurnedOn = false;
 
     // indicators
-    private int flipIndicator = 255; // blink the counter after flip
+    private int flipIndicator = FLIP_INDICATOR_IDLE_VALUE; // blink the counter after flip
     private int posResetIndicator = 0; // show when wg moves the world
     private int loadingProgress = 0;
     private int speedoState = 0;
@@ -1076,8 +1078,18 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         // score counter and debug posReset indicator
         if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || hintVisibleTimer > RESTART_HINT_TIME + 10) && !restartGestureStarted) {
-            if (countPoints || flipIndicator < 127) {
-                g.setColor(flipIndicator, flipIndicator, 255);
+            if (countPoints || flipIndicator < FLIP_INDICATOR_IDLE_VALUE) {
+                int accent = dimColor(getLandscapeColor(), 50);
+
+                int red = getColorRedComponent(accent);
+                int green = getColorGreenComponent(accent);
+                int blue = getColorBlueComponent(accent);
+
+                red += (255 - red) * flipIndicator / FLIP_INDICATOR_IDLE_VALUE;
+                green += (255 - green) * flipIndicator / FLIP_INDICATOR_IDLE_VALUE;
+                blue += (255 - blue) * flipIndicator / FLIP_INDICATOR_IDLE_VALUE;
+
+                g.setColor(red, green, blue);
             } else {
                 g.setColor(127, 31, 31);
             }
