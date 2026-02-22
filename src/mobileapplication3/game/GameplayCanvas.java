@@ -53,6 +53,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private boolean showFPS = false;
     private boolean battIndicator = false;
     private int batLevel;
+    private boolean restartGestureStarted = false;
 
     private boolean paused = false;
     private boolean stopped = false;
@@ -91,6 +92,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     // touchscreen
     private int pointerX = 0, pointerY = 0;
     private int pointerPressedX, pointerPressedY;
+    private long pointerPressedTime;
     private boolean pauseTouched = false;
     private boolean menuTouched = false;
 
@@ -930,7 +932,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
 
         // restart gesture hint
-        if (hintVisibleTimer > 0 && levelIdVisibleTimer <= 0 && !isRestartGestureStarted()) {
+        if (hintVisibleTimer > 0 && levelIdVisibleTimer <= 0 && !restartGestureStarted) {
             int y = scH * 7 / 8;
             int xLeft = scW / 6;
             int xRight = scW - xLeft;
@@ -956,7 +958,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
 
         // restart gesture visualisation
-        if (isRestartGestureStarted()) {
+        if (restartGestureStarted) {
             drawRestartGesture(g);
         }
 
@@ -1072,7 +1074,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
 
         // score counter and debug posReset indicator
-        if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || hintVisibleTimer > RESTART_HINT_TIME + 10) && !isRestartGestureStarted()) {
+        if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || hintVisibleTimer > RESTART_HINT_TIME + 10) && !restartGestureStarted) {
             if (countPoints || flipIndicator < 127) {
                 g.setColor(flipIndicator, flipIndicator, 255);
             } else {
@@ -1537,6 +1539,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     // touch events
     public boolean handlePointerPressed(int x, int y) {
+        pointerPressedTime = System.currentTimeMillis();
         pointerPressedX = pointerX = x;
         pointerPressedY = pointerY = y;
 
@@ -1562,6 +1565,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         pointerX = x;
         pointerY = y;
 
+        restartGestureStarted = isRestartGestureStarted();
+
         return true;
     }
     public boolean handlePointerReleased(int x, int y) {
@@ -1582,10 +1587,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         pointerPressedX = pointerX = 0;
         pointerPressedY = pointerY = 0;
 
+        restartGestureStarted = false;
+        restartGestureCompleted = false;
+
         return true;
     }
 
     private boolean isRestartGestureStarted() {
+        if (!restartGestureStarted && System.currentTimeMillis() - pointerPressedTime > 500) {
+            return false;
+        }
         int dx = Math.abs(pointerX - pointerPressedX);
         int marginX = scW / 32;
         int marginY = scH / 32;
