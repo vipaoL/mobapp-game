@@ -9,6 +9,10 @@ import mobileapplication3.ui.Property;
 public class Accelerator extends AbstractRectBodyElement {
     private short directionOffset, m = 150, effectDuration = 30;
 
+    public Accelerator() {
+        setModifierValue(m);
+    }
+
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
         int dx = l * Mathh.cos(angle) / 1000;
         int dy = l * Mathh.sin(angle) / 1000;
