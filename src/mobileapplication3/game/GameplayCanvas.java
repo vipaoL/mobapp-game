@@ -1111,24 +1111,21 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         // score counter and debug posReset indicator
         if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || hintVisibleTimer > RESTART_HINT_TIME + 10) && !restartGestureStarted) {
-            if (countPoints || flipIndicatorTimer < FLIP_INDICATOR_TIMER_MAX) {
-                int accent = dimColor(getLandscapeColor(), 50);
+            int accent = dimColor(getLandscapeColor(), 50);
+            int flipIndicatorIdleColor = countPoints ? 0xffffff : 0x802020;
 
-                int red = getColorRedComponent(accent);
-                int green = getColorGreenComponent(accent);
-                int blue = getColorBlueComponent(accent);
-
-                red += (255 - red) * flipIndicatorTimer / FLIP_INDICATOR_TIMER_MAX;
-                green += (255 - green) * flipIndicatorTimer / FLIP_INDICATOR_TIMER_MAX;
-                blue += (255 - blue) * flipIndicatorTimer / FLIP_INDICATOR_TIMER_MAX;
-
-                g.setColor(red, green, blue);
-            } else {
-                g.setColor(127, 31, 31);
+            if (points == 69) {
+                accent = 0xff6969;
             }
+
+            if (flipIndicatorTimer < FLIP_INDICATOR_TIMER_MAX) {
+                g.setColor(blendColor(accent, flipIndicatorIdleColor, flipIndicatorTimer * flipIndicatorTimer, FLIP_INDICATOR_TIMER_MAX * FLIP_INDICATOR_TIMER_MAX));
+            } else {
+                g.setColor(flipIndicatorIdleColor);
+            }
+
             setFont(largefont, g);
-            g.drawString(String.valueOf(points), scW/2, scH * 15 / 16,
-                    Graphics.HCENTER | Graphics.BOTTOM);
+            g.drawString(String.valueOf(points), scW/2, scH * 15 / 16, Graphics.HCENTER | Graphics.BOTTOM);
             if (DebugMenu.isDebugEnabled && posResetIndicator > 0) {
                 g.setColor(posResetIndicator, 0, 0);
                 int d = h / 20;
@@ -1164,6 +1161,22 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     private int getLandscapeColor() {
         return world != null ? world.currColLandscape : MobappGameSettings.getLandscapeColor();
+    }
+
+    // TODO: create GraphicsUtils in framework
+    public int blendColor(int c1, int c2, int k1, int k2) {
+        int r1 = getColorRedComponent(c1);
+        int r2 = getColorRedComponent(c2);
+        int g1 = getColorGreenComponent(c1);
+        int g2 = getColorGreenComponent(c2);
+        int b1 = getColorBlueComponent(c1);
+        int b2 = getColorBlueComponent(c2);
+
+        int r = r1 + (r2 - r1) * k1 / k2;
+        int g = g1 + (g2 - g1) * k1 / k2;
+        int b = b1 + (b2 - b1) * k1 / k2;
+
+        return (r << 16) | (g << 8) | b;
     }
 
     private static double getLuma(int color) {
