@@ -32,6 +32,7 @@ public abstract class Element {
     public static final short LINE_FACE_DOWN = 17;
     public static final short CIRCLE_FACE_OUTSIDE = 18;
     public static final short CIRCLE_FACE_INSIDE = 19;
+    public static final short LINK = 20;
 
     public static final int LINE_THICKNESS = 24;
 
@@ -110,6 +111,8 @@ public abstract class Element {
                 return new SquareBody();
             case Element.ROUND_BODY:
                 return new RoundBody();
+            case Element.LINK:
+                return new Link();
             default:
                 Logger.log("Unknown id: " + id);
                 return null;
@@ -204,6 +207,10 @@ public abstract class Element {
         Element clone = Element.createTypedInstance(getID());
         clone.setArgs(getArgs());
         return clone;
+    }
+
+    public Element createLink() {
+        return new Link().setReference(this);
     }
 
     public String toString() {

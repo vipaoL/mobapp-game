@@ -18,7 +18,7 @@ public class StructurePlacer {
     public static int[] place(GraphicsWorld world, boolean skipPlacingBodies, short[][] data, int x, int y) {
         ElementPlacer elementPlacer = new ElementPlacer(world, skipPlacingBodies);
         for (int i = 1; i < data.length; i++) {
-            elementPlacer.place(data[i], x, y);
+            elementPlacer.place(data, i, x, y);
         }
         return WorldGen.concatArrays(new int[] {x + data[0][1], y + data[0][2], elementPlacer.getLineCount(), STRUCTURE_ID_UNKNOWN}, elementPlacer.getDrawingData());
     }

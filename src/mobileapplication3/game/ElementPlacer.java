@@ -32,6 +32,7 @@ public class ElementPlacer {
     public static final short LINE_FACE_DOWN = 17;
     public static final short CIRCLE_FACE_OUTSIDE = 18;
     public static final short CIRCLE_FACE_INSIDE = 19;
+    public static final short LINK = 20;
 
     public static final int DRAWING_DATA_ID_LINE = 1, DRAWING_DATA_ID_PATH = 2, DRAWING_DATA_ID_CIRCLE = 3, DRAWING_DATA_ID_ARC = 4;
 
@@ -55,7 +56,8 @@ public class ElementPlacer {
         return lineCount;
     }
 
-    public void place(short[] data, int originX, int originY) {
+    public void place(short[][] elements, int idx, int originX, int originY) {
+        short[] data = elements[idx];
         int prevLowestY = w.lowestY;
         short id = data[0];
         switch (id) {
@@ -320,6 +322,12 @@ public class ElementPlacer {
                 updateLowestY(y + r);
                 break;
             }
+            case LINK:
+                short dX = data[1];
+                short dY = data[2];
+                short refOffset = data[3];
+                place(elements, idx + refOffset, originX + dX, originY + dY);
+                break;
         }
         if (w.lowestY != prevLowestY) {
             Logger.log("lowestY=", w.lowestY);
