@@ -1213,7 +1213,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 circleColor = world.currColBg;
             }
 
-            int mArrowColor = dimColor(landscapeColor, 5 * dx * dx * dx / Font.getDefaultFontHeight() / Font.getDefaultFontHeight() / Font.getDefaultFontHeight());
+            int mArrowColor = dimColor(landscapeColor, (invert ? -5 : 5) * dx * dx * dx / Font.getDefaultFontHeight() / Font.getDefaultFontHeight() / Font.getDefaultFontHeight());
             if (getLuma(mArrowColor) > getLuma(circleColor)) {
                 arrowColor = mArrowColor;
             } else {
@@ -1230,7 +1230,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         // circle
         if (getLuma(circleColor) > getLuma(world.currColBg) * 2) {
             g.setColor(circleColor);
+            int prevClipX = g.getClipX();
+            int prevClipY = g.getClipY();
+            int prevClipW = g.getClipWidth();
+            int prevClipH = g.getClipHeight();
+            g.setClip(x - (invert ? 0 : w / 2), y - h / 2, w / 2, h);
             g.fillArc(x - w / 2, y - h / 2, w, h, 0, 360);
+            g.setClip(prevClipX, prevClipY, prevClipW, prevClipH);
+            g.fillArc(x - h / 2, y - h / 2, h, h, 0, 360);
         }
 
         int arrowAngle = (invert ? -1000 : 1000) * dx / scW * dx / scW;
