@@ -39,7 +39,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public static final int RESTART_HINT_TIME = 40;
     public static final int CIRCLE_ANIM_TIME = 25;
 
-    public static final int FLIP_INDICATOR_IDLE_VALUE = 255;
+    public static final int FLIP_INDICATOR_TIMER_MAX = 255;
+    public static final int HINT_TIMER_MAX = 120;
 
     // to prevent siemens' bug which calls hideNotify right after showing canvas
     private static final int PAUSE_DELAY = 5;
@@ -50,7 +51,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int gameMode = GAME_MODE_ENDLESS;
     public boolean uninterestingDebug = false;
     private boolean isWorldLoaded = false;
-    private static int hintVisibleTimer = 1; // the real value will be (re)set on start if >0
+    private static int hintVisibleTimer = HINT_TIMER_MAX;
     private int levelIdVisibleTimer;
     private boolean showFPS = false;
     private boolean battIndicator = false;
@@ -78,7 +79,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private boolean motorTurnedOn = false;
 
     // indicators
-    private int flipIndicator = FLIP_INDICATOR_IDLE_VALUE; // blink the counter after flip
+    private int flipIndicatorTimer = FLIP_INDICATOR_TIMER_MAX; // blink the counter after flip
     private int posResetIndicator = 0; // show when wg moves the world
     private int loadingProgress = 0;
     private int speedoState = 0;
@@ -330,7 +331,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             log("starting game cycle");
 
             if (hintVisibleTimer > 0) {
-                hintVisibleTimer = 120; // ticks
+                hintVisibleTimer = HINT_TIMER_MAX; // ticks
             }
 
             Logger.setLogMessageDelay(0);
@@ -448,10 +449,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                             // flip counter and debug posReset indicator
                             if (WorldGen.isEnabled) {
                                 // highlight the score counter on flip
-                                if (flipIndicator < 255) {
-                                    flipIndicator+=64;
-                                    if (flipIndicator >= 255) {
-                                        flipIndicator = 255;
+                                if (flipIndicatorTimer < FLIP_INDICATOR_TIMER_MAX) {
+                                    flipIndicatorTimer += 64;
+                                    if (flipIndicatorTimer >= FLIP_INDICATOR_TIMER_MAX) {
+                                        flipIndicatorTimer = FLIP_INDICATOR_TIMER_MAX;
                                     }
                                 }
                                 flipCounter.tick();
@@ -1079,16 +1080,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         // score counter and debug posReset indicator
         if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || hintVisibleTimer > RESTART_HINT_TIME + 10) && !restartGestureStarted) {
-            if (countPoints || flipIndicator < FLIP_INDICATOR_IDLE_VALUE) {
+            if (countPoints || flipIndicatorTimer < FLIP_INDICATOR_TIMER_MAX) {
                 int accent = dimColor(getLandscapeColor(), 50);
 
                 int red = getColorRedComponent(accent);
                 int green = getColorGreenComponent(accent);
                 int blue = getColorBlueComponent(accent);
 
-                red += (255 - red) * flipIndicator / FLIP_INDICATOR_IDLE_VALUE;
-                green += (255 - green) * flipIndicator / FLIP_INDICATOR_IDLE_VALUE;
-                blue += (255 - blue) * flipIndicator / FLIP_INDICATOR_IDLE_VALUE;
+                red += (255 - red) * flipIndicatorTimer / FLIP_INDICATOR_TIMER_MAX;
+                green += (255 - green) * flipIndicatorTimer / FLIP_INDICATOR_TIMER_MAX;
+                blue += (255 - blue) * flipIndicatorTimer / FLIP_INDICATOR_TIMER_MAX;
 
                 g.setColor(red, green, blue);
             } else {
@@ -1677,7 +1678,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         // blink point counter after flip and increment the score
         public void afterFlip() {
-            flipIndicator = 0;
+            flipIndicatorTimer = 0;
             points++;
             lastFlipX = world.carX;
         }
