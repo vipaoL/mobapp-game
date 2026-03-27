@@ -12,75 +12,60 @@ import mobileapplication3.ui.Property;
 public class Sine extends AbstractCurve {
     //        #
     //      #
-    //  .  #    "." - (x0;y0)
+    //  .  #    "." - (x0;y0) in the file
     //    #
-    //  @       "@" - (anchorX;anchorY)
+    //  @       "@" - (x;y)
 
     private final static int STEP = 30;
     private short id = SINE;
-    private short x0, y0, l, halfperiods = 1, offset = 270, amp;
-    private short anchorX, anchorY;
+    private short l, halfPeriods = 1, offset = 270, amp;
 
     public PlacementStep[] getPlacementSteps() {
-        return new PlacementStep[] {
-            new PlacementStep() {
-                public void place(short pointX, short pointY) {
-                    setAnchorPoint(pointX, pointY);
-                }
-
-                public String getName() {
-                    return "Move";
-                }
-
-                public String getCurrentStepInfo() {
-                    return "x0=" + x0 + " y0=" + y0;
-                }
-            },
-            new PlacementStep() {
-                public void place(short pointX, short pointY) {
-                    setLength((short) (pointX - x0));
-                    int sinoffset = Mathh.sin(-offset);
-                    int amp = (anchorY - pointY);
-                    if (sinoffset != 0) {
-                        amp = amp * 1000 / sinoffset;
+        PlacementStep[] steps = {
+                new PlacementStep() {
+                    public void place(short pointX, short pointY) {
+                        setLength((short) (pointX - x));
+                        int offset = Mathh.sin(-Sine.this.offset);
+                        int amp = (y - pointY);
+                        if (offset != 0) {
+                            amp = amp * 1000 / offset;
+                        }
+                        setAmplitude((short) (amp / 2));
                     }
-                    setAmplitude((short) (amp/2));
-                    calcZeroPoint();
-                }
 
-                public String getName() {
-                    return "Change length and amplitude";
-                }
+                    public String getName() {
+                        return "Change length and amplitude";
+                    }
 
-                public String getCurrentStepInfo() {
-                    return "l=" + l;
-                }
-            },
-            new PlacementStep() {
-                public void place(short pointX, short pointY) {
-                    int dx = pointX - anchorX;
-                    if (dx * l > 0) {
-                        setHalfperiodsNumber((short) Math.max(1, l/dx));
+                    public String getCurrentStepInfo() {
+                        return "l=" + l;
+                    }
+                },
+                new PlacementStep() {
+                    public void place(short pointX, short pointY) {
+                        int dx = pointX - x;
+                        if (dx * l > 0) {
+                            setHalfPeriodsNumber((short) Math.max(1, l / dx));
+                        }
+                    }
+
+                    public String getName() {
+                        return "Change number of half-periods";
+                    }
+
+                    public String getCurrentStepInfo() {
+                        return "half-periods=" + halfPeriods;
                     }
                 }
-
-                public String getName() {
-                    return "Change number of half-periods";
-                }
-
-                public String getCurrentStepInfo() {
-                    return "half-periods=" + halfperiods;
-                }
-            }
         };
+        return concatArrays(super.getPlacementSteps(), steps);
     }
 
     public PlacementStep[] getExtraEditingSteps() {
         return new PlacementStep[] {
                 new PlacementStep() {
                     public void place(short pointX, short pointY) {
-                        int dx = pointX - anchorX;
-                        setOffset((short) ((dx)*halfperiods*180/l + 90));
+                        setOffset((short) ((pointX - x) * halfPeriods * 180 / l + 90));
                     }
 
                     public String getName() {
@@ -94,32 +79,12 @@ public class Sine extends AbstractCurve {
         };
     }
 
-    public void setAnchorPoint(short x, short y) {
-        if (anchorX == x && anchorY == y) {
-            return;
-        }
-        pointsCache = null;
-        anchorX = x;
-        anchorY = y;
-        calcZeroPoint();
+    private short getY0() {
+        return (short) (y - amp * Mathh.sin(-offset) / 1000);
     }
 
-    public void calcZeroPoint() {
-        setZeroPoint(anchorX, (short) (anchorY - amp*Mathh.sin(-offset)/1000));
-    }
-
-    public void calcAnchorPoint() {
-        setAnchorPoint(x0, (short) (y0 + amp*Mathh.sin(-offset)/1000));
-    }
-
-    public void setZeroPoint(short x, short y) {
-        if (x0 == x && y0 == y) {
-            return;
-        }
-        pointsCache = null;
-        x0 = x;
-        y0 = y;
-        calcAnchorPoint();
+    private void setY0(short y0) {
+        setY((short) (y0 + amp * Mathh.sin(-offset) / 1000));
     }
 
     public void setLength(short l) {
@@ -130,12 +95,12 @@ public class Sine extends AbstractCurve {
         this.l = l;
     }
 
-    public void setHalfperiodsNumber(short n) {
-        if (halfperiods == n) {
+    public void setHalfPeriodsNumber(short n) {
+        if (halfPeriods == n) {
             return;
         }
         pointsCache = null;
-        halfperiods = n;
+        halfPeriods = n;
     }
 
     public void setOffset(short offset) throws IllegalArgumentException {
@@ -145,7 +110,6 @@ public class Sine extends AbstractCurve {
         pointsCache = null;
         offset = (short) Mathh.normalizeAngle(offset);
         this.offset = offset;
-        calcZeroPoint();
     }
 
     public void setAmplitude(short a) {
@@ -157,47 +121,22 @@ public class Sine extends AbstractCurve {
     }
 
     public Element setArgs(short[] args) {
-        setZeroPoint(args[0], args[1]);
         setLength(args[2]);
-        setHalfperiodsNumber(args[3]);
+        setHalfPeriodsNumber(args[3]);
         setOffset((short) -args[4]);
         setAmplitude(args[5]);
+        setX(args[0]);
+        setY0(args[1]);
         pointsCache = null;
-        recalcCalculatedArgs();
         return this;
     }
 
     public short[] getArgs() {
-        return new short[]{x0, y0, l, halfperiods, (short) Mathh.normalizeAngle(-offset), amp};
+        return new short[]{getX(), getY0(), l, halfPeriods, (short) Mathh.normalizeAngle(-offset), amp};
     }
 
     public Property[] getProperties() {
-        return new Property[] {
-                new Property("X0") {
-                    public void setValue(int value) {
-                        if (x0 != value) {
-                            pointsCache = null;
-                        }
-                        x0 = (short) value;
-                        calcAnchorPoint();
-                    }
-
-                    public int getValue() {
-                        return x0;
-                    }
-                },
-                new Property("Y0") {
-                    public void setValue(int value) {
-                        if (y0 != value) {
-                            pointsCache = null;
-                        }
-                        y0 = (short) value;
-                    }
-
-                    public int getValue() {
-                        return y0;
-                    }
-                },
+        return concatArrays(super.getProperties(), new Property[]{
                 new Property("Length") {
                     public void setValue(int value) {
                         setLength((short) value);
@@ -206,22 +145,14 @@ public class Sine extends AbstractCurve {
                     public int getValue() {
                         return l;
                     }
-
-                    public int getMinValue() {
-                        return (short) -x0;
-                    }
-
-                    public int getMaxValue() {
-                        return (short) (Short.MAX_VALUE - x0);
-                    }
                 },
                 new Property("Half-periods") {
                     public void setValue(int value) {
-                        setHalfperiodsNumber((short) value);
+                        setHalfPeriodsNumber((short) value);
                     }
 
                     public int getValue() {
-                        return halfperiods;
+                        return halfPeriods;
                     }
 
                     public int getMinValue() {
@@ -296,7 +227,7 @@ public class Sine extends AbstractCurve {
                         return id != SINE;
                     }
                 },
-        };
+        });
     }
 
     public Sine setID(short id) {
@@ -316,21 +247,10 @@ public class Sine extends AbstractCurve {
         return "Sine";
     }
 
-    public void move(short dx, short dy) {
-        anchorX += dx;
-        anchorY += dy;
-        x0 += dx;
-        y0 += dy;
-
-        if (pointsCache != null) {
-            pointsCache.movePoints(dx, dy);
-        }
-    }
-
     private short[][] getEnds() {
         return new short[][] {
-                new short[]{anchorX, anchorY},
-                new short[]{(short) (x0 + l), (short) (y0 + amp*Mathh.sin(180*halfperiods - offset)/1000)}
+                new short[]{x, y},
+                new short[]{(short) (x + l), (short) (getY0() + amp * Mathh.sin(180 * halfPeriods - offset) / 1000)}
         };
     }
 
@@ -345,34 +265,31 @@ public class Sine extends AbstractCurve {
     }
 
     protected void genPoints() {
+        int y0 = getY0();
         if (amp == 0) {
             pointsCache = new PointsCache(2);
-            pointsCache.writePointToCache(x0, y0);
-            pointsCache.writePointToCache(x0 + l, y0);
+            pointsCache.writePointToCache(x, y0);
+            pointsCache.writePointToCache(x + l, y0);
         } else {
             int startA = 360 - offset;
-            int endA = 360 + halfperiods * 180 - offset;
+            int endA = 360 + halfPeriods * 180 - offset;
             int a = endA - startA;
 
             int nextPointX;
             int nextPointY;
-            pointsCache = new PointsCache(1 + halfperiods*6);
-            for (int i = startA; i <= endA; i+=STEP) {
-                nextPointX = x0 + (i - startA)*l/a;
-                nextPointY = y0 + amp*Mathh.sin(i)/1000;
+            pointsCache = new PointsCache(1 + halfPeriods * 6);
+            for (int i = startA; i <= endA; i += STEP) {
+                nextPointX = x + (i - startA) * l / a;
+                nextPointY = y0 + amp * Mathh.sin(i) / 1000;
                 pointsCache.writePointToCache(nextPointX, nextPointY);
             }
 
             if (a % STEP != 0) {
-                nextPointX = x0 + l;
-                nextPointY = y0 + amp*Mathh.sin(endA)/1000;
+                nextPointX = x + l;
+                nextPointY = y0 + amp * Mathh.sin(endA) / 1000;
                 pointsCache.writePointToCache(nextPointX, nextPointY);
             }
         }
-    }
-
-    public void recalcCalculatedArgs() {
-        calcAnchorPoint();
     }
 
     protected int getArrowsDirection() {
@@ -384,4 +301,6 @@ public class Sine extends AbstractCurve {
             return NO_ARROWS;
         }
     }
+
+    public void recalcCalculatedArgs() { }
 }

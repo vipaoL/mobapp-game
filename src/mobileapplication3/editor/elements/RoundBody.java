@@ -6,22 +6,14 @@ import mobileapplication3.ui.Property;
 public class RoundBody extends Body {
     private short r = 1;
 
+    public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
+        int r = this.r * 1000 / zoomOut;
+        g.setColor(getColor(drawAsSelected));
+        g.fillArc(xToPX(x, zoomOut, offsetX) - r, yToPX(y, zoomOut, offsetY) - r, r*2, r*2, 0, 360);
+    }
+
     public PlacementStep[] getPlacementSteps() {
-        return new PlacementStep[] {
-                new PlacementStep() {
-                    public void place(short pointX, short pointY) {
-                        x = pointX;
-                        y = pointY;
-                    }
-
-                    public String getName() {
-                        return "Move";
-                    }
-
-                    public String getCurrentStepInfo() {
-                        return "x=" + x + " y=" + y;
-                    }
-                },
+        return concatArrays(super.getPlacementSteps(), new PlacementStep[]{
                 new PlacementStep() {
                     public void place(short pointX, short pointY) {
                         short dx = (short) (pointX - x);
@@ -37,19 +29,11 @@ public class RoundBody extends Body {
                         return "r=" + r;
                     }
                 }
-        };
-    }
-
-    public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        int r = this.r * 1000 / zoomOut;
-
-        g.setColor(getColor(drawAsSelected));
-        g.fillArc(xToPX(x, zoomOut, offsetX) - r, yToPX(y, zoomOut, offsetY) - r, r*2, r*2, 0, 360);
+        });
     }
 
     public Element setArgs(short[] args) {
-        x = args[0];
-        y = args[1];
+        setPos(args[0], args[1]);
         r = args[2];
 
         parseBodyArgs(args, 3);
@@ -62,17 +46,13 @@ public class RoundBody extends Body {
     }
 
     public Property[] getProperties() {
-        Property[] roundBodyProps = new Property[] {
-                xProp,
-                yProp,
+        return concatArrays(concatArrays(super.getProperties(), new Property[] {
                 new Property("R") {
                     public void setValue(int value) { r = (short) value; }
                     public int getValue() { return r; }
                     public int getMinValue() { return 1; }
                 }
-        };
-
-        return concatArrays(roundBodyProps, getBodyProperties());
+        }), getBodyProperties());
     }
 
     public short getID() {

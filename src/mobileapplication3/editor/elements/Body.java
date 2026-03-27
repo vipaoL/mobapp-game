@@ -3,7 +3,6 @@ package mobileapplication3.editor.elements;
 import mobileapplication3.ui.Property;
 
 public abstract class Body extends Element {
-    protected short x, y;
     protected short fallDelay = DYNAMIC;
     protected short elasticity = 0, mass = 1, friction = 10;
     protected boolean gravityAffected = true;
@@ -17,32 +16,6 @@ public abstract class Body extends Element {
     protected static final short STATIC = -1;
     protected static final short DYNAMIC = Short.MIN_VALUE;
     protected static final short DEFAULT_FALL_DELAY = 600;
-
-    protected Property xProp = new Property("X") {
-        public void setValue(int value) {
-            x = (short) value;
-            recalcCalculatedArgs();
-        }
-
-        public int getValue() {
-            return x;
-        }
-    };
-
-    protected Property yProp = new Property("Y") {
-        public void setValue(int value) {
-            y = (short) value;
-            recalcCalculatedArgs();
-        }
-
-        public int getValue() {
-            return y;
-        }
-    };
-
-    public PlacementStep[] getExtraEditingSteps() {
-        return new PlacementStep[0];
-    }
 
     protected int getColor(boolean isSelected) {
         if (isLava) {
@@ -231,11 +204,6 @@ public abstract class Body extends Element {
 
     public int getStepsToPlace() {
         return 2;
-    }
-
-    public void move(short dx, short dy) {
-        x += dx;
-        y += dy;
     }
 
     public boolean isBody() {

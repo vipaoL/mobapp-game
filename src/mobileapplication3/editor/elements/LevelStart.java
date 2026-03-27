@@ -3,7 +3,6 @@
 package mobileapplication3.editor.elements;
 
 import mobileapplication3.platform.ui.Graphics;
-import mobileapplication3.ui.Property;
 
 /**
  *
@@ -11,39 +10,15 @@ import mobileapplication3.ui.Property;
  */
 public class LevelStart extends Element {
     public static final int COLOR = 0x00ff00;
-    private short x, y;
+    public static final int R = 3;
 
     public LevelStart() {
         color = COLOR;
     }
 
-    public PlacementStep[] getPlacementSteps() {
-        return new PlacementStep[] {
-            new PlacementStep() {
-                public void place(short pointX, short pointY) {
-                    x = pointX;
-                    y = pointY;
-                }
-
-                public String getName() {
-                    return "Move";
-                }
-
-                public String getCurrentStepInfo() {
-                    return "Choose level start point: x=" + x + " y=" + y;
-                }
-            }
-        };
-    }
-
-    public PlacementStep[] getExtraEditingSteps() {
-        return new PlacementStep[0];
-    }
-
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        int r = 3;
         g.setColor(getColor(drawAsSelected));
-        g.fillArc(xToPX(x, zoomOut, offsetX) - r, yToPX(y, zoomOut, offsetY) - r, r*2, r*2, 0, 360);
+        g.fillArc(xToPX(x, zoomOut, offsetX) - R, yToPX(y, zoomOut, offsetY) - R, R *2, R *2, 0, 360);
     }
 
     public Element setArgs(short[] args) {
@@ -56,44 +31,12 @@ public class LevelStart extends Element {
         return new short[]{x, y};
     }
 
-    public Property[] getProperties() {
-        return new Property[] {
-                new Property("X") {
-                    public void setValue(int value) {
-                        x = (short) value;
-                    }
-
-                    public int getValue() {
-                        return x;
-                    }
-                },
-                new Property("Y") {
-                    public void setValue(int value) {
-                        y = (short) value;
-                    }
-
-                    public int getValue() {
-                        return y;
-                    }
-                }
-        };
-    }
-
     public short getID() {
         return Element.LEVEL_START;
     }
 
-    public int getStepsToPlace() {
-        return 1;
-    }
-
     public String getName() {
         return "Level Start";
-    }
-
-    public void move(short dx, short dy) {
-        x += dx;
-        y += dy;
     }
 
     public short[] getStartPoint() {

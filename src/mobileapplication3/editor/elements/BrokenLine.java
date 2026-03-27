@@ -15,22 +15,7 @@ public class BrokenLine extends Line {
 
     public PlacementStep[] getPlacementSteps() {
         return new PlacementStep[] {
-            new PlacementStep() {
-                public void place(short pointX, short pointY) {
-                    int dx = pointX - x1;
-                    int dy = pointY - y1;
-                    setStartPoint(pointX, pointY);
-                    setEndPoint((short) (x2 + dx), (short) (y2 + dy));
-                }
-
-                public String getName() {
-                    return "Move";
-                }
-
-                public String getCurrentStepInfo() {
-                    return "x1=" + x1 + " y1=" + y1;
-                }
-            },
+            movePlacementStep,
             new PlacementStep() {
                 public void place(short pointX, short pointY) {
                     setEndPoint(pointX, pointY);
@@ -42,15 +27,15 @@ public class BrokenLine extends Line {
                 }
 
                 public String getCurrentStepInfo() {
-                    return "plL=" + platformLength + " ang=" + ang + "; x1=" + x1 + " y1=" + y1 + "; x2=" + x2 + " y2=" + y2;
+                    return "plL=" + platformLength + " ang=" + ang + "; x1=" + x + " y1=" + y + "; x2=" + x2 + " y2=" + y2;
                 }
             }
         };
     }
 
     public void recalcCalculatedArgs() {
-        short dx = (short) (x2 - x1);
-        short dy = (short) (y2 - y1);
+        short dx = (short) (x2 - x);
+        short dy = (short) (y2 - y);
         if (dy == 0) {
             l = dx;
         } else if (dx == 0) {
@@ -82,13 +67,9 @@ public class BrokenLine extends Line {
         ang = (short) Mathh.arctg(dx, dy);
     }
 
-    public PlacementStep[] getExtraEditingSteps() {
-        return super.getExtraEditingSteps();
-    }
-
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        int dx = x2 - x1;
-        int dy = y2 - y1;
+        int dx = x2 - x;
+        int dy = y2 - y;
 
         int n = (l + spacing) / (platformLength + spacing);
 
@@ -102,10 +83,10 @@ public class BrokenLine extends Line {
 
         for (int i = 0; i < n; i++) {
             g.drawLine(
-                    xToPX(x1 + i * platfDx, zoomOut, offsetX),
-                    yToPX(y1 + i * platfDy, zoomOut, offsetY),
-                    xToPX(x1 + (i + 1) * platfDx - spX, zoomOut, offsetX),
-                    yToPX(y1 + (i + 1) * platfDy - spY, zoomOut, offsetY),
+                    xToPX(x + i * platfDx, zoomOut, offsetX),
+                    yToPX(y + i * platfDy, zoomOut, offsetY),
+                    xToPX(x + (i + 1) * platfDx - spX, zoomOut, offsetX),
+                    yToPX(y + (i + 1) * platfDy - spY, zoomOut, offsetY),
                     thickness,
                     zoomOut,
                     true,
@@ -116,8 +97,8 @@ public class BrokenLine extends Line {
     }
 
     public Element setArgs(short[] args) {
-        x1 = args[0];
-        y1 = args[1];
+        x = args[0];
+        y = args[1];
         x2 = args[2];
         y2 = args[3];
         thickness = args[4];
@@ -129,12 +110,11 @@ public class BrokenLine extends Line {
     }
 
     public short[] getArgs() {
-        return new short[]{x1, y1, x2, y2, thickness, platformLength, spacing, l, ang};
+        return new short[]{x, y, x2, y2, thickness, platformLength, spacing, l, ang};
     }
 
     public Property[] getProperties() {
-        Property[] superProps = super.getProperties();
-        Property[] thisProps = {
+        return concatArrays(super.getProperties(), new Property[]{
                 new Property("Thickness") {
                     public void setValue(int value) {
                         thickness = (short) value;
@@ -216,19 +196,11 @@ public class BrokenLine extends Line {
                         return 360;
                     }
                 }
-        };
-        Property[] props = new Property[superProps.length + thisProps.length];
-        System.arraycopy(superProps, 0, props, 0, superProps.length);
-        System.arraycopy(thisProps, 0, props, superProps.length, thisProps.length);
-        return props;
+        });
     }
 
     public short getID() {
         return Element.BROKEN_LINE;
-    }
-
-    public int getStepsToPlace() {
-        return 2;
     }
 
     public String getName() {

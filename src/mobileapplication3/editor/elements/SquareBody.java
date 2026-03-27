@@ -7,35 +7,41 @@ import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
 
 public class SquareBody extends Body {
-    // *############    "*" - (anchorX;anchorY)
-    // #     @     #    "@" - (x;y)
+    // *############    "*" - (x;y)
+    // #     @     #    "@" - (x0;y0) in the file
     // #############
 
     protected short l, thickness = 100, angle;
-    protected short anchorX, anchorY;
+
+    public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
+        int x0 = getX0();
+        int y0 = getY0();
+        int dx = l * Mathh.cos(angle) / 1000;
+        int dy = l * Mathh.sin(angle) / 1000;
+
+        g.setColor(getColor(drawAsSelected));
+        g.drawLine(
+                xToPX(x0 - dx/2, zoomOut, offsetX),
+                yToPX(y0 - dy/2, zoomOut, offsetY),
+                xToPX(x0 + dx/2, zoomOut, offsetX),
+                yToPX(y0 + dy/2, zoomOut, offsetY),
+                thickness,
+                zoomOut,
+                true,
+                true,
+                false,
+                false
+        );
+    }
 
     public PlacementStep[] getPlacementSteps() {
-        return new PlacementStep[] {
+        return concatArrays(super.getPlacementSteps(), new PlacementStep[]{
                 new PlacementStep() {
                     public void place(short pointX, short pointY) {
-                        setAnchorPoint(pointX, pointY);
-                    }
-
-                    public String getName() {
-                        return "Move";
-                    }
-
-                    public String getCurrentStepInfo() {
-                        return "x=" + anchorX + "y=" + anchorY;
-                    }
-                },
-                new PlacementStep() {
-                    public void place(short pointX, short pointY) {
-                        short dx = (short) (pointX - anchorX);
-                        short dy = (short) (pointY - anchorY);
+                        short dx = (short) (pointX - x);
+                        short dy = (short) (pointY - y);
                         l = calcDistance(dx, dy);
                         angle = (short) Mathh.arctg(dx, dy);
-                        calcCenterPoint();
                     }
 
                     public String getName() {
@@ -46,33 +52,16 @@ public class SquareBody extends Body {
                         return "l=" + l + "angle=" + angle;
                     }
                 }
-        };
-    }
-
-    public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        int dx = l * Mathh.cos(angle) / 1000;
-        int dy = l * Mathh.sin(angle) / 1000;
-
-        g.setColor(getColor(drawAsSelected));
-        g.drawLine(
-                xToPX(x - dx/2, zoomOut, offsetX),
-                yToPX(y - dy/2, zoomOut, offsetY),
-                xToPX(x + dx/2, zoomOut, offsetX),
-                yToPX(y + dy/2, zoomOut, offsetY),
-                thickness,
-                zoomOut,
-                true,
-                true,
-                false,
-                false
-        );
+        });
     }
 
     public Element setArgs(short[] args) {
         l = args[2];
         thickness = args[3];
         angle = args[4];
-        setCenterPoint(args[0], args[1]);
+
+        setX0(args[0]);
+        setY0(args[1]);
 
         parseBodyArgs(args, 5);
 
@@ -80,13 +69,11 @@ public class SquareBody extends Body {
     }
 
     public short[] getArgs() {
-        return concatArrays(new short[] {x, y, l, thickness, angle}, getBodyArgsValues());
+        return concatArrays(new short[] {getX0(), getY0(), l, thickness, angle}, getBodyArgsValues());
     }
 
     public Property[] getProperties() {
-        Property[] squareBodyProps = new Property[] {
-                xProp,
-                yProp,
+        return concatArrays(concatArrays(super.getProperties(), new Property[] {
                 new Property("L") {
                     public void setValue(int value) {
                         l = (short) value;
@@ -134,9 +121,7 @@ public class SquareBody extends Body {
                         return 360;
                     }
                 }
-        };
-
-        return concatArrays(squareBodyProps, getBodyProperties());
+        }), getBodyProperties());
     }
 
     public short getID() {
@@ -153,15 +138,6 @@ public class SquareBody extends Body {
 
     public short[] getEndPoint() {
         return getCornerPoint(((angle+90)%360 < 180) ? 1 : 3);
-    }
-
-    public void recalcCalculatedArgs() {
-        calcAnchorPoint();
-    }
-
-    public void move(short dx, short dy) {
-        super.move(dx, dy);
-        calcAnchorPoint();
     }
 
     private short[] getCornerPoint(int i) {
@@ -181,36 +157,26 @@ public class SquareBody extends Body {
         }
 
         return new short[] {
-                (short) (x + m1 * l * Mathh.cos(angle) / 2000 + m2 * thickness * Mathh.cos(angle + 90) / 2000),
-                (short) (y + m1 * l * Mathh.sin(angle) / 2000 + m2 * thickness * Mathh.sin(angle + 90) / 2000)
+                (short) (getX0() + m1 * l * Mathh.cos(angle) / 2000 + m2 * thickness * Mathh.cos(angle + 90) / 2000),
+                (short) (getY0() + m1 * l * Mathh.sin(angle) / 2000 + m2 * thickness * Mathh.sin(angle + 90) / 2000)
         };
     }
 
-    private void setCenterPoint(short x, short y) {
-        if (x == this.x && y == this.y) {
-            return;
-        }
-        this.x = x;
-        this.y = y;
-        calcAnchorPoint();
+    private short getX0() {
+        return (short) (getX() + l * Mathh.cos(angle) / 2000 + thickness * Mathh.cos(angle + 90) / 2000);
     }
 
-    private void setAnchorPoint(short x, short y) {
-        if (x == anchorX && y == anchorY) {
-            return;
-        }
-        anchorX = x;
-        anchorY = y;
-        calcCenterPoint();
+    private short getY0() {
+        return (short) (getY() + l * Mathh.sin(angle) / 2000 + thickness * Mathh.sin(angle + 90) / 2000);
     }
 
-    private void calcCenterPoint() {
-        x = (short) (anchorX + l * Mathh.cos(angle) / 2000 + thickness * Mathh.cos(angle + 90) / 2000);
-        y = (short) (anchorY + l * Mathh.sin(angle) / 2000 + thickness * Mathh.sin(angle + 90) / 2000);
+    private void setX0(short x0) {
+        setX((short) (x0 - l * Mathh.cos(angle) / 2000 - thickness * Mathh.cos(angle + 90) / 2000));
     }
 
-    private void calcAnchorPoint() {
-        anchorX = (short) (x - l * Mathh.cos(angle) / 2000 - thickness * Mathh.cos(angle + 90) / 2000);
-        anchorY = (short) (y - l * Mathh.sin(angle) / 2000 - thickness * Mathh.sin(angle + 90) / 2000);
+    private void setY0(short y0) {
+        setY((short) (y0 - l * Mathh.sin(angle) / 2000 - thickness * Mathh.sin(angle + 90) / 2000));
     }
+
+    public void recalcCalculatedArgs() { }
 }

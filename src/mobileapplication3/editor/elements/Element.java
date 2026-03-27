@@ -43,8 +43,29 @@ public abstract class Element {
     protected static final int ARROWS_NORMAL = 1;
     protected static final int ARROWS_INVERTED = -1;
 
+    protected short x, y;
     protected int color;
     protected int colorSelected;
+
+    protected Property xProp = new Property("X") {
+        public void setValue(int value) {
+            setX((short) value);
+        }
+
+        public int getValue() {
+            return getX();
+        }
+    };
+
+    protected Property yProp = new Property("Y") {
+        public void setValue(int value) {
+            setY((short) value);
+        }
+
+        public int getValue() {
+            return getY();
+        }
+    };
 
     protected Element() {
         color = isBody() ? COLOR_BODY : COLOR_LANDSCAPE;
@@ -69,8 +90,8 @@ public abstract class Element {
                 return new Circle().setID(id);
             case Element.BROKEN_LINE:
                 return new BrokenLine();
-            case Element.BROKEN_CIRCLE:
-                return new BrokenCircle();
+//            case Element.BROKEN_CIRCLE: // Not implemented yet
+//                return new BrokenCircle();
             case Element.SINE:
             case Element.SINE_FACE_UP:
             case Element.SINE_FACE_DOWN:
@@ -133,6 +154,32 @@ public abstract class Element {
         return arr;
     }
 
+    public int getStepsToPlace() {
+        return 1;
+    }
+
+    public PlacementStep[] getPlacementSteps() {
+        return new PlacementStep[] {
+                new PlacementStep() {
+                    public void place(short pointX, short pointY) {
+                        setPos(pointX, pointY);
+                    }
+
+                    public String getName() {
+                        return "Move";
+                    }
+
+                    public String getCurrentStepInfo() {
+                        return "x=" + x + " y=" + y;
+                    }
+                }
+        };
+    }
+
+    public PlacementStep[] getExtraEditingSteps() {
+        return new PlacementStep[0];
+    }
+
     public final PlacementStep[] getAllSteps() {
         PlacementStep[] placementSteps = getPlacementSteps();
         PlacementStep[] editSteps = getExtraEditingSteps();
@@ -140,6 +187,13 @@ public abstract class Element {
         System.arraycopy(placementSteps, 0, allSteps, 0, placementSteps.length);
         System.arraycopy(editSteps, 0, allSteps, placementSteps.length, editSteps.length);
         return allSteps;
+    }
+
+    public Property[] getProperties() {
+        return new Property[] {
+                xProp,
+                yProp,
+        };
     }
 
     public Element clone() {
@@ -150,6 +204,10 @@ public abstract class Element {
         Element clone = Element.createTypedInstance(getID());
         clone.setArgs(getArgs());
         return clone;
+    }
+
+    public String toString() {
+        return getName();
     }
 
     protected int getColor(boolean isSelected) {
@@ -168,6 +226,39 @@ public abstract class Element {
         System.arraycopy(arr1, 0, result, 0, arr1.length);
         System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
         return result;
+    }
+
+    public static PlacementStep[] concatArrays(PlacementStep[] arr1, PlacementStep[] arr2) {
+        PlacementStep[] result = new PlacementStep[arr1.length + arr2.length];
+        System.arraycopy(arr1, 0, result, 0, arr1.length);
+        System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
+        return result;
+    }
+
+    public short getX() {
+        return x;
+    }
+
+    public short getY() {
+        return y;
+    }
+
+    public final void setX(short x) {
+        setPos(x, getY());
+    }
+
+    public final void setY(short y) {
+        setPos(getX(), y);
+    }
+
+    public void setPos(short x, short y) {
+        this.x = x;
+        this.y = y;
+        recalcCalculatedArgs();
+    }
+
+    public final void move(short dx, short dy) {
+        setPos((short) (x + dx), (short) (y + dy));
     }
 
     public static void move(Element[] elements, int dx, int dy) {
@@ -193,25 +284,15 @@ public abstract class Element {
         }
     }
 
-    public abstract PlacementStep[] getPlacementSteps();
-
-    public abstract PlacementStep[] getExtraEditingSteps();
-
     public abstract void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected);
 
     public abstract Element setArgs(short[] args);
 
     public abstract short[] getArgs();
 
-    public abstract Property[] getProperties();
-
     public abstract short getID();
 
-    public abstract int getStepsToPlace();
-
     public abstract String getName();
-
-    public abstract void move(short dx, short dy);
 
     public abstract short[] getStartPoint();
 
