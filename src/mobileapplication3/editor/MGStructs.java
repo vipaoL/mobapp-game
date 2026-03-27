@@ -3,6 +3,7 @@
 package mobileapplication3.editor;
 
 import mobileapplication3.editor.elements.Element;
+import mobileapplication3.editor.elements.Link;
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Utils;
@@ -30,6 +31,15 @@ public class MGStructs {
                 if (elements[i] == null) {
                     Logger.log("got null. stopping read");
                     break;
+                }
+            }
+            for (int i = 0; i < elementsCount; i++) {
+                if (elements[i] instanceof Link) {
+                    Link link = (Link) elements[i];
+                    short refOffset = link.getRefOffset();
+                    if (refOffset != 0) {
+                        link.setReference(elements[i + refOffset]);
+                    }
                 }
             }
             ret = shrinkArray(elements);

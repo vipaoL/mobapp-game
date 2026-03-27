@@ -6,6 +6,7 @@ import mobileapplication3.editor.elements.Element;
 import mobileapplication3.editor.elements.Element.PlacementStep;
 import mobileapplication3.editor.elements.EndPoint;
 import mobileapplication3.editor.elements.LevelStart;
+import mobileapplication3.editor.elements.Link;
 import mobileapplication3.ui.*;
 
 public class ElementEditUI extends AbstractPopupPage {
@@ -29,7 +30,7 @@ public class ElementEditUI extends AbstractPopupPage {
     protected IUIComponent initAndGetPageContent() {
         PlacementStep[] editSteps = element.getPlacementSteps();
         PlacementStep[] extraEditSteps = element.getExtraEditingSteps();
-        rows = new Button[editSteps.length + extraEditSteps.length + 3 /*clone, advanced edit and delete*/];
+        rows = new Button[editSteps.length + extraEditSteps.length + 4 /*clone, link, advanced edit and delete*/];
         for (int i = 0; i < editSteps.length; i++) {
             final int o = i;
             rows[o] = new Button(editSteps[i].getName()) {
@@ -59,6 +60,19 @@ public class ElementEditUI extends AbstractPopupPage {
             }
         };
 
+        Button linkButton = new Button("Create Link") {
+            public void buttonPressed() {
+                Element link = element.createLink();
+                sb.add(link);
+                if (element instanceof Link) {
+                    link.setArgs(element.getArgs());
+                } else {
+                    sb.edit(link, 0);
+                }
+                close();
+            }
+        };
+
         final IPopupFeedback fb = this;
         Button advancedEditButton = new Button("AdvancedEdit") {
             public void buttonPressed() {
@@ -78,7 +92,8 @@ public class ElementEditUI extends AbstractPopupPage {
             deleteButton.setIsActive(false);
         }
 
-        rows[rows.length - 3] = (cloneButton);
+        rows[rows.length - 4] = (cloneButton);
+        rows[rows.length - 3] = (linkButton);
         rows[rows.length - 2] = (advancedEditButton);
         rows[rows.length - 1] = (deleteButton);
 

@@ -6,6 +6,7 @@ import mobileapplication3.editor.elements.Element;
 import mobileapplication3.editor.elements.Element.PlacementStep;
 import mobileapplication3.editor.elements.EndPoint;
 import mobileapplication3.editor.elements.LevelStart;
+import mobileapplication3.editor.elements.Link;
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
 
@@ -93,13 +94,19 @@ public abstract class StructureBuilder {
 
     public void add(Element element) {
         if (element != null && !(element instanceof EndPoint)) {
+            int i = buffer.size();
+            if (element instanceof Link) {
+                fixLink((Link) element, i);
+            }
             buffer.addElement(element);
             onUpdate();
-            setSelectedInList(buffer.size() - 1);
+            setSelectedInList(i);
         }
     }
 
     public short[] asShortArray() {
+        fixLinks();
+
         int carriage = 0;
         // {file format version, count of elements, ...data..., eof mark}
         short[] data = new short[1 + 1 + getDataLengthInShorts() + 1];
@@ -123,11 +130,40 @@ public abstract class StructureBuilder {
     }
 
     public short[][] asShortArrays() {
+        fixLinks();
+
         short[][] data = new short[getElementsCount()][];
         for (int i = 0; i < data.length; i++) {
             data[i] = ((Element) buffer.elementAt(i)).getAsShortArray();
         }
         return data;
+    }
+
+    private void fixLinks() {
+        int count = getElementsCount();
+        for (int i = 0; i < count; i++) {
+            Element element = (Element) buffer.elementAt(i);
+            if (element instanceof Link) {
+                fixLink((Link) element, i);
+            }
+        }
+    }
+
+    private void fixLink(Link link, int i) {
+        Element ref = link.getReference();
+        if (ref != null) {
+            try {
+                link.setRefOffset((short) (findInBuffer(ref) - i));
+            } catch (IllegalArgumentException ex) {
+                link.setReference(null);
+                link.setRefOffset((short) 0);
+            }
+        } else {
+            short refOffset = link.getRefOffset();
+            if (refOffset != 0) {
+                link.setReference((Element) buffer.elementAt(i + refOffset));
+            }
+        }
     }
 
     public void saveToFile(String path) throws IOException, SecurityException {
@@ -185,6 +221,7 @@ public abstract class StructureBuilder {
         if (needToRecalculateEndPoint) {
             recalculateEndPoint();
         }
+        fixLinks();
         onUpdate();
     }
 
