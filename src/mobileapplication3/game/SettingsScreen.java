@@ -26,8 +26,29 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             ABOUT = 8,
             BACK = 9;
 
-    private static final int[] LANDSCAPE_COLORS = {GraphicsWorld.DEFAULT_LANDSCAPE_COLOR, 0x44aaff, 0xaaaaff, 0xffffff, 0xffe100, 0x44ffaa, 0xaaff44, 0xff44aa, 0xffaa44};
-    private static final String[] LANDSCAPE_COLOR_NAMES = {"blue", "light blue", "pale blue", "white", "yellow", "light green", "lime", "pink", "orange"};
+    private static final int[] LANDSCAPE_COLORS = {
+            GraphicsWorld.DEFAULT_LANDSCAPE_COLOR,
+            0x44aaff, // light blue
+            0xaaaaff, // pale blue
+            0xffffff, // white
+            0xffe100, // yellow
+            0x44ffaa, // light green
+            0xaaff44, // lime
+            0xff44aa, // pink
+            0xffaa44, // orange
+    };
+
+    private static final String[] LANDSCAPE_COLOR_NAMES = {
+            "blue",
+            "light blue",
+            "pale blue",
+            "white",
+            "yellow",
+            "light green",
+            "lime",
+            "pink",
+            "orange",
+    };
 
     private static String[] menuOpts = new String[BACK + 1];
 
