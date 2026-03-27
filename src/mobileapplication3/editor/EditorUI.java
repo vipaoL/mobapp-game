@@ -3,7 +3,7 @@
 package mobileapplication3.editor;
 
 import mobileapplication3.editor.elements.Element;
-import mobileapplication3.editor.elements.StartPoint;
+import mobileapplication3.editor.elements.StartPointUtils;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.Platform;
@@ -108,7 +108,7 @@ public class EditorUI extends Container {
 
     public void paint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
         if (startPointWarning != null) {
-            startPointWarning.setVisible(!StartPoint.checkStartPoint(elementsBuffer.getElementsAsArray()));
+            startPointWarning.setVisible(!StartPointUtils.checkStartPoint(elementsBuffer.getElementsAsArray()));
         }
         super.paint(g, x0, y0, w, h, forceInactive);
     }
@@ -409,7 +409,7 @@ public class EditorUI extends Container {
     }
 
     private void moveToZeros() {
-        StartPoint.moveToZeros(elementsBuffer.getElementsAsArray());
+        StartPointUtils.moveToZeros(elementsBuffer.getElementsAsArray());
         saveToAutoSave();
     }
 

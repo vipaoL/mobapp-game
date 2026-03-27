@@ -28,7 +28,8 @@ public class Accelerator extends AbstractRectBodyElement {
                 true,
                 true,
                 false,
-                true);
+                true
+        );
         int vectorX = m * Mathh.cos(angle + 15 + directionOffset) / 1000;
         int vectorY = m * Mathh.sin(angle + 15 + directionOffset) / 1000;
         g.drawArrow(
@@ -38,7 +39,8 @@ public class Accelerator extends AbstractRectBodyElement {
                 yToPX(y + vectorY, zoomOut, offsetY),
                 thickness / 4,
                 zoomOut,
-                drawThickness);
+                drawThickness
+        );
     }
 
     private short[] getZeros() {
@@ -79,15 +81,15 @@ public class Accelerator extends AbstractRectBodyElement {
         return this;
     }
 
-    public short[] getArgsValues() {
+    public short[] getArgs() {
         short[] zeros = getZeros();
         short x = zeros[0];
         short y = zeros[1];
         return new short[] {x, y, l, thickness, angle, directionOffset, m, effectDuration};
     }
 
-    public Property[] getArgs() {
-        return concatArrays(super.getArgs(), new Property[] {
+    public Property[] getProperties() {
+        return concatArrays(super.getProperties(), new Property[] {
                 new Property("Speed direction offset") {
                     public void setValue(int value) {
                         directionOffset = (short) value;
@@ -149,5 +151,4 @@ public class Accelerator extends AbstractRectBodyElement {
     public String getName() {
         return "Accelerator";
     }
-
 }

@@ -2,8 +2,10 @@
 
 package mobileapplication3.editor.elements;
 
-public class StartPoint {
-    private StartPoint() { }
+// Just a utility class, not an Element
+
+public class StartPointUtils {
+    private StartPointUtils() { }
 
     public static void moveToZeros(Element[] elements) {
         short[] startPoint = findStartPoint(elements);

@@ -103,12 +103,11 @@ public class Line extends Element {
         return this;
     }
 
-    public short[] getArgsValues() {
-        short[] args = {x1, y1, x2, y2};
-        return args;
+    public short[] getArgs() {
+        return new short[]{x1, y1, x2, y2};
     }
 
-    public Property[] getArgs() {
+    public Property[] getProperties() {
         return new Property[] {
                 new Property("X1") {
                     public void setValue(int value) {
@@ -220,7 +219,7 @@ public class Line extends Element {
 
     public short[] getStartPoint() {
         short[][] ends = getEnds();
-        return StartPoint.compareAsStartPoints(ends[0], ends[1]);
+        return StartPointUtils.compareAsStartPoints(ends[0], ends[1]);
     }
 
     public short[] getEndPoint() {
@@ -233,5 +232,4 @@ public class Line extends Element {
     }
 
     public void recalcCalculatedArgs() { }
-
 }

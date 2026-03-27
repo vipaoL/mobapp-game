@@ -18,12 +18,12 @@ public class Trampoline extends AbstractRectBodyElement {
         return super.setArgs(args);
     }
 
-    public short[] getArgsValues() {
+    public short[] getArgs() {
         return new short[] {x, y, l, thickness, angle, elasticity};
     }
 
-    public Property[] getArgs() {
-        return concatArrays(super.getArgs(), new Property[] {
+    public Property[] getProperties() {
+        return concatArrays(super.getProperties(), new Property[] {
                 new Property("Elasticity") {
                     public void setValue(int value) {
                         elasticity = (short) value;
@@ -51,5 +51,4 @@ public class Trampoline extends AbstractRectBodyElement {
     public String getName() {
         return "Trampoline";
     }
-
 }

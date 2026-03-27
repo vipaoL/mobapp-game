@@ -10,7 +10,6 @@ import mobileapplication3.ui.Property;
  * @author vipaol
  */
 public class Sine extends AbstractCurve {
-
     //        #
     //      #
     //  .  #    "." - (x0;y0)
@@ -66,11 +65,11 @@ public class Sine extends AbstractCurve {
                 }
 
                 public String getName() {
-                    return "Change number of halfperiods";
+                    return "Change number of half-periods";
                 }
 
                 public String getCurrentStepInfo() {
-                    return "halfperiods=" + halfperiods;
+                    return "half-periods=" + halfperiods;
                 }
             }
         };
@@ -168,11 +167,11 @@ public class Sine extends AbstractCurve {
         return this;
     }
 
-    public short[] getArgsValues() {
+    public short[] getArgs() {
         return new short[]{x0, y0, l, halfperiods, (short) Mathh.normalizeAngle(-offset), amp};
     }
 
-    public Property[] getArgs() {
+    public Property[] getProperties() {
         return new Property[] {
                 new Property("X0") {
                     public void setValue(int value) {
@@ -337,7 +336,7 @@ public class Sine extends AbstractCurve {
 
     public short[] getStartPoint() {
         short[][] ends = getEnds();
-        return StartPoint.compareAsStartPoints(ends[0], ends[1]);
+        return StartPointUtils.compareAsStartPoints(ends[0], ends[1]);
     }
 
     public short[] getEndPoint() {

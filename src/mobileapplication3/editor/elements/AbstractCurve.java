@@ -56,7 +56,7 @@ public abstract class AbstractCurve extends Element {
         return NO_ARROWS;
     }
 
-    protected class PointsCache {
+    protected static class PointsCache {
         short[][] pointsCache;
         int cacheCarriage = 0;
 
@@ -90,5 +90,4 @@ public abstract class AbstractCurve extends Element {
         }
 
     }
-
 }

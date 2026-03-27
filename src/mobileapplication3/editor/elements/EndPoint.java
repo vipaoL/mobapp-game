@@ -2,6 +2,7 @@
 
 package mobileapplication3.editor.elements;
 
+import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
 
@@ -53,12 +54,11 @@ public class EndPoint extends Element {
         return this;
     }
 
-    public short[] getArgsValues() {
-        short[] args = {x, y};
-        return args;
+    public short[] getArgs() {
+        return new short[]{x, y};
     }
 
-    public Property[] getArgs() {
+    public Property[] getProperties() {
         return new Property[] {
                 new Property("X") {
                     public void setValue(int value) {
@@ -111,12 +111,7 @@ public class EndPoint extends Element {
         short oldY = oldEndPoint[1];
         short newX = newEndPoint[0];
         short newY = newEndPoint[1];
-        if (newX >= oldX) {
-            if (newX > oldX || (newY > oldY)) {
-                return true;
-            }
-        }
-        return false;
+        return (newX >= oldX) && (newX > oldX || newY > oldY);
     }
 
     public static short[] compareAsEndPoints(short[] a, short[] b) {
@@ -129,15 +124,15 @@ public class EndPoint extends Element {
 
     public static short[] findEndPoint(Element[] elements) {
         short[] endPoint = {0, 0};
-        short[] mayBeEndPoint = endPoint;
+        short[] potentialEndPoint;
         for (int i = 1; i < elements.length; i++) {
             try {
-                mayBeEndPoint = elements[i].getEndPoint();
-                if (EndPoint.compare(endPoint, mayBeEndPoint)) {
-                    endPoint = mayBeEndPoint;
+                potentialEndPoint = elements[i].getEndPoint();
+                if (EndPoint.compare(endPoint, potentialEndPoint)) {
+                    endPoint = potentialEndPoint;
                 }
             } catch (Exception ex) {
-                ex.printStackTrace();
+                Logger.log(ex);
             }
         }
         return endPoint;
@@ -148,5 +143,4 @@ public class EndPoint extends Element {
     }
 
     public void recalcCalculatedArgs() { }
-
 }
