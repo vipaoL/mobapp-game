@@ -12,40 +12,26 @@ import mobileapplication3.ui.Property;
  */
 public class Circle extends AbstractCurve {
     private short id = CIRCLE;
-    private short x, y, r = 1, arcAngle = 360, startAngle, kx = 100, ky = 100;
+    private short r = 1, arcAngle = 360, startAngle, kx = 100, ky = 100;
 
     public PlacementStep[] getPlacementSteps() {
-        return new PlacementStep[] {
-            new PlacementStep() {
-                public void place(short pointX, short pointY) {
-                    setCenter(pointX, pointY);
-                }
+        return concatArrays(super.getPlacementSteps(), new PlacementStep[]{
+                new PlacementStep() {
+                    public void place(short pointX, short pointY) {
+                        short dx = (short) (pointX - x);
+                        short dy = (short) (pointY - y);
+                        setRadius(calcDistance(dx, dy));
+                    }
 
-                public String getName() {
-                    return "Move";
-                }
+                    public String getName() {
+                        return "Change radius";
+                    }
 
-                public String getCurrentStepInfo() {
-                    return "x=" + x + " y=" + y;
+                    public String getCurrentStepInfo() {
+                        return "r=" + r;
+                    }
                 }
-
-            },
-            new PlacementStep() {
-                public void place(short pointX, short pointY) {
-                    short dx = (short) (pointX - x);
-                    short dy = (short) (pointY - y);
-                    setRadius(calcDistance(dx, dy));
-                }
-
-                public String getName() {
-                    return "Change radius";
-                }
-
-                public String getCurrentStepInfo() {
-                    return "r=" + r;
-                }
-            }
-        };
+        });
     }
 
     public PlacementStep[] getExtraEditingSteps() {
@@ -101,18 +87,6 @@ public class Circle extends AbstractCurve {
                 }
             }
         };
-    }
-
-    public Element setCenter(short x, short y) {
-        if (this.x == x && this.y == y) {
-            return this;
-        }
-        if (pointsCache != null) {
-            pointsCache.movePoints((short) (x - this.x), (short) (y - this.y));
-        }
-        this.x = x;
-        this.y = y;
-        return this;
     }
 
     public Element setRadius(short r) {
@@ -175,31 +149,7 @@ public class Circle extends AbstractCurve {
     }
 
     public Property[] getProperties() {
-        return new Property[] {
-                new Property("X") {
-                    public void setValue(int value) {
-                        if (x != value) {
-                            pointsCache = null;
-                        }
-                        x = (short) value;
-                    }
-
-                    public int getValue() {
-                        return x;
-                    }
-                },
-                new Property("Y") {
-                    public void setValue(int value) {
-                        if (y != value) {
-                            pointsCache = null;
-                        }
-                        y = (short) value;
-                    }
-
-                    public int getValue() {
-                        return y;
-                    }
-                },
+        return concatArrays(super.getProperties(), new Property[] {
                 new Property("R") {
                     public void setValue(int value) {
                         if (r != value) {
@@ -334,7 +284,7 @@ public class Circle extends AbstractCurve {
                         return id != CIRCLE;
                     }
                 },
-        };
+        });
     }
 
     public Circle setID(short id) {
@@ -352,14 +302,6 @@ public class Circle extends AbstractCurve {
 
     public String getName() {
         return "Circle";
-    }
-
-    public void move(short dx, short dy) {
-        x += dx;
-        y += dy;
-        if (pointsCache != null) {
-            pointsCache.movePoints(dx, dy);
-        }
     }
 
     public short[] getStartPoint() {

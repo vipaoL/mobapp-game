@@ -11,39 +11,38 @@ import mobileapplication3.ui.Property;
  */
 public class Line extends Element {
     private short id = LINE;
-    protected short x1, y1, x2, y2;
+    protected short x2, y2;
+
+    PlacementStep movePlacementStep = new PlacementStep() {
+        public void place(short pointX, short pointY) {
+            setPos(pointX, pointY);
+        }
+
+        public String getName() {
+            return "Move";
+        }
+
+        public String getCurrentStepInfo() {
+            return "x1=" + x + " y1=" + y + "; x2=" + x2 + " y2=" + y2;
+        }
+    };
 
     public PlacementStep[] getPlacementSteps() {
-        return new PlacementStep[] {
-            new PlacementStep() {
-                public void place(short pointX, short pointY) {
-                    int dx = pointX - x1;
-                    int dy = pointY - y1;
-                    setStartPoint(pointX, pointY);
-                    setEndPoint((short) (x2 + dx), (short) (y2 + dy));
-                }
+        return new PlacementStep[]{
+                movePlacementStep,
+                new PlacementStep() {
+                    public void place(short pointX, short pointY) {
+                        setEndPoint(pointX, pointY);
+                    }
 
-                public String getName() {
-                    return "Move";
-                }
+                    public String getName() {
+                        return "Move end point";
+                    }
 
-                public String getCurrentStepInfo() {
-                    return "x1=" + x1 + " y1=" + y1;
+                    public String getCurrentStepInfo() {
+                        return "x2=" + x2 + " y2=" + y2;
+                    }
                 }
-            },
-            new PlacementStep() {
-                public void place(short pointX, short pointY) {
-                    setEndPoint(pointX, pointY);
-                }
-
-                public String getName() {
-                    return "Move end point";
-                }
-
-                public String getCurrentStepInfo() {
-                    return "x1=" + x1 + " y1=" + y1 + "; x2=" + x2 + " y2=" + y2;
-                }
-            }
         };
     }
 
@@ -59,15 +58,19 @@ public class Line extends Element {
                     }
 
                     public String getCurrentStepInfo() {
-                        return "x1=" + x1 + " y1=" + y1;
+                        return "x1=" + x + " y1=" + y;
                     }
                 }
         };
     }
 
+    public int getStepsToPlace() {
+        return 2;
+    }
+
     public void setStartPoint(short x, short y) {
-        x1 = x;
-        y1 = y;
+        this.x = x;
+        this.y = y;
     }
 
     public void setEndPoint(short x, short y) {
@@ -76,8 +79,8 @@ public class Line extends Element {
     }
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        int x1 = xToPX(this.x1, zoomOut, offsetX);
-        int y1 = yToPX(this.y1, zoomOut, offsetY);
+        int x1 = xToPX(this.x, zoomOut, offsetX);
+        int y1 = yToPX(this.y, zoomOut, offsetY);
         int x2 = xToPX(this.x2, zoomOut, offsetX);
         int y2 = yToPX(this.y2, zoomOut, offsetY);
 
@@ -96,37 +99,19 @@ public class Line extends Element {
     }
 
     public Element setArgs(short[] args) {
-        x1 = args[0];
-        y1 = args[1];
+        x = args[0];
+        y = args[1];
         x2 = args[2];
         y2 = args[3];
         return this;
     }
 
     public short[] getArgs() {
-        return new short[]{x1, y1, x2, y2};
+        return new short[]{x, y, x2, y2};
     }
 
     public Property[] getProperties() {
-        return new Property[] {
-                new Property("X1") {
-                    public void setValue(int value) {
-                        x1 = (short) value;
-                    }
-
-                    public int getValue() {
-                        return x1;
-                    }
-                },
-                new Property("Y1") {
-                    public void setValue(int value) {
-                        y1 = (short) value;
-                    }
-
-                    public int getValue() {
-                        return y1;
-                    }
-                },
+        return concatArrays(super.getProperties(), new Property[]{
                 new Property("X2") {
                     public void setValue(int value) {
                         x2 = (short) value;
@@ -183,7 +168,7 @@ public class Line extends Element {
                         return id != LINE;
                     }
                 },
-        };
+        });
     }
 
     public Line setID(short id) {
@@ -195,24 +180,19 @@ public class Line extends Element {
         return id;
     }
 
-    public int getStepsToPlace() {
-        return 2;
-    }
-
     public String getName() {
         return "Line";
     }
 
-    public void move(short dx, short dy) {
-        x1 += dx;
-        y1 += dy;
-        x2 += dx;
-        y2 += dy;
+    public void setPos(short x, short y) {
+        x2 += (short) (x - getX());
+        y2 += (short) (y - getY());
+        super.setPos(x, y);
     }
 
     private short[][] getEnds() {
         return new short[][] {
-                new short[]{x1, y1},
+                new short[]{x, y},
                 new short[]{x2, y2}
         };
     }

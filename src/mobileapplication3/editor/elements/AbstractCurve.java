@@ -17,6 +17,16 @@ public abstract class AbstractCurve extends Element {
 
     abstract void genPoints();
 
+    public void setPos(short x, short y) {
+        if (this.x == x && this.y == y) {
+            return;
+        }
+        if (pointsCache != null) {
+            pointsCache.movePoints((short) (x - getX()), (short) (y - getY()));
+        }
+        super.setPos(x, y);
+    }
+
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
         if (pointsCache == null) {
             genPoints();
