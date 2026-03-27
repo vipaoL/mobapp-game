@@ -87,7 +87,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int fps;
     private int tps;
     private int physicsIterations;
-    private int debugTickTime, debugPaintTime;
+    private int measuredTickTime, measuredPaintTime;
     private String statusMessage = null;
 
     // debug
@@ -352,6 +352,12 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             long start = System.currentTimeMillis();
             int bigTickN = 0;
 
+            int targetTPS = 60;
+            int measureSeconds = 0;
+            boolean performanceEvaluated = false;
+            int physicsTimeTotal = 0;
+            int ticksTotal = 0;
+
             // Main game cycle
             while (!stopped && hasParent()) {
                 try {
@@ -362,8 +368,30 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                             lastFPSMeasureTime = System.currentTimeMillis();
                             if (!wasPaused) {
                                 fps = framesFromLastFPSMeasure * 1000 / dtFromLastFPSMeasure;
-                                framesFromLastFPSMeasure = 0;
                                 tps = ticksFromLastTPSMeasure * 1000 / dtFromLastFPSMeasure;
+
+                                if (!lockPhysicsPrecision && !performanceEvaluated) {
+                                    measureSeconds++;
+                                    if (measureSeconds >= 3) {
+                                        if (fps < 100) {
+                                            int physTickAvg10x = (int) (physicsTimeTotal * 10 / Math.max(1, ticksTotal));
+                                            Logger.log("perf test (avg): phys=" + (physTickAvg10x / 10) + "." + (physTickAvg10x % 10) + "ms");
+                                            if (physTickAvg10x <= 10) {
+                                                targetTPS = 140;
+                                                Logger.log("device is powerful enough, doubling physics precision...");
+                                            } else {
+                                                Logger.log("keeping low-precision physics");
+                                            }
+                                        } else {
+                                            Logger.log("refresh rate is high, keeping standard multiplier.");
+                                        }
+
+                                        performanceEvaluated = true;
+                                        physicsIterationsUnalteredCount = 0;
+                                    }
+                                }
+
+                                framesFromLastFPSMeasure = 0;
                                 ticksFromLastTPSMeasure = 0;
                                 fpsCounterReady = true;
                             }
@@ -373,10 +401,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                             if (framesFromLastFPSMeasure == 0) {
                                 int prevValue = physicsIterations;
                                 if (fps != 0) {
-                                    physicsIterations = Mathh.constrain(1, 140 / fps + 1, 10);
+                                    physicsIterations = Mathh.constrain(1, targetTPS / fps + 1, 10);
                                     if (physicsIterations == prevValue) {
                                         physicsIterationsUnalteredCount++;
-                                        if (!dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
+                                        if (performanceEvaluated && !dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
                                             Logger.log("locking precision multiplier: ", physicsIterations);
                                             lockPhysicsPrecision = true;
                                         }
@@ -414,11 +442,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                             carContacts = getCarContacts();
                             tickCustomBodyInteractions(carContacts);
                             ticksFromLastTPSMeasure++;
+                            ticksTotal++;
                         }
-                        debugTickTime = (int) (System.currentTimeMillis() - tickStart);
+                        measuredTickTime = (int) (System.currentTimeMillis() - tickStart);
+                        physicsTimeTotal += measuredTickTime;
+
                         long paintStart = System.currentTimeMillis();
                         paint();
-                        debugPaintTime = (int) (System.currentTimeMillis() - paintStart);
+                        measuredPaintTime = (int) (System.currentTimeMillis() - paintStart);
 
                         boolean leftWheelContacts = carContacts[0][0] != null;
                         boolean carBodyContacts = carContacts[1][0] != null;
@@ -1037,7 +1068,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 }
                 drawDebugText(g, String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())));
             }
-            drawDebugText(g, "physics: " + debugTickTime + "ms, paint: " + debugPaintTime + "ms");
+            drawDebugText(g, "physics: " + measuredTickTime + "ms, paint: " + measuredPaintTime + "ms");
 
             if (flipCounter != null) {
                 int x = world.xToPX(flipCounter.lastFlipX);
