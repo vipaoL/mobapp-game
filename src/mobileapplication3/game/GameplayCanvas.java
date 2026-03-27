@@ -387,7 +387,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                             }
                         }
 
-                        if (fpsCounterReady && fps < 20) {
+                        if (fpsCounterReady && fps < 15) {
                             tryReduceLags();
                         }
 
