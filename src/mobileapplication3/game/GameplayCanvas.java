@@ -199,12 +199,35 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         return this;
     }
 
-    public void init() {
+    public synchronized void init() {
         if (gameThread == null || !gameThread.isAlive()) {
+            setLoadingProgress(0);
             log("starting game thread");
             gameThread = new Thread(this, "game canvas");
             gameThread.start();
         }
+    }
+
+    private void setDefaultWorld() {
+        setLoadingProgress(25);
+
+        log("creating world");
+        // here Siemens C65 freezes if obfuscation is enabled
+        world = new GraphicsWorld();
+        world.setGame(this);
+
+        setLoadingProgress(30);
+        log("setting the world");
+        initWorld();
+    }
+
+    private void initWorld() {
+        log("initing world");
+        world.setGravity(FXVector.newVector(0, 1000));
+        world.getLandscape().getBody().shape().setElasticity(5);
+        setLoadingProgress(40);
+        reset();
+        isWorldLoaded = true;
     }
 
     private void reset() {
@@ -234,28 +257,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             world.addCar(carSpawnX, carSpawnY, FXUtil.TWO_PI_2FX / 360 * 30);
         }
         setLoadingProgress(60);
-    }
-
-    private void initWorld() {
-        log("initing world");
-        world.setGravity(FXVector.newVector(0, 1000));
-        world.getLandscape().getBody().shape().setElasticity(5);
-        setLoadingProgress(40);
-        reset();
-        isWorldLoaded = true;
-    }
-
-    private void setDefaultWorld() {
-        setLoadingProgress(25);
-
-        log("creating world");
-        // there siemens c65 stucks if obfuscation is enabled
-        world = new GraphicsWorld();
-        world.setGame(this);
-
-        setLoadingProgress(30);
-        log("setting the world");
-        initWorld();
     }
 
     // game thread with main cycle and preparing
