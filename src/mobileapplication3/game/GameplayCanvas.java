@@ -1668,7 +1668,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             return false;
         }
         int dx = Math.abs(pointerX - pointerPressedX);
-        int marginX = scW / 32;
+        int marginX = scW / 8;
         int marginY = scH / 32;
 
         //noinspection SuspiciousNameCombination
