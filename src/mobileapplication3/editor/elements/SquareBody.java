@@ -7,7 +7,6 @@ import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
 
 public class SquareBody extends Body {
-
     // *############    "*" - (anchorX;anchorY)
     // #     @     #    "@" - (x;y)
     // #############
@@ -80,12 +79,12 @@ public class SquareBody extends Body {
         return this;
     }
 
-    public short[] getArgsValues() {
+    public short[] getArgs() {
         return concatArrays(new short[] {x, y, l, thickness, angle}, getBodyArgsValues());
     }
 
-    public Property[] getArgs() {
-        Property[] squareBodyArgs = new Property[] {
+    public Property[] getProperties() {
+        Property[] squareBodyProps = new Property[] {
                 xProp,
                 yProp,
                 new Property("L") {
@@ -137,7 +136,7 @@ public class SquareBody extends Body {
                 }
         };
 
-        return concatArrays(squareBodyArgs, getBodyArgs());
+        return concatArrays(squareBodyProps, getBodyProperties());
     }
 
     public short getID() {

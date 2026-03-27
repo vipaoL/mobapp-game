@@ -11,7 +11,6 @@ import mobileapplication3.ui.Property;
  * @author vipaol
  */
 public class BrokenLine extends Line {
-
     protected short thickness = 20, platformLength, spacing = 10, l, ang;
 
     public PlacementStep[] getPlacementSteps() {
@@ -129,13 +128,13 @@ public class BrokenLine extends Line {
         return this;
     }
 
-    public short[] getArgsValues() {
+    public short[] getArgs() {
         return new short[]{x1, y1, x2, y2, thickness, platformLength, spacing, l, ang};
     }
 
-    public Property[] getArgs() {
-        Property[] superArgs = super.getArgs();
-        Property[] thisArgs = {
+    public Property[] getProperties() {
+        Property[] superProps = super.getProperties();
+        Property[] thisProps = {
                 new Property("Thickness") {
                     public void setValue(int value) {
                         thickness = (short) value;
@@ -218,10 +217,10 @@ public class BrokenLine extends Line {
                     }
                 }
         };
-        Property[] args = new Property[superArgs.length + thisArgs.length];
-        System.arraycopy(superArgs, 0, args, 0, superArgs.length);
-        System.arraycopy(thisArgs, 0, args, superArgs.length, thisArgs.length);
-        return args;
+        Property[] props = new Property[superProps.length + thisProps.length];
+        System.arraycopy(superProps, 0, props, 0, superProps.length);
+        System.arraycopy(thisProps, 0, props, superProps.length, thisProps.length);
+        return props;
     }
 
     public short getID() {

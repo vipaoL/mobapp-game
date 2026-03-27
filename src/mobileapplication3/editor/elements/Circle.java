@@ -170,11 +170,11 @@ public class Circle extends AbstractCurve {
         return this;
     }
 
-    public short[] getArgsValues() {
+    public short[] getArgs() {
         return new short[]{x, y, r, arcAngle, startAngle, kx, ky};
     }
 
-    public Property[] getArgs() {
+    public Property[] getProperties() {
         return new Property[] {
                 new Property("X") {
                     public void setValue(int value) {
@@ -366,7 +366,7 @@ public class Circle extends AbstractCurve {
         if (Mathh.isPointOnArc(180, startAngle, arcAngle)) {
             return new short[]{(short) (x - r * kx/100), y};
         } else {
-            return StartPoint.compareAsStartPoints(getPointOnCircleByAngle(startAngle), getPointOnCircleByAngle(startAngle + arcAngle));
+            return StartPointUtils.compareAsStartPoints(getPointOnCircleByAngle(startAngle), getPointOnCircleByAngle(startAngle + arcAngle));
         }
     }
 
@@ -428,5 +428,4 @@ public class Circle extends AbstractCurve {
     }
 
     public void recalcCalculatedArgs() { }
-
 }

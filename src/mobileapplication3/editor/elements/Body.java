@@ -75,7 +75,7 @@ public abstract class Body extends Element {
         };
     }
 
-    public Property[] getBodyArgs() {
+    public Property[] getBodyProperties() {
         return new Property[] {
                 new Property("Is lava") {
                     public void setValue(int value) {

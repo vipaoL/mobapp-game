@@ -16,5 +16,4 @@ public class LevelFinish extends AbstractRectBodyElement {
     public String getName() {
         return "Level Finish";
     }
-
 }

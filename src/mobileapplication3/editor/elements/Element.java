@@ -96,11 +96,11 @@ public abstract class Element {
     }
 
     public void printDebug() {
-        short[] args = getArgsValues();
+        short[] args = getArgs();
         StringBuffer sb = new StringBuffer();
-        sb.append("id="+getID());
+        sb.append("id=").append(getID());
         for (int i = 0; i < args.length; i++) {
-            sb.append(" " + args[i]);
+            sb.append(" ").append(args[i]);
         }
         Logger.log(sb.toString());
     }
@@ -118,7 +118,7 @@ public abstract class Element {
     }
 
     public int getArgsCount() {
-        return getArgsValues().length;
+        return getArgs().length;
     }
 
     public int getDataLengthInShorts() {
@@ -126,7 +126,7 @@ public abstract class Element {
     }
 
     public short[] getAsShortArray() {
-        short[] args = getArgsValues();
+        short[] args = getArgs();
         short[] arr = new short[args.length + 1];
         arr[0] = getID();
         System.arraycopy(args, 0, arr, 1, args.length);
@@ -148,7 +148,7 @@ public abstract class Element {
         }
 
         Element clone = Element.createTypedInstance(getID());
-        clone.setArgs(getArgsValues());
+        clone.setArgs(getArgs());
         return clone;
     }
 
@@ -201,9 +201,9 @@ public abstract class Element {
 
     public abstract Element setArgs(short[] args);
 
-    public abstract short[] getArgsValues();
+    public abstract short[] getArgs();
 
-    public abstract Property[] getArgs();
+    public abstract Property[] getProperties();
 
     public abstract short getID();
 
@@ -221,10 +221,9 @@ public abstract class Element {
 
     public abstract void recalcCalculatedArgs();
 
-    public abstract class PlacementStep {
+    public abstract static class PlacementStep {
         public abstract void place(short pointX, short pointY);
         public abstract String getName();
         public abstract String getCurrentStepInfo();
     }
-
 }

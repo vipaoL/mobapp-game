@@ -57,12 +57,12 @@ public class RoundBody extends Body {
         return this;
     }
 
-    public short[] getArgsValues() {
+    public short[] getArgs() {
         return concatArrays(new short[] {x, y, r}, getBodyArgsValues());
     }
 
-    public Property[] getArgs() {
-        Property[] roundBodyArgs = new Property[] {
+    public Property[] getProperties() {
+        Property[] roundBodyProps = new Property[] {
                 xProp,
                 yProp,
                 new Property("R") {
@@ -72,7 +72,7 @@ public class RoundBody extends Body {
                 }
         };
 
-        return concatArrays(roundBodyArgs, getBodyArgs());
+        return concatArrays(roundBodyProps, getBodyProperties());
     }
 
     public short getID() {

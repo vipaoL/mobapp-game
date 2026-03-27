@@ -4,7 +4,7 @@ package mobileapplication3.editor;
 
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.editor.elements.EndPoint;
-import mobileapplication3.editor.elements.StartPoint;
+import mobileapplication3.editor.elements.StartPointUtils;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.UIComponent;
@@ -34,7 +34,7 @@ public class StructureViewerComponent extends UIComponent {
 
     public void setElements(Element[] elements) {
         this.elements = elements;
-        start = StartPoint.findStartPoint(elements)[0];
+        start = StartPointUtils.findStartPoint(elements)[0];
         end = EndPoint.findEndPoint(elements)[0];
     }
 

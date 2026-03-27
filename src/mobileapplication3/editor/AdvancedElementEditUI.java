@@ -18,7 +18,7 @@ public class AdvancedElementEditUI extends AbstractPopupPage {
     }
 
     protected Button[] getActionButtons() {
-        final short[] argsUnmodified = element.getArgsValues();
+        final short[] argsUnmodified = element.getArgs();
         return new Button[] {
             new Button("OK") {
                 public void buttonPressed() {
@@ -52,7 +52,7 @@ public class AdvancedElementEditUI extends AbstractPopupPage {
     }
 
     private void refreshList() {
-        Property[] properties = element.getArgs();
+        Property[] properties = element.getProperties();
         IUIComponent[] rows = new IUIComponent[properties.length + 1];
         for (int i = 0; i < properties.length; i++) {
             final Property property = properties[i];

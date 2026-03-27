@@ -52,12 +52,11 @@ public class LevelStart extends Element {
         return this;
     }
 
-    public short[] getArgsValues() {
-        short[] args = {x, y};
-        return args;
+    public short[] getArgs() {
+        return new short[]{x, y};
     }
 
-    public Property[] getArgs() {
+    public Property[] getProperties() {
         return new Property[] {
                 new Property("X") {
                     public void setValue(int value) {
@@ -110,5 +109,4 @@ public class LevelStart extends Element {
     }
 
     public void recalcCalculatedArgs() { }
-
 }

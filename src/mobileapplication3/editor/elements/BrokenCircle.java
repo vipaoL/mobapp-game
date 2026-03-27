@@ -9,7 +9,6 @@ import mobileapplication3.platform.ui.Graphics;
  * @author vipaol
  */
 public class BrokenCircle extends Circle {
-
     public void placePoint(int i, short x, short y) {
 
     }
@@ -23,7 +22,7 @@ public class BrokenCircle extends Circle {
         return this;
     }
 
-    public short[] getArgsValues() {
+    public short[] getArgs() {
         return null;
     }
 
@@ -50,5 +49,4 @@ public class BrokenCircle extends Circle {
     public boolean isBody() {
         return true;
     }
-
 }

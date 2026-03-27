@@ -7,7 +7,6 @@ import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
 
 public abstract class AbstractRectBodyElement extends Element {
-
     // *############    "*" - (anchorX;anchorY)
     // #     @     #    "@" - (x;y)
     // #############
@@ -79,11 +78,11 @@ public abstract class AbstractRectBodyElement extends Element {
         return this;
     }
 
-    public short[] getArgsValues() {
+    public short[] getArgs() {
         return new short[] {x, y, l, thickness, angle};
     }
 
-    public Property[] getArgs() {
+    public Property[] getProperties() {
         return new Property[] {
                 new Property("X") {
                     public void setValue(int value) {
@@ -130,7 +129,7 @@ public abstract class AbstractRectBodyElement extends Element {
                     }
 
                     public int getMaxValue() {
-                        return (short) (l*2);
+                        return (short) (l * 2);
                     }
                 },
                 new Property("Angle") {

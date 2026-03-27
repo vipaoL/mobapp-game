@@ -40,7 +40,7 @@ public class MGStructs {
         }
         try {
             dis.close();
-        } catch (Exception e) { }
+        } catch (Exception ignored) { }
         return ret;
     }
 
@@ -82,6 +82,7 @@ public class MGStructs {
             Logger.logReplaceLast(prevLogLine, logLine);
 
             element.setArgs(args);
+
             return element;
         } catch (IOException ex) {
             Logger.log(ex);

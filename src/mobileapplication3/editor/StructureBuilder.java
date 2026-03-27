@@ -111,7 +111,6 @@ public abstract class StructureBuilder {
 
         for (int i = 0; i < getElementsCount(); i++) {
             Element element = (Element) buffer.elementAt(i);
-
             short[] elementArgs = element.getAsShortArray();
             for (int j = 0; j < elementArgs.length; j++) {
                 data[carriage] = elementArgs[j];
