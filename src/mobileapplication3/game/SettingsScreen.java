@@ -52,7 +52,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             "orange",
     };
 
-    private static String[] menuOpts = new String[BACK + 1];
+    private static final String[] menuOpts = new String[BACK + 1];
 
     // array with states of all buttons (active/inactive/enabled)
     private final int[] statemap = new int[menuOpts.length];
@@ -82,24 +82,22 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             init();
         }
 
-        while (!isStopped) {
-            if (!isPaused) {
-                start = System.currentTimeMillis();
+        try {
+            while (!isStopped) {
+                if (!isPaused) {
+                    start = System.currentTimeMillis();
 
-                repaint();
-                tick();
+                    repaint();
+                    tick();
 
-                sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
-                sleep = Math.max(sleep, 0);
-            } else {
-                sleep = 200;
-            }
-            try {
+                    sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
+                    sleep = Math.max(sleep, 0);
+                } else {
+                    sleep = 200;
+                }
                 Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
-        }
+        } catch (InterruptedException ignored) { }
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
