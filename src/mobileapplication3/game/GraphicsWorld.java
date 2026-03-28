@@ -25,7 +25,7 @@ public class GraphicsWorld extends World {
     private static final int CAR_COLLISION_LAYER = 1;
 
     public int colBg = 0x000000;
-    public int colLandscape = MobappGameSettings.getLandscapeColor();
+    public int colLandscape = DEFAULT_LANDSCAPE_COLOR;
     int colBodies = 0xffffff;
     int currColBg;
     int currColWheel;
@@ -70,11 +70,27 @@ public class GraphicsWorld extends World {
 
     public GraphicsWorld() {
         resetColors();
+        readSettings();
     }
 
     public GraphicsWorld(World w) {
         super(w);
         resetColors();
+        readSettings();
+    }
+
+    private void readSettings() {
+        bg = bgOverride;
+        try {
+            currColLandscape = colLandscape = MobappGameSettings.getLandscapeColor();
+            bg = bg || MobappGameSettings.isBGEnabled(false);
+            legacyDrawingMethod = MobappGameSettings.isLegacyDrawingMethodEnabled(false);
+        } catch (Throwable ex) {
+            Logger.log(ex);
+        }
+        if (bg) {
+            colBg = 0x150031;
+        }
     }
 
     public void resetColors() {
@@ -660,17 +676,10 @@ public class GraphicsWorld extends World {
         calcZoomOut();
         bgLineThickness = Math.max(w, h)/250;
 
-        bg = bgOverride;
         try {
             betterGraphics = MobappGameSettings.isBetterGraphicsEnabled(Math.max(scWidth, scHeight) >= BIG_SCREEN_SIDE);
-            currColLandscape = colLandscape = MobappGameSettings.getLandscapeColor();
-            bg = bg || MobappGameSettings.isBGEnabled(false);
-            legacyDrawingMethod = MobappGameSettings.isLegacyDrawingMethodEnabled(false);
         } catch (Throwable ex) {
             Logger.log(ex);
-        }
-        if (bg) {
-            colBg = 0x150031;
         }
     }
 
