@@ -1664,6 +1664,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         boolean inMenuArea = (menuLeftX <= x && x <= menuLeftX + btnW) && (btnTopY <= y && y <= btnTopY + btnH);
         boolean inPauseArea = (pauseLeftX <= x && x <= pauseLeftX + btnW) && (btnTopY <= y && y <= btnTopY + btnH);
 
+        pauseTouched = false;
+        menuTouched = false;
         if (inPauseArea) {
             pauseTouched = true;
         } else if (inMenuArea) {
@@ -1675,14 +1677,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         return true;
     }
     public boolean handlePointerDragged(int x, int y) {
-        if (pauseTouched || menuTouched) {
-            int t = Font.getDefaultFontHeight() / 2;
-            if (Math.abs(x - pointerPressedX) > t || Math.abs(y - pointerPressedY) > t) {
-                pauseTouched = false;
-                menuTouched = false;
-            }
-        }
-
         pointerX = x;
         pointerY = y;
 
@@ -1699,6 +1693,19 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             restart();
             Platform.vibrate(1);
         }
+
+        motorTurnedOn = false;
+
+        pointerPressedX = pointerX = 0;
+        pointerPressedY = pointerY = 0;
+
+        restartGestureStarted = false;
+        restartGestureCompleted = false;
+
+        return true;
+    }
+
+    protected boolean handlePointerClicked(int x, int y) {
         if (pauseTouched) {
             pauseButtonPressed();
         }
@@ -1708,13 +1715,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         pauseTouched = false;
         menuTouched = false;
-        motorTurnedOn = false;
-
-        pointerPressedX = pointerX = 0;
-        pointerPressedY = pointerY = 0;
-
-        restartGestureStarted = false;
-        restartGestureCompleted = false;
 
         return true;
     }
