@@ -59,6 +59,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private boolean restartGestureStarted = false;
     private boolean restartGestureCompleted = false;
 
+    private boolean bottomButtons = false;
+
     private boolean paused = false;
     private boolean stopped = false;
     private boolean isStopping = false;
@@ -279,6 +281,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 physicsIterationsSetting = MobappGameSettings.getPhysicsPrecision();
                 maxFrameTime = MobappGameSettings.getFrameTime();
                 showFPS = MobappGameSettings.isFPSShown(showFPS);
+                bottomButtons = MobappGameSettings.buttonsAtTheBottom(scW < scH && RootContainer.displayKbHints);
                 battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
             } catch (Throwable ex) {
                 Platform.showError("Can't read settings", ex);
@@ -886,6 +889,12 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             drawLoading(g);
             Logger.paint(g);
         } else {
+            if (bottomButtons && hintVisibleTimer > 0) {
+                int maxOffset = getButtonH() / 2;
+                world.camOffsetY = -Mathh.constrain(0, maxOffset * 8 * (hintVisibleTimer - HINT_TIMER_MAX / 8) / HINT_TIMER_MAX, maxOffset);
+            } else {
+                world.camOffsetY = 0;
+            }
             if (worldgen != null) {
                 world.drawWorld(g, worldgen.getStructures(), worldgen.getStructuresRingBufferOffset(), worldgen.getStructuresCount());
             } else {
@@ -939,31 +948,40 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     // debug info, on-screen log, game over screen
     private void drawHUD(Graphics g) {
         int centerAnchor = Graphics.HCENTER | Graphics.VCENTER;
-        // show hint on first start
+        // show buttons hint on first start
         if (hintVisibleTimer > 0 && levelIdVisibleTimer <= 0) {
-            int btnW = scW/3;
-            int btnH = scH/6;
+            int btnW = getButtonW();
+            int btnH = getButtonH();
+
+            int menuX = getMenuButtonLeftX();
+            int pauseX = getPauseButtonLeftX();
+            int btnY = getButtonsTopY();
+
             int btnRoundingD = Math.min(btnW, btnH) / 4;
+
+            int textY = btnY + btnH / 2;
+            int menuTextX = menuX + btnW / 2;
+            int pauseTextX = pauseX + btnW / 2;
+
             int landscapeColor = getLandscapeColor();
-            int buttonBgColor = dimColor(landscapeColor, Math.min(200, hintVisibleTimer) / 5);
+            int buttonBgColor = dimColor(landscapeColor, Math.min(200, hintVisibleTimer) / 3);
             if (getLuma(buttonBgColor) / 2 > getLuma(world.currColBg)) {
                 g.setColor(buttonBgColor);
-                g.fillRoundRect(0, 0, btnW, btnH, btnRoundingD, btnRoundingD);
-                g.fillRoundRect(w - btnW, 0, btnW, btnH, btnRoundingD, btnRoundingD);
+                g.fillRoundRect(menuX, btnY, btnW, btnH, btnRoundingD, btnRoundingD);
+                g.fillRoundRect(pauseX, btnY, btnW, btnH, btnRoundingD, btnRoundingD);
             }
-            int xLeft = scW / 6;
-            int xRight = scW - xLeft;
-            int y = scH / 12;
+
             g.setColor(dimColor(landscapeColor, Math.min(200, hintVisibleTimer)));
-            setFont(new Font(Font.SIZE_MEDIUM), g);
+            setFont(new Font(bottomButtons ? Font.SIZE_SMALL : Font.SIZE_MEDIUM), g);
+
             if (RootContainer.displayKbHints) {
-                g.drawString(MENU_HINT, xLeft, y - currentFontH / 2, centerAnchor);
-                g.drawString(MENU_HINT_KB, xLeft, y + currentFontH / 2, centerAnchor);
-                g.drawString(PAUSE_HINT, xRight, y - currentFontH / 2, centerAnchor);
-                g.drawString(PAUSE_HINT_KB, xRight, y + currentFontH / 2, centerAnchor);
+                g.drawString(MENU_HINT, menuTextX, textY - currentFontH / 2, centerAnchor);
+                g.drawString(MENU_HINT_KB, menuTextX, textY + currentFontH / 2, centerAnchor);
+                g.drawString(PAUSE_HINT, pauseTextX, textY - currentFontH / 2, centerAnchor);
+                g.drawString(PAUSE_HINT_KB, pauseTextX, textY + currentFontH / 2, centerAnchor);
             } else {
-                g.drawString(MENU_HINT, xLeft, y, centerAnchor);
-                g.drawString(PAUSE_HINT, xRight, y, centerAnchor);
+                g.drawString(MENU_HINT, menuTextX, textY, centerAnchor);
+                g.drawString(PAUSE_HINT, pauseTextX, textY, centerAnchor);
             }
         }
 
@@ -1110,7 +1128,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         }
 
         // score counter and debug posReset indicator
-        if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || hintVisibleTimer > RESTART_HINT_TIME + 10) && !restartGestureStarted) {
+        if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || (hintVisibleTimer > RESTART_HINT_TIME + 10 && !bottomButtons)) && !restartGestureStarted) {
             int accent = dimColor(getLandscapeColor(), 50);
             int flipIndicatorIdleColor = countPoints ? 0xffffff : 0x802020;
 
@@ -1155,8 +1173,36 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
             setFont(largefont, g);
             g.setColor(255, 255, 255);
-            g.drawString("PAUSED", scW / 2, scH / 3 + currentFontH / 2, Graphics.HCENTER | Graphics.TOP);
+            g.drawString("PAUSED", scW / 2, scH / 3, Graphics.VCENTER | Graphics.HCENTER);
         }
+    }
+
+    private int getButtonW() {
+        return scW / 3;
+    }
+
+    private int getButtonH() {
+        return bottomButtons ? Math.max(smallfont.getHeight() * 5 / 2, scH / 16) : scH / 6;
+    }
+
+    private int getButtonMarginX() {
+        return scW / 32;
+    }
+
+    private int getButtonMarginY() {
+        return scH / 32;
+    }
+
+    private int getMenuButtonLeftX() {
+        return bottomButtons ? getButtonMarginX() : 0;
+    }
+
+    private int getButtonsTopY() {
+        return bottomButtons ? scH - getButtonH() - getButtonMarginY() : 0;
+    }
+
+    private int getPauseButtonLeftX() {
+        return bottomButtons ? scW - getButtonW() - getButtonMarginX() : scW - getButtonW();
     }
 
     private int getLandscapeColor() {
@@ -1608,9 +1654,19 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         pointerPressedX = pointerX = x;
         pointerPressedY = pointerY = y;
 
-        if (x > scW * 2 / 3 && y < scH / 6) {
+        int btnW = getButtonW();
+        int btnH = getButtonH();
+
+        int menuLeftX = getMenuButtonLeftX();
+        int pauseLeftX = getPauseButtonLeftX();
+        int btnTopY = getButtonsTopY();
+
+        boolean inMenuArea = (menuLeftX <= x && x <= menuLeftX + btnW) && (btnTopY <= y && y <= btnTopY + btnH);
+        boolean inPauseArea = (pauseLeftX <= x && x <= pauseLeftX + btnW) && (btnTopY <= y && y <= btnTopY + btnH);
+
+        if (inPauseArea) {
             pauseTouched = true;
-        } else if (x < scW / 3 && y < scH / 6) {
+        } else if (inMenuArea) {
             menuTouched = true;
         } else if (!gameOver) {
             motorTurnedOn = true;

@@ -48,6 +48,8 @@ public class GraphicsWorld extends World {
     int zoomOut = 100;
     int offsetX = 0;
     int offsetY = 0;
+    public int camOffsetX;
+    public int camOffsetY;
     public int viewField;
 
     public int carX = 0;
@@ -624,11 +626,11 @@ public class GraphicsWorld extends World {
 
 
     public int xToPX(int c) {
-        return c * 1000 / zoomOut + offsetX;
+        return c * 1000 / zoomOut + offsetX + camOffsetX;
     }
 
     public int yToPX(int c) {
-        return c * 1000 / zoomOut + offsetY;
+        return c * 1000 / zoomOut + offsetY + camOffsetY;
     }
 
     public void refreshCarPos() {

@@ -17,6 +17,7 @@ public class MobappGameSettings {
             FRAME_TIME = "FrameTime",
             SHOW_FPS = "showFPS",
             SHOW_BG = "enBG",
+            BOTTOM_BUTTONS = "bottBtns",
             BATTERY_INDICATOR = "Batt";
 
     public static final int DYNAMIC_PHYSICS_PRECISION = -1, AUTO_PHYSICS_PRECISION = 0;
@@ -44,6 +45,7 @@ public class MobappGameSettings {
                     FRAME_TIME,
                     SHOW_FPS,
                     SHOW_BG,
+                    BOTTOM_BUTTONS,
                     BATTERY_INDICATOR
                 }, RECORD_STORE_SETTINGS);
         }
@@ -184,6 +186,24 @@ public class MobappGameSettings {
 
     public static boolean toggleLegacyDrawingMethod() {
         return getSettingsInst().toggleBool(LEGACY_DRAWING_METHOD);
+    }
+
+    ///
+
+    public static boolean buttonsAtTheBottom() {
+        return getSettingsInst().getBool(BOTTOM_BUTTONS);
+    }
+
+    public static boolean buttonsAtTheBottom(boolean defaultValue) {
+        return getSettingsInst().getBool(BOTTOM_BUTTONS, defaultValue);
+    }
+
+    public static void setButtonsAtTheBottom(boolean b) {
+        getSettingsInst().set(BOTTOM_BUTTONS, b);
+    }
+
+    public static boolean toggleButtonsAtTheBottom() {
+        return getSettingsInst().toggleBool(BOTTOM_BUTTONS);
     }
 
     ///

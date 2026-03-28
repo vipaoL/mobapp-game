@@ -20,11 +20,12 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             LEGACY_DRAWING_METHOD = 2,
             FRAME_TIME = 3,
             SHOW_FPS = 4,
-            BATTERY = 5,
-            DEBUG = 6,
-            PLATFORM_SETTINGS = 7,
-            ABOUT = 8,
-            BACK = 9;
+            BOTTOM_BUTTONS = 5,
+            BATTERY = 6,
+            DEBUG = 7,
+            PLATFORM_SETTINGS = 8,
+            ABOUT = 9,
+            BACK = 10;
 
     private static final int[] LANDSCAPE_COLORS = {
             GraphicsWorld.DEFAULT_LANDSCAPE_COLOR,
@@ -145,6 +146,9 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             case LANDSCAPE_COLOR:
                 MobappGameSettings.setLandscapeColor(LANDSCAPE_COLORS[(findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor()) + 1) % LANDSCAPE_COLORS.length]);
                 break;
+            case BOTTOM_BUTTONS:
+                MobappGameSettings.toggleButtonsAtTheBottom();
+                break;
             case BATTERY:
                 if (!MobappGameSettings.isBattIndicatorEnabled()) {
                     if (!Battery.checkAndInit()) {
@@ -194,6 +198,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";
         menuOpts[SHOW_FPS] = "Show FPS";
         menuOpts[LANDSCAPE_COLOR] = "Landscape color: " + LANDSCAPE_COLOR_NAMES[findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor())];
+        menuOpts[BOTTOM_BUTTONS] = "Buttons at the bottom";
         menuOpts[BATTERY] = "Show battery level";
         menuOpts[DEBUG] = "Debug settings";
         menuOpts[PLATFORM_SETTINGS] = "Platform settings";
@@ -209,6 +214,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         } else {
             setStateFor(STATE_INACTIVE, BATTERY);
         }
+        setEnabledFor(MobappGameSettings.buttonsAtTheBottom(), BOTTOM_BUTTONS);
         try {
             Class.forName("PlatformSettingsScreen");
             menuOpts[PLATFORM_SETTINGS] = String.valueOf(getPlatformSettings());
