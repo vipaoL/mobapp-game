@@ -44,6 +44,10 @@ public class GraphicsWorld extends World {
     private int bgLineThickness;
     public int bgXOffset = 0;
 
+    public int cameraRotationMode = MobappGameSettings.CAMERA_ROTATION_DEFAULT_VALUE;
+    private int camCos = 1000;
+    private int camSin = 0;
+
     int zoomOutBase = 0;
     int zoomOut = 100;
     int offsetX = 0;
@@ -85,6 +89,7 @@ public class GraphicsWorld extends World {
             currColLandscape = colLandscape = MobappGameSettings.getLandscapeColor();
             bg = bg || MobappGameSettings.isBGEnabled(false);
             legacyDrawingMethod = MobappGameSettings.isLegacyDrawingMethodEnabled(false);
+            cameraRotationMode = MobappGameSettings.getCameraRotationMode();
         } catch (Throwable ex) {
             Logger.log(ex);
         }
@@ -260,7 +265,7 @@ public class GraphicsWorld extends World {
             calcOffset();
 
             drawBg(g);
-            if (structuresData != null && !legacyDrawingMethod) {
+            if (structuresData != null && !legacyDrawingMethod && cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC) {
                 try {
                     drawLandscape(g, structuresData, structureRingBufferOffset, structureCount);
                 } catch (Exception ex) {
@@ -369,9 +374,12 @@ public class GraphicsWorld extends World {
         if (vertices.length == 1) { // if shape of the body is circle
             int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
             g.setColor(colorStroke);
+            int x = b.positionFX().xAsInt();
+            int y = b.positionFX().yAsInt();
+            int zoomedRadius = radius * 1000 / zoomOut;
             drawArc(g,
-                    xToPX(b.positionFX().xAsInt() - radius),
-                    yToPX(b.positionFX().yAsInt() - radius),
+                    xToPX(x, y) - zoomedRadius,
+                    yToPX(x, y) - zoomedRadius,
                     radius * 2000 / zoomOut,
                     radius * 2000 / zoomOut,
                     0, 360, thickness, colorFill
@@ -380,15 +388,21 @@ public class GraphicsWorld extends World {
         else { // if not a circle, then a polygon
             // fill
             g.setColor(colorFill);
+            int p0X = vertices[0].xAsInt();
+            int p0Y = vertices[0].yAsInt();
             for (int i = 0; i < vertices.length - 1; i++) {
                 if (b != carbody) {
+                    int piX = vertices[i].xAsInt();
+                    int piY = vertices[i].yAsInt();
+                    int pi1X = vertices[i + 1].xAsInt();
+                    int pi1Y = vertices[i + 1].yAsInt();
                     g.fillTriangle(
-                            xToPX(vertices[0].xAsInt()),
-                            yToPX(vertices[0].yAsInt()),
-                            xToPX(vertices[i].xAsInt()),
-                            yToPX(vertices[i].yAsInt()),
-                            xToPX(vertices[i + 1].xAsInt()),
-                            yToPX(vertices[i + 1].yAsInt())
+                            xToPX(p0X, p0Y),
+                            yToPX(p0X, p0Y),
+                            xToPX(piX, piY),
+                            yToPX(piX, piY),
+                            xToPX(pi1X, pi1Y),
+                            yToPX(pi1X, pi1Y)
                     );
                 }
             }
@@ -396,19 +410,25 @@ public class GraphicsWorld extends World {
             // stroke
             g.setColor(colorStroke);
             for (int i = 0; i < vertices.length - 1; i++) {
+                int piX = vertices[i].xAsInt();
+                int piY = vertices[i].yAsInt();
+                int pi1X = vertices[i + 1].xAsInt();
+                int pi1Y = vertices[i + 1].yAsInt();
                 drawLine(g,
-                        xToPX(vertices[i].xAsInt()),
-                        yToPX(vertices[i].yAsInt()),
-                        xToPX(vertices[i + 1].xAsInt()),
-                        yToPX(vertices[i + 1].yAsInt()),
+                        xToPX(piX, piY),
+                        yToPX(piX, piY),
+                        xToPX(pi1X, pi1Y),
+                        yToPX(pi1X, pi1Y),
                         THICKNESS_BODIES
                 );
             }
+            int pnX = vertices[vertices.length - 1].xAsInt();
+            int pnY = vertices[vertices.length - 1].yAsInt();
             drawLine(g,
-                    xToPX(vertices[vertices.length - 1].xAsInt()),
-                    yToPX(vertices[vertices.length - 1].yAsInt()),
-                    xToPX(vertices[0].xAsInt()),
-                    yToPX(vertices[0].yAsInt()),
+                    xToPX(pnX, pnY),
+                    yToPX(pnX, pnY),
+                    xToPX(p0X, p0Y),
+                    yToPX(p0X, p0Y),
                     THICKNESS_BODIES
             );
         }
@@ -422,10 +442,10 @@ public class GraphicsWorld extends World {
     private void drawLandscape(Graphics g) {
         Landscape landscape = getLandscape();
         for (int i = 0; i < landscape.segmentCount(); i++) {
-            int stPointX = xToPX(landscape.startPoint(i).xAsInt());
-            int stPointY = yToPX(landscape.startPoint(i).yAsInt());
-            int endPointX = xToPX(landscape.endPoint(i).xAsInt());
-            int endPointY = yToPX(landscape.endPoint(i).yAsInt());
+            int stPointX = xToPX(landscape.startPoint(i).xAsInt(), landscape.startPoint(i).yAsInt());
+            int stPointY = yToPX(landscape.startPoint(i).xAsInt(), landscape.startPoint(i).yAsInt());
+            int endPointX = xToPX(landscape.endPoint(i).xAsInt(), landscape.endPoint(i).yAsInt());
+            int endPointY = yToPX(landscape.endPoint(i).xAsInt(), landscape.endPoint(i).yAsInt());
             if (stPointX < scWidth | endPointX > 0) {
                 if (!DebugMenu.isDebugEnabled) {
                     g.setColor(currColLandscape);
@@ -483,7 +503,7 @@ public class GraphicsWorld extends World {
                 }
             }
 
-            if (xToPX(endX) < 0) {
+            if (xToPX(endX, endY) < 0) {
                 prevStructureEndX = endX;
                 prevStructureEndY = endY;
                 continue;
@@ -493,23 +513,30 @@ public class GraphicsWorld extends World {
                 int id = structureData[c++];
                 switch (id) {
                     case ElementPlacer.DRAWING_DATA_ID_LINE:
-                        int x1 = xToPX(structureData[c++]);
-                        int y1 = yToPX(structureData[c++]);
-                        drawLine(g, x1, y1, xToPX(structureData[c++]), yToPX(structureData[c++]), THICKNESS_LANDSCAPE);
+                        int x1 = structureData[c++];
+                        int y1 = structureData[c++];
+                        int x2 = structureData[c++];
+                        int y2 = structureData[c++];
+                        drawLine(g, xToPX(x1, y1), yToPX(x1, y1), xToPX(x2, y2), yToPX(x2, y2), THICKNESS_LANDSCAPE);
                         break;
-                    case ElementPlacer.DRAWING_DATA_ID_PATH:
+                    case ElementPlacer.DRAWING_DATA_ID_PATH: {
                         int pointsCount = structureData[c++];
-                        int prevX = xToPX(structureData[c++]);
-                        int prevY = yToPX(structureData[c++]);
+                        int x = structureData[c++];
+                        int y = structureData[c++];
+                        int prevX = xToPX(x, y);
+                        int prevY = yToPX(x, y);
                         for (int j = 1; j < pointsCount; j++) {
-                            drawLine(g, prevX, prevY, prevX = xToPX(structureData[c++]), prevY = yToPX(structureData[c++]), THICKNESS_LANDSCAPE);
+                            int newX = structureData[c++];
+                            int newY = structureData[c++];
+                            drawLine(g, prevX, prevY, prevX = xToPX(newX, newY), prevY = yToPX(newX, newY), THICKNESS_LANDSCAPE);
                         }
                         break;
+                    }
                     case ElementPlacer.DRAWING_DATA_ID_CIRCLE: {
                         int x = structureData[c++];
                         int y = structureData[c++];
                         int r = structureData[c++];
-                        g.drawArc(xToPX(x - r), yToPX(y - r), r * 2 * 1000 / zoomOut, r * 2 * 1000 / zoomOut, 0, 360, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
+                        g.drawArc(xToPX(x - r, y - r), yToPX(x - r, y - r), r * 2 * 1000 / zoomOut, r * 2 * 1000 / zoomOut, 0, 360, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
                         break;
                     }
                     case ElementPlacer.DRAWING_DATA_ID_ARC: {
@@ -525,11 +552,13 @@ public class GraphicsWorld extends World {
                         int ky = structureData[c++];
                         if (DebugMenu.structureDebug) {
                             if (!DebugMenu.simulationMode) {
-                                g.drawString("startAngle=" + startAngle, xToPX(x), yToPX(y), Graphics.BOTTOM | Graphics.HCENTER);
-                                g.drawString("arcAngle=" + arcAngle, xToPX(x), yToPX(y), Graphics.TOP | Graphics.HCENTER);
+                                g.drawString("startAngle=" + startAngle, xToPX(x, y), yToPX(x, y), Graphics.BOTTOM | Graphics.HCENTER);
+                                g.drawString("arcAngle=" + arcAngle, xToPX(x, y), yToPX(x, y), Graphics.TOP | Graphics.HCENTER);
                             }
                         }
-                        g.drawArc(xToPX(x - r * kx / 10), yToPX(y - r * ky / 10), r*2 * kx * 100 / zoomOut, r*2 * ky * 100 / zoomOut, startAngle, arcAngle, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
+                        int cX = x - r * kx / 10;
+                        int cY = y - r * ky / 10;
+                        g.drawArc(xToPX(cX, cY), yToPX(cX, cY), r*2 * kx * 100 / zoomOut, r*2 * ky * 100 / zoomOut, startAngle, arcAngle, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
                         break;
                     }
                 }
@@ -542,20 +571,22 @@ public class GraphicsWorld extends World {
                 }
                 g.setColor(0x000033);
                 String str = String.valueOf(lineCount);
-                int x = xToPX((endX + prevStructureEndX) / 2);
-                int y = yToPX((endY + prevStructureEndY) / 2);
+                int textX = (endX + prevStructureEndX) / 2;
+                int textY = (endY + prevStructureEndY) / 2;
+                int x = xToPX(textX, textY);
+                int y = yToPX(textX, textY);
                 int w = g.stringWidth(str);
                 int h = g.getFontHeight();
                 g.fillRect(x - w/2, y - h/2, w, h);
                 g.setColor(color);
-                g.drawLine(xToPX(endX), 0, xToPX(endX), scHeight);
+                g.drawLine(xToPX(endX, endY), 0, xToPX(endX, endY), scHeight);
                 g.drawString(str, x, y, Graphics.VCENTER | Graphics.HCENTER);
             }
 
             prevStructureEndX = endX;
             prevStructureEndY = endY;
 
-            if (xToPX(endX) >= scWidth) {
+            if (xToPX(endX, endY) >= scWidth) {
                 break;
             }
         }
@@ -586,9 +617,12 @@ public class GraphicsWorld extends World {
         }
 
         g.setColor(currColBodies);
+        int x = b.positionFX().xAsInt();
+        int y = b.positionFX().yAsInt();
+        int zoomedRadius = radius * 1000 / zoomOut;
         drawArc(g,
-                xToPX(b.positionFX().xAsInt() - radius),
-                yToPX(b.positionFX().yAsInt() - radius),
+                xToPX(x, y) - zoomedRadius,
+                yToPX(x, y) - zoomedRadius,
                 radius * 2000 / zoomOut,
                 radius * 2000 / zoomOut,
                 0, 360, THICKNESS_BODIES * 500 / zoomOut * 2, currColWheel
@@ -640,13 +674,30 @@ public class GraphicsWorld extends World {
         }
     }
 
+    public int xToPX(int x, int y) {
+        if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC) {
+            return x * 1000 / zoomOut + offsetX + camOffsetX;
+        } else {
+            long dx = x - carX;
+            long dy = y - carY;
 
-    public int xToPX(int c) {
-        return c * 1000 / zoomOut + offsetX + camOffsetX;
+            long rotatedX = (dx * camCos - dy * camSin) / 1000;
+
+            return (int)(rotatedX * 1000 / zoomOut) + offsetX + camOffsetX;
+        }
     }
 
-    public int yToPX(int c) {
-        return c * 1000 / zoomOut + offsetY + camOffsetY;
+    public int yToPX(int x, int y) {
+        if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC) {
+            return y * 1000 / zoomOut + offsetY + camOffsetY;
+        } else {
+            long dx = x - carX;
+            long dy = y - carY;
+
+            long rotatedY = (dx * camSin + dy * camCos) / 1000;
+
+            return (int)(rotatedY * 1000 / zoomOut) + offsetY + camOffsetY;
+        }
     }
 
     public void refreshCarPos() {
@@ -713,10 +764,31 @@ public class GraphicsWorld extends World {
     }
 
     private void calcOffset() {
-        offsetX = -carX * 1000 / zoomOut + scWidth / 3;
-        offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
-        offsetY += carY * scMinSide / 20000;
-        offsetY = Mathh.constrain(-carY * 1000 / zoomOut + scHeight/16, offsetY, -carY * 1000 / zoomOut + scHeight*4/5);
+        if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC || carbody == null) {
+            camCos = 1000;
+            camSin = 0;
+
+            offsetX = -carX * 1000 / zoomOut + scWidth / 3;
+            offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
+            offsetY += carY * scMinSide / 20000;
+            offsetY = Mathh.constrain(-carY * 1000 / zoomOut + scHeight / 16, offsetY, -carY * 1000 / zoomOut + scHeight * 4 / 5);
+        } else {
+            double camRotation = -carbody.rotation2FX() * 1d / FXUtil.ONE_2FX;
+
+            if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_DONT_FLIP) {
+                camRotation = Math.PI / 4 * Math.sin(camRotation);
+                if (Math.PI / 2 < camRotation && camRotation < Math.PI * 3 / 2) {
+                    camRotation = camRotation * camRotation / Math.PI * 4;
+                }
+            }
+
+            camCos = (int) (Math.cos(camRotation) * 1000);
+            camSin = (int) (Math.sin(camRotation) * 1000);
+
+            offsetX = scWidth / 2;
+
+            offsetY = scHeight * 2 / 3;
+        }
     }
 
     public void moveBg(int dx) {

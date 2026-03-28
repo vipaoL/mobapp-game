@@ -18,14 +18,15 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             LANDSCAPE_COLOR = 0,
             HI_RES_GRAPHICS = 1,
             LEGACY_DRAWING_METHOD = 2,
-            FRAME_TIME = 3,
-            SHOW_FPS = 4,
-            BOTTOM_BUTTONS = 5,
-            BATTERY = 6,
-            DEBUG = 7,
-            PLATFORM_SETTINGS = 8,
-            ABOUT = 9,
-            BACK = 10;
+            CAMERA_ROTATION_MODE = 3,
+            FRAME_TIME = 4,
+            SHOW_FPS = 5,
+            BOTTOM_BUTTONS = 6,
+            BATTERY = 7,
+            DEBUG = 8,
+            PLATFORM_SETTINGS = 9,
+            ABOUT = 10,
+            BACK = 11;
 
     private static final int[] LANDSCAPE_COLORS = {
             GraphicsWorld.DEFAULT_LANDSCAPE_COLOR,
@@ -124,6 +125,9 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             case LEGACY_DRAWING_METHOD:
                 MobappGameSettings.toggleLegacyDrawingMethod();
                 break;
+            case CAMERA_ROTATION_MODE:
+                MobappGameSettings.toggleCameraRotationMode();
+                break;
             case FRAME_TIME:
                 value = MobappGameSettings.getFrameTime();
                 int newFrameTime = value;
@@ -193,7 +197,21 @@ public class SettingsScreen extends GenericMenu implements Runnable {
 
     void refreshStates() {
         int frameTime = MobappGameSettings.getFrameTime();
+        int cameraRotationMode = MobappGameSettings.getCameraRotationMode();
+        String cameraRotationModeString = "?";
+        switch (cameraRotationMode) {
+            case MobappGameSettings.CAMERA_ROTATION_STATIC:
+                cameraRotationModeString = "Static";
+                break;
+            case MobappGameSettings.CAMERA_ROTATION_DONT_FLIP:
+                cameraRotationModeString = "Stay horizontal";
+                break;
+            case MobappGameSettings.CAMERA_ROTATION_FULL:
+                cameraRotationModeString = "Full";
+                break;
+        }
         menuOpts[LEGACY_DRAWING_METHOD] = "Legacy drawing method";
+        menuOpts[CAMERA_ROTATION_MODE] = "Camera rotation: " + cameraRotationModeString;
         menuOpts[FRAME_TIME] = "FPS: " + round(1000f / frameTime) + " (" + frameTime + "ms/frame)";
         menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";
         menuOpts[SHOW_FPS] = "Show FPS";
@@ -205,7 +223,12 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         menuOpts[ABOUT] = "About";
         menuOpts[BACK] = "Back";
         setEnabledFor(frameTime != MobappGameSettings.DEFAULT_FRAME_TIME, FRAME_TIME);
-        setEnabledFor(MobappGameSettings.isLegacyDrawingMethodEnabled(), LEGACY_DRAWING_METHOD);
+        setEnabledFor(cameraRotationMode != MobappGameSettings.CAMERA_ROTATION_DEFAULT_VALUE, CAMERA_ROTATION_MODE);
+        if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC) {
+            setEnabledFor(MobappGameSettings.isLegacyDrawingMethodEnabled(), LEGACY_DRAWING_METHOD);
+        } else {
+            setStateFor(STATE_INACTIVE, LEGACY_DRAWING_METHOD);
+        }
         setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), HI_RES_GRAPHICS);
         setEnabledFor(MobappGameSettings.isFPSShown(), SHOW_FPS);
         setEnabledFor(findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor()) != 0, LANDSCAPE_COLOR);
