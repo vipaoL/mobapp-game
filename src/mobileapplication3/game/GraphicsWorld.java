@@ -47,6 +47,7 @@ public class GraphicsWorld extends World {
     public int cameraRotationMode = MobappGameSettings.CAMERA_ROTATION_DEFAULT_VALUE;
     private int camCos = 1000;
     private int camSin = 0;
+    private double smoothedCamRotation = 0;
 
     int zoomOutBase = 0;
     int zoomOut = 100;
@@ -767,23 +768,33 @@ public class GraphicsWorld extends World {
         if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC || carbody == null) {
             camCos = 1000;
             camSin = 0;
+            smoothedCamRotation = 0;
 
             offsetX = -carX * 1000 / zoomOut + scWidth / 3;
             offsetY = -carY * 1000 / zoomOut + scHeight * 2 / 3;
             offsetY += carY * scMinSide / 20000;
             offsetY = Mathh.constrain(-carY * 1000 / zoomOut + scHeight / 16, offsetY, -carY * 1000 / zoomOut + scHeight * 4 / 5);
         } else {
-            double camRotation = -carbody.rotation2FX() * 1d / FXUtil.ONE_2FX;
+            double carRotation = -carbody.rotation2FX() * 1d / FXUtil.ONE_2FX;
 
             if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_DONT_FLIP) {
-                camRotation = Math.PI / 4 * Math.sin(camRotation);
+                double camRotation = Math.PI / 4 * Math.sin(carRotation);
                 if (Math.PI / 2 < camRotation && camRotation < Math.PI * 3 / 2) {
                     camRotation = camRotation * camRotation / Math.PI * 4;
                 }
-            }
 
-            camCos = (int) (Math.cos(camRotation) * 1000);
-            camSin = (int) (Math.sin(camRotation) * 1000);
+                double diff = (camRotation - smoothedCamRotation) % (2 * Math.PI);
+                if (diff > Math.PI) diff -= 2 * Math.PI;
+                if (diff < -Math.PI) diff += 2 * Math.PI;
+
+                smoothedCamRotation += diff * 0.15 / Math.max(FXUtil.ONE_2FX / 2, Math.abs(carbody.rotationVelocity2FX())) * FXUtil.ONE_2FX;
+
+                camCos = (int) (Math.cos(smoothedCamRotation) * 1000);
+                camSin = (int) (Math.sin(smoothedCamRotation) * 1000);
+            } else {
+                camCos = (int) (Math.cos(carRotation) * 1000);
+                camSin = (int) (Math.sin(carRotation) * 1000);
+            }
 
             offsetX = scWidth / 2;
 
