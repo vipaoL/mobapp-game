@@ -12,6 +12,7 @@ public class MobappGameSettings {
             GRAPHICS_FOR_HIRES = "btrGr",
             LANDSCAPE_COLOR = "landscapeCol",
             LEGACY_DRAWING_METHOD = "oldDrawing",
+            CAMERA_ROTATION = "camRotation",
             PHYSICS_PRECISION = "PhyPrecision",
             DETAIL_LEVEL = "DetailLvl",
             FRAME_TIME = "FrameTime",
@@ -27,6 +28,14 @@ public class MobappGameSettings {
             DEFAULT_FRAME_TIME = 16;
     public static final int MAX_PHYSICS_PRECISION = 16, MAX_DETAIL_LEVEL = 3, MAX_FRAME_TIME = 100;
 
+    public static final int
+            CAMERA_ROTATION_STATIC = 0,
+            CAMERA_ROTATION_DONT_FLIP = 1,
+            CAMERA_ROTATION_FULL = 2,
+            CAMERA_ROTATION_MIN_VALUE = CAMERA_ROTATION_STATIC,
+            CAMERA_ROTATION_DEFAULT_VALUE = CAMERA_ROTATION_STATIC,
+            CAMERA_ROTATION_MAX_VALUE = CAMERA_ROTATION_FULL;
+
     private static String mgstructsFolderPath = null;
     private static String detailLevel = Settings.UNDEF;
 
@@ -40,6 +49,7 @@ public class MobappGameSettings {
                     GRAPHICS_FOR_HIRES,
                     LANDSCAPE_COLOR,
                     LEGACY_DRAWING_METHOD,
+                    CAMERA_ROTATION,
                     PHYSICS_PRECISION,
                     DETAIL_LEVEL,
                     FRAME_TIME,
@@ -204,6 +214,25 @@ public class MobappGameSettings {
 
     public static boolean toggleButtonsAtTheBottom() {
         return getSettingsInst().toggleBool(BOTTOM_BUTTONS);
+    }
+
+    ///
+
+    public static int getCameraRotationMode() {
+        return Mathh.constrain(
+                CAMERA_ROTATION_MIN_VALUE,
+                getSettingsInst().getInt(CAMERA_ROTATION, CAMERA_ROTATION_DEFAULT_VALUE),
+                CAMERA_ROTATION_MAX_VALUE
+        );
+    }
+
+    public static void setCameraRotationMode(int mode) {
+        mode = Mathh.constrain(CAMERA_ROTATION_MIN_VALUE, mode, CAMERA_ROTATION_MAX_VALUE);
+        getSettingsInst().set(CAMERA_ROTATION, String.valueOf(mode));
+    }
+
+    public static void toggleCameraRotationMode() {
+        setCameraRotationMode((getCameraRotationMode() + 1) % (CAMERA_ROTATION_MAX_VALUE + 1));
     }
 
     ///

@@ -1089,7 +1089,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             drawDebugText(g, "physics: " + measuredTickTime + "ms, paint: " + measuredPaintTime + "ms");
 
             if (flipCounter != null) {
-                int x = world.xToPX(flipCounter.lastFlipX);
+                int x = world.xToPX(flipCounter.lastFlipX, 0);
                 g.drawLine(x, 0, x, h);
             }
         }
