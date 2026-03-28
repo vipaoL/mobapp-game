@@ -82,6 +82,8 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             init();
         }
 
+        MobappGameSettings.setAutoSaveEnabled(false);
+
         try {
             while (!isStopped) {
                 if (!isPaused) {
@@ -98,6 +100,9 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 Thread.sleep(sleep);
             }
         } catch (InterruptedException ignored) { }
+
+        MobappGameSettings.save();
+        MobappGameSettings.setAutoSaveEnabled(true);
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {

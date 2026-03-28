@@ -62,6 +62,14 @@ public class MobappGameSettings {
         return settingsInst;
     }
 
+    public static void setAutoSaveEnabled(boolean autoSaveEnabled) {
+        getSettingsInst().setAutoSaveEnabled(autoSaveEnabled);
+    }
+
+    public static void save() {
+        getSettingsInst().saveToDisk();
+    }
+
     public static boolean isBattIndicatorEnabled() {
         return getSettingsInst().getBool(BATTERY_INDICATOR);
     }
