@@ -1129,8 +1129,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         // score counter and debug posReset indicator
         if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || (hintVisibleTimer > RESTART_HINT_TIME + 10 && !bottomButtons)) && !restartGestureStarted) {
-            int accent = dimColor(getLandscapeColor(), 50);
             int flipIndicatorIdleColor = countPoints ? 0xffffff : 0x802020;
+            int accent = getLandscapeColor();
 
             if (points == 69) {
                 accent = 0xff6969;
