@@ -132,21 +132,23 @@ public abstract class GenericMenu extends CanvasComponent {
         return font.getHeight();
     }
 
-    private boolean isOptionAvailable(int n) {
-        if (stateMap != null) {
-            if (n >= stateMap.length) {
-                return false;
-            }
-            if (stateMap[n] == STATE_INACTIVE) {
-                return false;
-            }
+    private boolean isOptionAvailable(int i) {
+        if (isOptionOutOfRange(i)) {
+            return false;
         }
 
-        if (n < firstReachable || n > getLastReachable()) {
+        if (stateMap != null && (i >= stateMap.length || stateMap[i] == STATE_INACTIVE)) {
             return false;
         }
 
         return true;
+    }
+
+    private boolean isOptionOutOfRange(int i) {
+        if (i < firstReachable || i > getLastReachable()) {
+            return true;
+        }
+        return false;
     }
 
     public boolean isMenuInited() {
@@ -175,16 +177,11 @@ public abstract class GenericMenu extends CanvasComponent {
         y -= y0;
         isPaused = false;
         int selected = firstDrawable + y / k;
-        if (selected < firstReachable && firstReachable < firstDrawable) {
-            selected = firstReachable;
+        if (isOptionAvailable(selected)) {
+            this.selected = selected;
         }
-        if (!isOptionAvailable(selected)) {
-            isPressedByPointerNow = false;
-            return false;
-        }
-        this.selected = selected;
         isPressedByPointerNow = true;
-        return stateMap == null || stateMap[selected] != STATE_INACTIVE;
+        return stateMap == null || stateMap[this.selected] != STATE_INACTIVE;
     }
 
     private boolean handleKeyStates(int keyStates) {
