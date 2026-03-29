@@ -56,6 +56,16 @@ public class EditorUI extends Container {
     public EditorUI(int editorMode, Element[] elements, String path) {
         this(editorMode);
         elementsBuffer.setElements(elements);
+
+        if (path != null && path.startsWith(MGStructs.RESOURCE_PREFIX)) {
+            String folderPath;
+            if (editorMode == MODE_STRUCTURE) {
+                folderPath = EditorSettings.getStructsFolderPath();
+            } else {
+                folderPath = EditorSettings.getLevelsFolderPath();
+            }
+            path = folderPath + path.substring(MGStructs.RESOURCE_PREFIX.length() + 1);
+        }
         elementsBuffer.setFilePath(path);
     }
 

@@ -9,6 +9,8 @@ import mobileapplication3.ui.*;
 import java.io.IOException;
 
 public abstract class AbstractEditorMenu extends AbstractPopupWindow {
+    public static final int COLOR_OFFSET_FOR_BUILT_IN = -90;
+
     private final static int LAYOUT_MINIMIZED = 1, LAYOUT_LIST_OF_NAMES = 2, LAYOUT_GRID = 3;
 
     private final TextComponent title;
@@ -184,9 +186,17 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
         public EditorFileListCell(String path) {
             this.path = path;
             structureViewer = new StructureViewerComponent(MGStructs.readMGStruct(path));
+            structureViewer.setBgColor(COLOR_TRANSPARENT);
             String[] tmp = Utils.split(path, String.valueOf(FileUtils.SEP));
             fileNameLabel = new TextComponent(tmp[tmp.length - 1]);
+            setBgColor(COLOR_ACCENT_MUTED);
+            roundBg(true);
             setComponents(new IUIComponent[]{structureViewer, fileNameLabel});
+        }
+
+        protected void shiftBgHue(int offset) {
+            setBgColor(GraphicsUtils.shiftHue(getBgColor(), offset));
+            fileNameLabel.setBgColor(GraphicsUtils.shiftHue(fileNameLabel.getBgColor(), offset));
         }
 
         protected void onSetBounds(int x0, int y0, int w, int h) {

@@ -6,15 +6,23 @@ import mobileapplication3.editor.elements.Element;
 import mobileapplication3.editor.elements.Link;
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
+import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.Utils;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 
 public class MGStructs {
+
+    public static final String RESOURCE_PREFIX = "resource://";
+
     public static Element[] readMGStruct(String path) {
         Logger.log(path);
-        return readMGStruct(FileUtils.fileToDataInputStream(path));
+        if (path.startsWith(RESOURCE_PREFIX)) {
+            return readMGStruct(new DataInputStream(Platform.getResource(path.substring(RESOURCE_PREFIX.length()))));
+        } else {
+            return readMGStruct(FileUtils.fileToDataInputStream(path));
+        }
     }
 
     public static Element[] readMGStruct(DataInputStream dis) {
