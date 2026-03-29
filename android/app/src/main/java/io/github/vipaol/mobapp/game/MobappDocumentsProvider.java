@@ -62,7 +62,11 @@ public class MobappDocumentsProvider extends DocumentsProvider {
         MatrixCursor.RowBuilder row = roots.newRow();
         row.add(Root.COLUMN_ROOT_ID, ROOT_NAME);
         row.add(Root.COLUMN_SUMMARY, "Custom game content");
-        row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_SEARCH);
+        int flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_SUPPORTS_SEARCH | Root.FLAG_LOCAL_ONLY;
+        if (SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            flags |= Root.FLAG_SUPPORTS_IS_CHILD;
+        }
+        row.add(Root.COLUMN_FLAGS, flags);
         row.add(Root.COLUMN_TITLE, "mobapp-game " + Platform.getAppVersion(getContext()));
         row.add(Root.COLUMN_DOCUMENT_ID, getDocIdForFile(ROOT));
         row.add(Root.COLUMN_AVAILABLE_BYTES, ROOT.getFreeSpace());
@@ -89,6 +93,25 @@ public class MobappDocumentsProvider extends DocumentsProvider {
             includeFile(result, null, file);
         }
         return result;
+    }
+
+    @Override
+    public boolean isChildDocument(String parentDocumentId, String documentId) {
+        try {
+            File parent = getFileForDocId(parentDocumentId).getCanonicalFile();
+            File child = getFileForDocId(documentId).getCanonicalFile();
+
+            File temp = child.getParentFile();
+            while (temp != null) {
+                if (temp.equals(parent)) {
+                    return true;
+                }
+                temp = temp.getParentFile();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return false;
     }
 
     @Override
