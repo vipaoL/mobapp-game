@@ -7,6 +7,7 @@ import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.Image;
 import mobileapplication3.ui.CanvasComponent;
+import mobileapplication3.ui.GraphicsUtils;
 import utils.MobappGameSettings;
 
 public class LevelCompletedScreen extends CanvasComponent {
@@ -45,7 +46,7 @@ public class LevelCompletedScreen extends CanvasComponent {
             return fadingLine;
         }
         int[] rgb = new int[w];
-        int accentColor = GameplayCanvas.dimColor(this.accentColor, 70);
+        int accentColor = GraphicsUtils.dimColor(this.accentColor, 70);
         for (int x = 0; x < w / 2; x++) {
             int color = accentColor + (((1000 - Mathh.cos(x * 180 / w)) * 255 / 1000) << 24);
             rgb[x] = color;
