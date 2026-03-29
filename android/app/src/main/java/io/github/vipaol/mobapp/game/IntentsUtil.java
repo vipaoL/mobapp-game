@@ -13,6 +13,7 @@ import mobileapplication3.editor.EditorUI;
 import mobileapplication3.editor.MGStructs;
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.platform.FileUtils;
+import mobileapplication3.platform.Logger;
 import mobileapplication3.ui.IUIComponent;
 
 import java.io.DataInputStream;
@@ -21,6 +22,7 @@ import java.io.FileNotFoundException;
 public class IntentsUtil {
     public static IUIComponent handleFileOpenIntent(Intent intent, Context context) throws FileNotFoundException {
         Uri uri = intent.getData();
+        Logger.log("Loading \"" + uri + "\"...");
         Element[] elements = MGStructs.readMGStruct(new DataInputStream(context.getContentResolver().openInputStream(uri)));
         if (elements == null) {
             elements = new Element[0];
