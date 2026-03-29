@@ -2,17 +2,13 @@
 
 package mobileapplication3.editor;
 
-import mobileapplication3.platform.FileUtils;
-import mobileapplication3.platform.Mathh;
-import mobileapplication3.platform.Platform;
-import mobileapplication3.platform.Utils;
+import mobileapplication3.platform.*;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.ui.*;
 
 import java.io.IOException;
 
 public abstract class AbstractEditorMenu extends AbstractPopupWindow {
-
     private final static int LAYOUT_MINIMIZED = 1, LAYOUT_LIST_OF_NAMES = 2, LAYOUT_GRID = 3;
 
     private final TextComponent title;
@@ -30,7 +26,10 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
 
         title = new TextComponent(titleStr);
         buttons = new ButtonCol();
+    }
 
+    public void init() {
+        super.init();
         switch (EditorSettings.getWhatToLoadAutomatically()) {
             case EditorSettings.OPTION_ALWAYS_LOAD_NONE:
                 setLayout(LAYOUT_MINIMIZED);
@@ -177,10 +176,10 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
     protected abstract void createNew();
     protected abstract String getPath();
 
-    protected abstract class EditorFileListCell extends Container {
+    protected abstract static class EditorFileListCell extends Container {
         protected String path;
-        private StructureViewerComponent structureViewer;
-        private TextComponent fileNameLabel;
+        private final StructureViewerComponent structureViewer;
+        private final TextComponent fileNameLabel;
 
         public EditorFileListCell(String path) {
             this.path = path;
