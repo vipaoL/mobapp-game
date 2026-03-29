@@ -39,11 +39,45 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="content" />
-                <data android:mimeType="application/octet-stream" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="content"/>
+                <data android:scheme="file" />
+
+                <data android:host="*"/>
+
+                <data android:mimeType="*/*" />
+
+                <!--
+                It took them 12 years to realize, they added pathSuffix in Android 12.
+                But it doesn't work in older versions... So we'll stick with the old way of implementing the filter
+                https://www.reddit.com/r/android_devs/comments/q03692/meet_the_new_way_to_handle_files_on_android_12/
+                -->
+                <data android:pathPattern=".*\\.mgstruct" />
+                <data android:pathPattern=".*\\.mglvl" />
+
+                <data android:pathPattern=".*\\..*\\.mgstruct" />
+                <data android:pathPattern=".*\\..*\\.mglvl" />
+
+                <data android:pathPattern=".*\\..*\\..*\\.mgstruct" />
+                <data android:pathPattern=".*\\..*\\..*\\.mglvl" />
+
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mgstruct" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.mglvl" />
+
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mgstruct" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.mglvl" />
+
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mgstruct" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\.mglvl" />
+
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mgstruct" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\..*\\..*\\.mglvl" />
             </intent-filter>
 
         </activity>
