@@ -12,6 +12,7 @@ import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.CanvasComponent;
+import mobileapplication3.ui.GraphicsUtils;
 import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.Keys;
 import utils.MobappGameSettings;
@@ -964,14 +965,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             int pauseTextX = pauseX + btnW / 2;
 
             int landscapeColor = getLandscapeColor();
-            int buttonBgColor = dimColor(landscapeColor, Math.min(200, hintVisibleTimer) / 3);
-            if (getLuma(buttonBgColor) / 2 > getLuma(world.currColBg)) {
+            int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer) / 3);
+            if (GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
                 g.setColor(buttonBgColor);
                 g.fillRoundRect(menuX, btnY, btnW, btnH, btnRoundingD, btnRoundingD);
                 g.fillRoundRect(pauseX, btnY, btnW, btnH, btnRoundingD, btnRoundingD);
             }
 
-            g.setColor(dimColor(landscapeColor, Math.min(200, hintVisibleTimer)));
+            g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer)));
             setFont(new Font(bottomButtons ? Font.SIZE_SMALL : Font.SIZE_MEDIUM), g);
 
             if (RootContainer.displayKbHints) {
@@ -993,14 +994,14 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             int x = (RESTART_HINT_TIME - hintVisibleTimer) * w / CIRCLE_ANIM_TIME;
             int xConstrained = Mathh.constrain(xLeft, x, xRight);
             int landscapeColor = getLandscapeColor();
-            int buttonBgColor = dimColor(landscapeColor, Math.min(25, (25 * hintVisibleTimer / 10)));
-            if (hintVisibleTimer <= RESTART_HINT_TIME && getLuma(buttonBgColor) / 2 > getLuma(world.currColBg)) {
+            int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(25, (25 * hintVisibleTimer / 10)));
+            if (hintVisibleTimer <= RESTART_HINT_TIME && GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
                 int d = g.getFontHeight() * 2;
                 g.setColor(buttonBgColor);
                 g.fillArc(xConstrained - d / 2, y - d / 2, d, d, 0, 360);
             }
             if (hintVisibleTimer <= RESTART_HINT_TIME) {
-                g.setColor(dimColor(landscapeColor, Math.min(100, (100 * hintVisibleTimer / 10))));
+                g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(100, (100 * hintVisibleTimer / 10))));
                 setFont(new Font(Font.SIZE_MEDIUM), g);
                 if (RootContainer.displayKbHints) {
                     g.drawString(RESTART_HINT, w / 2, y, HCENTER | BOTTOM);
@@ -1021,15 +1022,15 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             int y = scH / 8;
             String str = "Level " + currentLevelId;
             int landscapeColor = getLandscapeColor();
-            int buttonBgColor = dimColor(landscapeColor, Math.min(25, (25 * levelIdVisibleTimer / 10)));
-            if (getLuma(buttonBgColor) / 2 > getLuma(world.currColBg)) {
+            int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(25, (25 * levelIdVisibleTimer / 10)));
+            if (GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
                 int bgW = g.getFont().stringWidth(str) + g.getFontHeight() * 2;
                 int bgH = g.getFontHeight() * 3;
                 int d = g.getFontHeight() * 4;
                 g.setColor(buttonBgColor);
                 g.fillRoundRect(x - bgW / 2, y - bgH / 2, bgW, bgH, d, d);
             }
-            g.setColor(dimColor(landscapeColor, Math.min(100, (100 * levelIdVisibleTimer / 10))));
+            g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(100, (100 * levelIdVisibleTimer / 10))));
             setFont(new Font(Font.SIZE_MEDIUM), g);
             g.drawString(str, x, y, centerAnchor);
         }
@@ -1122,7 +1123,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             g.setFont(largefont);
             g.setColor(255, 0, 0);
             g.drawString("!", scW / 2, scH / 3 + currentFontH / 2, Graphics.HCENTER | Graphics.TOP);
-            g.setColor(dimColor(world.currColLandscape, 50 * (GAME_OVER_DAMAGE - damage) / GAME_OVER_DAMAGE));
+            g.setColor(GraphicsUtils.dimColor(world.currColLandscape, 50 * (GAME_OVER_DAMAGE - damage) / GAME_OVER_DAMAGE));
             g.fillRect(0, 0, scW, scH* damage / GAME_OVER_DAMAGE /2 + 1);
             g.fillRect(0, scH - scH* damage / GAME_OVER_DAMAGE /2, scW, scH - 1);
         }
@@ -1137,7 +1138,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             }
 
             if (flipIndicatorTimer < FLIP_INDICATOR_TIMER_MAX) {
-                g.setColor(blendColor(accent, flipIndicatorIdleColor, flipIndicatorTimer * flipIndicatorTimer, FLIP_INDICATOR_TIMER_MAX * FLIP_INDICATOR_TIMER_MAX));
+                g.setColor(GraphicsUtils.blendColor(accent, flipIndicatorIdleColor, flipIndicatorTimer * flipIndicatorTimer, FLIP_INDICATOR_TIMER_MAX * FLIP_INDICATOR_TIMER_MAX));
             } else {
                 g.setColor(flipIndicatorIdleColor);
             }
@@ -1209,30 +1210,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         return world != null ? world.currColLandscape : MobappGameSettings.getLandscapeColor();
     }
 
-    // TODO: create GraphicsUtils in framework
-    public int blendColor(int c1, int c2, int k1, int k2) {
-        int r1 = getColorRedComponent(c1);
-        int r2 = getColorRedComponent(c2);
-        int g1 = getColorGreenComponent(c1);
-        int g2 = getColorGreenComponent(c2);
-        int b1 = getColorBlueComponent(c1);
-        int b2 = getColorBlueComponent(c2);
-
-        int r = r1 + (r2 - r1) * k1 / k2;
-        int g = g1 + (g2 - g1) * k1 / k2;
-        int b = b1 + (b2 - b1) * k1 / k2;
-
-        return (r << 16) | (g << 8) | b;
-    }
-
-    private static double getLuma(int color) {
-        int r = (color >> 16) & 0xFF;
-        int g = (color >> 8) & 0xFF;
-        int b = color & 0xFF;
-
-        return (0.299 * r) + (0.587 * g) + (0.114 * b);
-    }
-
     private void drawDebugText(Graphics g, String str) {
         g.drawString(str, 0, debugTextOffset, 0);
         debugTextOffset += currentFontH;
@@ -1249,18 +1226,18 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         int arrowColor;
 
         if (restartGestureCompleted) {
-            circleColor = dimColor(landscapeColor, 200);
-            arrowColor = dimColor(landscapeColor, 25);
+            circleColor = GraphicsUtils.dimColor(landscapeColor, 200);
+            arrowColor = GraphicsUtils.dimColor(landscapeColor, 25);
         } else {
-            int mCircleColor = dimColor(landscapeColor, 5 * dx * dx / Font.getDefaultFontHeight() / Font.getDefaultFontHeight());
-            if (getLuma(mCircleColor) > getLuma(world.currColBg)) {
+            int mCircleColor = GraphicsUtils.dimColor(landscapeColor, 5 * dx * dx / Font.getDefaultFontHeight() / Font.getDefaultFontHeight());
+            if (GraphicsUtils.getLuma(mCircleColor) > GraphicsUtils.getLuma(world.currColBg)) {
                 circleColor = mCircleColor;
             } else {
                 circleColor = world.currColBg;
             }
 
-            int mArrowColor = dimColor(landscapeColor, (invert ? -5 : 5) * dx * dx * dx / Font.getDefaultFontHeight() / Font.getDefaultFontHeight() / Font.getDefaultFontHeight());
-            if (getLuma(mArrowColor) > getLuma(circleColor)) {
+            int mArrowColor = GraphicsUtils.dimColor(landscapeColor, (invert ? -5 : 5) * dx * dx * dx / Font.getDefaultFontHeight() / Font.getDefaultFontHeight() / Font.getDefaultFontHeight());
+            if (GraphicsUtils.getLuma(mArrowColor) > GraphicsUtils.getLuma(circleColor)) {
                 arrowColor = mArrowColor;
             } else {
                 arrowColor = circleColor;
@@ -1274,7 +1251,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         int y = pointerPressedY;
 
         // circle
-        if (getLuma(circleColor) > getLuma(world.currColBg) * 2) {
+        if (GraphicsUtils.getLuma(circleColor) > GraphicsUtils.getLuma(world.currColBg) * 2) {
             g.setColor(circleColor);
             int prevClipX = g.getClipX();
             int prevClipY = g.getClipY();
@@ -1390,39 +1367,17 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private void dimColors() {
-        world.currColLandscape = dimColor(world.currColLandscape, 80);
-        world.currColBodies = dimColor(world.currColBodies, 80);
+        world.currColLandscape = GraphicsUtils.dimColor(world.currColLandscape, 80);
+        world.currColBodies = GraphicsUtils.dimColor(world.currColBodies, 80);
         if (world.currColBodies > 0) {
-            int baseColor = dimColor(world.currColLandscape, 8);
-            world.currColBg = dimColor(getLuma(baseColor) > getLuma(world.currColBg) ? baseColor : world.currColBg, 108);
-            if (getLuma(world.currColBg) > getLuma(world.currColLandscape)) {
+            int baseColor = GraphicsUtils.dimColor(world.currColLandscape, 8);
+            world.currColBg = GraphicsUtils.dimColor(GraphicsUtils.getLuma(baseColor) > GraphicsUtils.getLuma(world.currColBg) ? baseColor : world.currColBg, 108);
+            if (GraphicsUtils.getLuma(world.currColBg) > GraphicsUtils.getLuma(world.currColLandscape)) {
                 world.currColBg = world.currColLandscape;
             }
         } else {
-            world.currColBg = dimColor(world.currColBg, 70);
+            world.currColBg = GraphicsUtils.dimColor(world.currColBg, 70);
         }
-    }
-
-    public static int dimColor(int color, int percent) {
-        int r = getColorRedComponent(color) * percent / 100;
-        int g = getColorGreenComponent(color) * percent / 100;
-        int b = getColorBlueComponent(color) * percent / 100;
-        r = Mathh.constrain(0, r, 255);
-        g = Mathh.constrain(0, g, 255);
-        b = Mathh.constrain(0, b, 255);
-        return (r << 16) + (g << 8) + b;
-    }
-
-    private static int getColorRedComponent(int color) {
-        return (color >> 16) & 0xff;
-    }
-
-    private static int getColorGreenComponent(int color) {
-        return (color >> 8) & 0xff;
-    }
-
-    private static int getColorBlueComponent(int color) {
-        return color & 0xff;
     }
 
     public void stop(final boolean openMenu, boolean blockUntilCompleted) {
