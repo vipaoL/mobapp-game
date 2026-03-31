@@ -2,7 +2,9 @@
 
 package io.github.vipaol.mobapp.game;
 
+import org.robovm.apple.coregraphics.CGRect;
 import org.robovm.apple.foundation.NSAutoreleasePool;
+import org.robovm.apple.foundation.NSOperationQueue;
 import org.robovm.apple.uikit.*;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.RootContainer;
@@ -18,14 +20,24 @@ public class IOSLauncher extends UIApplicationDelegateAdapter {
         Platform.init(rootViewController);
 
         RootContainer.createView(rootViewController);
-        RootContainer.getInst().setFrame(UIScreen.getMainScreen().getBounds());
+        CGRect screenBounds = UIScreen.getMainScreen().getBounds();
+        RootContainer.getInst().setFrame(screenBounds);
+
         rootViewController.setView(RootContainer.getInst());
 
-        window = new UIWindow(UIScreen.getMainScreen().getBounds());
+        window = new UIWindow(screenBounds);
         window.setRootViewController(rootViewController);
         window.makeKeyAndVisible();
 
-        RootContainer.setRootUIComponent(new MenuCanvas());
+        NSOperationQueue.getMainQueue().addOperation(() -> {
+            try {
+                System.out.println("Delayed start: Init MenuCanvas");
+                RootContainer.setRootUIComponent(new MenuCanvas());
+                System.out.println("Delayed start: Done");
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
 
         return true;
     }
