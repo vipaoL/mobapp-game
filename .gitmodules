@@ -16,3 +16,6 @@
 [submodule "lib/EminiPhysicsEngine"]
 	path = lib/EminiPhysicsEngine
 	url = git@github.com:vipaoL/EminiPhysicsEngine.git
+[submodule "lib/mobapp-platform-ios"]
+	path = lib/mobapp-platform-ios
+	url = git@github.com:vipaoL/mobapp-platform.git

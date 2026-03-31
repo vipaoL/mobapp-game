@@ -1,0 +1,68 @@
+name: iOS Build Action
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+jobs:
+  Build-iOS:
+    runs-on: macos-14
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Download and Prepare Legacy iOS 14.5 SDK
+      run: |
+        curl -L -o sdk.zip https://github.com/xybp888/iOS-SDKs/releases/download/iOS-SDKs/iPhoneOS14.5.sdk.zip
+        unzip -q sdk.zip
+
+        if [ -d "iPhoneOS14.5.sdk/iPhoneOS14.5.sdk" ]; then
+          SDK_PATH="$GITHUB_WORKSPACE/iPhoneOS14.5.sdk/iPhoneOS14.5.sdk"
+        else
+          SDK_PATH="$GITHUB_WORKSPACE/iPhoneOS14.5.sdk"
+        fi
+
+        echo "Legacy SDK Path: $SDK_PATH"
+
+        if [ ! -f "$SDK_PATH/SDKSettings.plist" ]; then
+          echo "ERROR: SDKSettings.plist not found in $SDK_PATH"
+          exit 1
+        fi
+
+        echo "LEGACY_SDK_PATH=$SDK_PATH" >> $GITHUB_ENV
+        echo "SDKROOT=$SDK_PATH" >> $GITHUB_ENV
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x ios/gradlew
+
+    - name: Build with Gradle
+      env:
+        SDKROOT: ${{ env.LEGACY_SDK_PATH }}
+      run: |
+        cd ios/
+        ./gradlew createIPA \
+          -Drobovm.iosSdkPath=${{ env.LEGACY_SDK_PATH }} \
+          -Drobovm.iosSdkVersion=14.5 \
+          -Drobovm.dev.path=$(xcode-select -p) \
+          --info
+
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: mobapp-game-ios
+        path: ios/build/robovm/*.ipa
