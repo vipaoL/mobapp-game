@@ -6,6 +6,7 @@ import org.robovm.apple.coregraphics.CGRect;
 import org.robovm.apple.foundation.NSAutoreleasePool;
 import org.robovm.apple.foundation.NSOperationQueue;
 import org.robovm.apple.uikit.*;
+import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.game.MenuCanvas;
@@ -17,6 +18,7 @@ public class IOSLauncher extends UIApplicationDelegateAdapter {
     @Override
     public boolean didFinishLaunching(UIApplication application, UIApplicationLaunchOptions launchOptions) {
         rootViewController = new UIViewController();
+        Logger.logToStdout(true);
         Platform.init(rootViewController);
 
         RootContainer.createView(rootViewController);
