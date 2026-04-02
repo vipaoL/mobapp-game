@@ -30,7 +30,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public static final String PAUSE_HINT = "PAUSE";
     public static final String PAUSE_HINT_KB = "*, 3";
     public static final String RESTART_HINT = "Swipe to restart";
-    public static final String RESTART_HINT_KB = "(7, Right mouse click)";
+    public static final String RESTART_HINT_KB = "(7 or Right mouse click)";
     public static final short EFFECT_SPEED = 0;
     private static final int BATT_UPD_PERIOD = 10000;
     private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2, GAME_MODE_EMINI_WORLD = 3;
