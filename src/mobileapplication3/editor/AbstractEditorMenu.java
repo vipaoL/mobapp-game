@@ -4,6 +4,7 @@ package mobileapplication3.editor;
 
 import mobileapplication3.platform.*;
 import mobileapplication3.platform.ui.Font;
+import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.*;
 
 import java.io.IOException;
@@ -214,7 +215,9 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
         }
 
         public boolean keyPressed(int keyCode, int count) {
-            openInEditor();
+            if (RootContainer.getAction(keyCode) == Keys.FIRE) {
+                openInEditor();
+            }
             return true;
         }
 
