@@ -42,6 +42,8 @@ public class MgStruct {
     };
 
     private static final int STRUCTURE_STORAGE_SIZE = 32;
+    public static final String PREFIX = "/s";
+    public static final String EXTENSION = ".mgstruct";
 
     public static short[][][] structStorage = new short[STRUCTURE_STORAGE_SIZE][][];
 
@@ -54,17 +56,22 @@ public class MgStruct {
     public static void init() {
         if (!isInited) {
             Logger.log("mgs init");
-            loadedFromRes = 0;
-            for (int i = 1; readFromRes("/s" + i + ".mgstruct"); i++) {
-                Logger.log(i + ".mgstruct");
-                loadedFromRes++;
-            }
-
-            Logger.log("MGStruct:loaded " + loadedTotal);
-            loadedFromRes = loadedTotal;
+            loadFromRes();
         }
         Logger.log("inited");
         isInited = true;
+    }
+
+    private static void loadFromRes() {
+        loadedTotal = 0;
+        loadedFromRes = 0;
+
+        for (int i = 1; readFromRes(PREFIX + i + EXTENSION); i++) {
+            Logger.log(i + EXTENSION);
+            loadedFromRes++;
+        }
+
+        Logger.log("MGStruct:loaded " + loadedFromRes + " from resources");
     }
 
     private static boolean readFromRes(String path) {
@@ -94,7 +101,11 @@ public class MgStruct {
 
     public static boolean loadFromFiles() {
         Logger.log("mgs load()");
-        init();
+        if (!isInited) {
+            init();
+        } else {
+            loadFromRes();
+        }
         String[] paths = GameFileUtils.listFilesInAllPlaces("MobappGame/MGStructs");
 
         loadCancelled = false;
@@ -120,7 +131,15 @@ public class MgStruct {
                 try {
                     short[][] structure = readFromDataInputStream(dis);
                     if (structure != null) {
-                        saveStructToStorage(structure);
+                        int targetIndex = getTargetIndexFromPath(path);
+
+                        if (targetIndex >= 0 && targetIndex < loadedFromRes) {
+                            Logger.log("overriding built-in s" + (targetIndex + 1) + " with " + path);
+                            structStorage[targetIndex] = structure;
+                        } else {
+                            saveStructToStorage(structure);
+                        }
+
                         loadedFromFiles += 1;
                         Logger.log(path + " loaded");
                     }
@@ -218,5 +237,22 @@ public class MgStruct {
             return newArray;
         }
         return array;
+    }
+
+    private static int getTargetIndexFromPath(String path) {
+        if (path == null) return -1;
+
+        String fileName = path.substring(Utils.lastIndexOf(path, '/') + 1).toLowerCase();
+        String prefix = PREFIX.substring(1);
+        if (fileName.startsWith(prefix) && fileName.endsWith(EXTENSION)) {
+            try {
+                String numberStr = fileName.substring(prefix.length(), fileName.length() - EXTENSION.length());
+                int id = Integer.valueOf(numberStr).intValue();
+                if (id > 0) {
+                    return id - 1;
+                }
+            } catch (NumberFormatException ignored) { }
+        }
+        return -1;
     }
 }
