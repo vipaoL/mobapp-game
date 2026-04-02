@@ -26,9 +26,9 @@ import java.util.Vector;
 public class GameplayCanvas extends CanvasComponent implements Runnable {
     public static final int TICK_DURATION = 50;
     public static final String MENU_HINT = "MENU";
-    public static final String MENU_HINT_KB = "(LSoft, #, 9)";
+    public static final String MENU_HINT_KB = "#, 9";
     public static final String PAUSE_HINT = "PAUSE";
-    public static final String PAUSE_HINT_KB = "(RSoft, *, 3)";
+    public static final String PAUSE_HINT_KB = "*, 3";
     public static final String RESTART_HINT = "Swipe to restart";
     public static final String RESTART_HINT_KB = "(7, Right mouse click)";
     public static final short EFFECT_SPEED = 0;
@@ -1179,11 +1179,17 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private int getButtonW() {
-        return scW / 3;
+        return bottomButtons ? smallfont.getHeight() * 10 / 3 : scW / 3;
     }
 
     private int getButtonH() {
-        return bottomButtons ? Math.max(smallfont.getHeight() * 5 / 2, scH / 16) : scH / 6;
+        if (!bottomButtons) {
+            return scH / 6;
+        } else {
+            int minH = scH / 16;
+            int h = smallfont.getHeight() * (RootContainer.displayKbHints ? 5 : 3) / 2;
+            return Math.max(h, minH);
+        }
     }
 
     private int getButtonMarginX() {
