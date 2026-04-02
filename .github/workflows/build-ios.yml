@@ -37,29 +37,18 @@ jobs:
           SDK_PATH="$GITHUB_WORKSPACE/iPhoneOS14.5.sdk"
         fi
 
-        echo "Legacy SDK Path: $SDK_PATH"
+        XCODE_SDKS="$(xcode-select -p)/Platforms/iPhoneOS.platform/Developer/SDKs"
 
-        if [ ! -f "$SDK_PATH/SDKSettings.plist" ]; then
-          echo "ERROR: SDKSettings.plist not found in $SDK_PATH"
-          exit 1
-        fi
+        sudo mv "$SDK_PATH" "$XCODE_SDKS/iPhoneOS14.5.sdk"
 
-        echo "LEGACY_SDK_PATH=$SDK_PATH" >> $GITHUB_ENV
-        echo "SDKROOT=$SDK_PATH" >> $GITHUB_ENV
+        echo "Installed SDKs:"
+        ls -la "$XCODE_SDKS" | grep "iPhoneOS"
 
     - name: Grant execute permission for gradlew
       run: chmod +x ios/gradlew
 
     - name: Build with Gradle
-      env:
-        SDKROOT: ${{ env.LEGACY_SDK_PATH }}
-      run: |
-        cd ios/
-        ./gradlew createIPA \
-          -Drobovm.iosSdkPath=${{ env.LEGACY_SDK_PATH }} \
-          -Drobovm.iosSdkVersion=14.5 \
-          -Drobovm.dev.path=$(xcode-select -p) \
-          --info
+      run: cd ios/ && ./gradlew createIPA -Drobovm.iosSdkVersion=14.5
 
     - name: Upload build
       uses: actions/upload-artifact@v4
