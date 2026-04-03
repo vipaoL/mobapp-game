@@ -123,6 +123,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     // fonts
     private Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
+    private Font mediumfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
     private Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
     private Font currentFont = largefont;
     private int currentFontH = currentFont.getHeight();
@@ -973,7 +974,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             }
 
             g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer)));
-            setFont(new Font(bottomButtons ? Font.SIZE_SMALL : Font.SIZE_MEDIUM), g);
+            setFont(getButtonFont(), g);
 
             if (RootContainer.displayKbHints) {
                 g.drawString(MENU_HINT, menuTextX, textY - currentFontH / 2, centerAnchor);
@@ -1176,6 +1177,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             g.setColor(255, 255, 255);
             g.drawString("PAUSED", scW / 2, scH / 3, Graphics.VCENTER | Graphics.HCENTER);
         }
+    }
+
+    private Font getButtonFont() {
+        return bottomButtons ? smallfont : mediumfont;
     }
 
     private int getButtonW() {
