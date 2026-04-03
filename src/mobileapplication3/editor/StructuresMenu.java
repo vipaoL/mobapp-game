@@ -3,6 +3,7 @@
 package mobileapplication3.editor;
 
 import mobileapplication3.editor.elements.Element;
+import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.Resources;
@@ -44,16 +45,26 @@ public class StructuresMenu extends AbstractEditorMenu {
         } catch (IOException e) {
             Platform.showError(e);
         }
+        if (files == null) {
+            files = new String[0];
+        }
         Logger.log("getting grid content: " + files.length + " files");
         try {
             for (int i = 0; i < files.length; i++) {
-                final String filePath = getPath() + files[i];
+                final String name = files[i];
+                final String filePath = getPath() + name;
                 try {
-                    gridContentVector.addElement(new EditorFileListCell(filePath) {
+                    EditorFileListCell cell = new EditorFileListCell(filePath) {
                         public void openInEditor() {
                             StructuresMenu.this.openInEditor(filePath);
                         }
-                    });
+                    };
+
+                    if (isBuiltinName(name)) {
+                        cell.shiftBgHue(COLOR_OFFSET_FOR_BUILT_IN / 4);
+                    }
+
+                    gridContentVector.addElement(cell);
                 } catch (Exception ex) {
                     Logger.log("Can't create StructureViewer:");
                     Logger.log(ex);
@@ -65,7 +76,9 @@ public class StructuresMenu extends AbstractEditorMenu {
 
         try {
             for (int i = 0; i < builtinStructuresCount; i++) {
-                final String path = MGStructs.RESOURCE_PREFIX + PREFIX + (i + 1) + EXTENSION;
+                String name = PREFIX.substring(1) + (i + 1) + EXTENSION;
+
+                final String path = MGStructs.RESOURCE_PREFIX + FileUtils.SEP + name;
                 Logger.log("Loading " + path);
                 try {
                     EditorFileListCell cell = new EditorFileListCell(path) {
@@ -73,7 +86,14 @@ public class StructuresMenu extends AbstractEditorMenu {
                             StructuresMenu.this.openInEditor(path);
                         }
                     };
-                    cell.shiftBgHue(COLOR_OFFSET_FOR_BUILT_IN);
+
+                    boolean overridden = isOverriddenByFiles(name, files);
+                    if (overridden) {
+                        cell.shiftBgHue(COLOR_OFFSET_FOR_BUILT_IN / 2);
+                    } else {
+                        cell.shiftBgHue(COLOR_OFFSET_FOR_BUILT_IN);
+                    }
+
                     gridContentVector.addElement(cell);
                     Logger.log("Loaded " + path);
                 } catch (Exception ignored) { }
@@ -103,21 +123,34 @@ public class StructuresMenu extends AbstractEditorMenu {
         Button[] buttons = new Button[files.length + builtinStructuresCount];
         for (int i = 0; i < files.length; i++) {
             final String name = files[i];
-            buttons[i] = new Button(name) {
+            boolean overrides = isBuiltinName(name);
+
+            String buttonText = name;
+            if (overrides) {
+                buttonText += " (overrides)";
+            }
+
+            buttons[i] = new Button(buttonText) {
                 public void buttonPressed() {
                     openInEditor(getPath() + name);
                 }
             };
         }
         for (int i = 0; i < builtinStructuresCount; i++) {
-            String name = PREFIX + (i + 1) + EXTENSION;
-            final String path = MGStructs.RESOURCE_PREFIX + name;
-            Button button = new Button(name.substring(1) + " (built-in)") {
+            String name = PREFIX.substring(1) + (i + 1) + EXTENSION;
+            final String path = MGStructs.RESOURCE_PREFIX + FileUtils.SEP + name;
+            boolean overridden = isOverriddenByFiles(name, files);
+
+            String buttonText = name + (overridden ? " (overridden)" : " (built-in)");
+
+            Button button = new Button(buttonText) {
                 public void buttonPressed() {
                     openInEditor(path);
                 }
             };
-            button.setBgColor(GraphicsUtils.shiftHue(button.getBgColor(), COLOR_OFFSET_FOR_BUILT_IN));
+
+            int hueShift = overridden ? COLOR_OFFSET_FOR_BUILT_IN / 2 : COLOR_OFFSET_FOR_BUILT_IN;
+            button.setBgColor(GraphicsUtils.shiftHue(button.getBgColor(), hueShift));
             buttons[files.length + i] = button;
         }
         return buttons;
@@ -133,5 +166,27 @@ public class StructuresMenu extends AbstractEditorMenu {
 
     protected void createNew() {
         RootContainer.setRootUIComponent(new EditorUI(EditorUI.MODE_STRUCTURE));
+    }
+
+    private boolean isOverriddenByFiles(String name, String[] files) {
+        for (int i = 0; i < files.length; i++) {
+            if (name.equals(files[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isBuiltinName(String name) {
+        if (name == null) return false;
+        String prefix = PREFIX.substring(1);
+        if (name.startsWith(prefix) && name.endsWith(EXTENSION)) {
+            try {
+                String numStr = name.substring(prefix.length(), name.length() - EXTENSION.length());
+                int id = Integer.parseInt(numStr);
+                return id > 0 && id <= builtinStructuresCount;
+            } catch (NumberFormatException ignored) { }
+        }
+        return false;
     }
 }
