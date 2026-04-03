@@ -61,7 +61,12 @@ public class StructuresMenu extends AbstractEditorMenu {
                     };
 
                     if (isBuiltinName(name)) {
-                        cell.shiftBgHue(COLOR_OFFSET_FOR_BUILT_IN / 4);
+                        String builtinPath = MGStructs.RESOURCE_PREFIX + FileUtils.SEP + name;
+                        if (MGStructs.areIdentical(filePath, builtinPath)) {
+                            cell.shiftBgHue(COLOR_OFFSET_FOR_BUILT_IN);
+                        } else {
+                            cell.shiftBgHue(COLOR_OFFSET_FOR_BUILT_IN / 2);
+                        }
                     }
 
                     gridContentVector.addElement(cell);
@@ -126,22 +131,40 @@ public class StructuresMenu extends AbstractEditorMenu {
             boolean overrides = isBuiltinName(name);
 
             String buttonText = name;
+            int hueShift = 0;
             if (overrides) {
-                buttonText += " (overrides)";
+                String builtinPath = MGStructs.RESOURCE_PREFIX + FileUtils.SEP + name;
+                if (MGStructs.areIdentical(getPath() + name, builtinPath)) {
+                    buttonText += " (overrides, identical)";
+                    hueShift = COLOR_OFFSET_FOR_BUILT_IN;
+                } else {
+                    buttonText += " (overrides)";
+                    hueShift = COLOR_OFFSET_FOR_BUILT_IN / 2;
+                }
             }
 
-            buttons[i] = new Button(buttonText) {
+            Button button = new Button(buttonText) {
                 public void buttonPressed() {
                     openInEditor(getPath() + name);
                 }
             };
+            button.setBgColor(GraphicsUtils.shiftHue(button.getBgColor(), hueShift));
+            buttons[i] = button;
         }
         for (int i = 0; i < builtinStructuresCount; i++) {
             String name = PREFIX.substring(1) + (i + 1) + EXTENSION;
             final String path = MGStructs.RESOURCE_PREFIX + FileUtils.SEP + name;
             boolean overridden = isOverriddenByFiles(name, files);
 
-            String buttonText = name + (overridden ? " (overridden)" : " (built-in)");
+            String buttonText = name;
+            int hueShift;
+            if (overridden) {
+                buttonText += " (overridden)";
+                hueShift = COLOR_OFFSET_FOR_BUILT_IN / 2;
+            } else {
+                buttonText += " (built-in)";
+                hueShift = COLOR_OFFSET_FOR_BUILT_IN;
+            }
 
             Button button = new Button(buttonText) {
                 public void buttonPressed() {
@@ -149,7 +172,6 @@ public class StructuresMenu extends AbstractEditorMenu {
                 }
             };
 
-            int hueShift = overridden ? COLOR_OFFSET_FOR_BUILT_IN / 2 : COLOR_OFFSET_FOR_BUILT_IN;
             button.setBgColor(GraphicsUtils.shiftHue(button.getBgColor(), hueShift));
             buttons[files.length + i] = button;
         }

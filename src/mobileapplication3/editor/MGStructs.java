@@ -107,4 +107,37 @@ public class MGStructs {
             return null;
         }
     }
+
+    public static boolean areIdentical(String path1, String path2) {
+        try {
+            Element[] a = MGStructs.readMGStruct(path1);
+            Element[] b = MGStructs.readMGStruct(path2);
+
+            if (a == null || b == null) return false;
+            if (a.length != b.length) return false;
+
+            for (int i = 0; i < a.length; i++) {
+                if (a[i] == null && b[i] == null) continue;
+                if (a[i] == null || b[i] == null) return false;
+
+                if (!a[i].equals(b[i])) {
+                    short[] args1 = a[i].getArgs();
+                    short[] args2 = b[i].getArgs();
+
+                    if (args1.length != args2.length) {
+                        return false;
+                    }
+                    for (int j = 0; j < args1.length; j++) {
+                        if (args1[j] != args2[j]) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            Logger.log("Error comparing structures/levels: " + e);
+            return false;
+        }
+    }
 }
