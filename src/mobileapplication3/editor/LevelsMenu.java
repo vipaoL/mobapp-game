@@ -40,6 +40,7 @@ public class LevelsMenu extends AbstractEditorMenu {
         String[] files = { };
         try {
             files = listFiles(getPath());
+            sortByName(files);
         } catch (IOException e) {
             Platform.showError(e);
         }
@@ -88,6 +89,7 @@ public class LevelsMenu extends AbstractEditorMenu {
         String[] files = null;
         try {
             files = listFiles(getPath());
+            sortByName(files);
         } catch (IOException e) {
             Platform.showError(e);
         }

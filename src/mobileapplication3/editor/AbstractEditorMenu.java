@@ -174,6 +174,75 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
         return files;
     }
 
+    // TODO: move to Utils (after moving Utils to framework)
+    protected void sortByName(String[] files) {
+        if (files == null || files.length <= 1) {
+            return;
+        }
+        for (int i = 1; i < files.length; i++) {
+            String current = files[i];
+            int j = i - 1;
+            while (j >= 0 && compareStringsNatural(files[j], current) > 0) {
+                files[j + 1] = files[j];
+                j--;
+            }
+            files[j + 1] = current;
+        }
+    }
+
+    private int compareStringsNatural(String s1, String s2) {
+        int i1 = 0, i2 = 0;
+        int len1 = s1.length();
+        int len2 = s2.length();
+
+        while (i1 < len1 && i2 < len2) {
+            char c1 = s1.charAt(i1);
+            char c2 = s2.charAt(i2);
+
+            boolean isDigit1 = (c1 >= '0' && c1 <= '9');
+            boolean isDigit2 = (c2 >= '0' && c2 <= '9');
+
+            if (isDigit1 && isDigit2) {
+                int start1 = i1;
+                while (i1 < len1 && (s1.charAt(i1) >= '0' && s1.charAt(i1) <= '9')) i1++;
+                int end1 = i1;
+
+                int start2 = i2;
+                while (i2 < len2 && (s2.charAt(i2) >= '0' && s2.charAt(i2) <= '9')) i2++;
+                int end2 = i2;
+
+                while (start1 < end1 - 1 && s1.charAt(start1) == '0') start1++;
+                while (start2 < end2 - 1 && s2.charAt(start2) == '0') start2++;
+
+                int numLen1 = end1 - start1;
+                int numLen2 = end2 - start2;
+
+                if (numLen1 != numLen2) {
+                    return numLen1 - numLen2;
+                }
+
+                for (int k = 0; k < numLen1; k++) {
+                    char d1 = s1.charAt(start1 + k);
+                    char d2 = s2.charAt(start2 + k);
+                    if (d1 != d2) {
+                        return d1 - d2;
+                    }
+                }
+            } else {
+                if (c1 != c2) {
+                    c1 = Character.toLowerCase(c1);
+                    c2 = Character.toLowerCase(c2);
+                    if (c1 != c2) {
+                        return c1 - c2;
+                    }
+                }
+                i1++;
+                i2++;
+            }
+        }
+        return len1 - len2;
+    }
+
     protected abstract Button[] getList();
     protected abstract IUIComponent[] getGridContent();
     protected abstract void createNew();
