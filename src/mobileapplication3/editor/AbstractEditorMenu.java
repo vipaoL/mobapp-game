@@ -159,7 +159,7 @@ public abstract class AbstractEditorMenu extends AbstractPopupWindow {
                         .setSize(w, ButtonRow.H_AUTO)
                         .setPos(x0 + w/2, y0 + h, HCENTER | BOTTOM);
                 grid
-                        .setCols(Mathh.constrain(1, w/Font.getDefaultFontHeight()/5, 3))//.setCols(3)
+                        .setCols(Mathh.constrain(1, w/Font.getDefaultFontHeight()/6, 5))
                         .setElementsPadding(w/128)
                         .setSize(w, backButtonComponent.getTopY() - title.getBottomY())
                         .setPos(x0 + w/2, backButtonComponent.getTopY(), BOTTOM | HCENTER);
