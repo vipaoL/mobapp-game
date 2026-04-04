@@ -151,42 +151,42 @@ public abstract class Body extends Element {
                 },
                 new Property("Red") {
                     public void setValue(int value) {
-                        red = (short)(value * 31 / 255);
+                        red = value;
                         updateColor();
                     }
                     public int getValue() {
-                        return (short) (red * 255 / 31);
+                        return red;
                     }
                     public int getMinValue() {
                         return 0;
                     }
                     public int getMaxValue() {
-                        return 255;
+                        return 31;
                     }
                 },
                 new Property("Green") {
                     public void setValue(int value) {
-                        green = (short)(value * 63 / 255);
+                        green = value;
                         updateColor();
                     }
                     public int getValue() {
-                        return (short) (green * 255 / 63);
+                        return green;
                     }
                     public int getMinValue() {
                         return 0;
                     }
                     public int getMaxValue() {
-                        return 255;
+                        return 63;
                     }
                 },
                 new Property("Blue") {
                     public void setValue(int value) {
-                        blue = (short)(value * 31 / 255);
+                        blue = value;
                         updateColor();
                     }
-                    public int getValue() { return (short) (blue * 255 / 31); }
+                    public int getValue() { return blue; }
                     public int getMinValue() { return 0; }
-                    public int getMaxValue() { return 255; }
+                    public int getMaxValue() { return 31; }
                 }
         };
     }
