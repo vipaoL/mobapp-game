@@ -357,7 +357,6 @@ public class GraphicsWorld extends World {
 
         int colorFill = currColBodies;
         int colorStroke = currColBodies;
-        int thickness = THICKNESS_BODIES * 500 / zoomOut * 2;
 
         UserData userData = b.getUserData();
         if (userData instanceof MUserData) {
@@ -383,7 +382,7 @@ public class GraphicsWorld extends World {
                     yToPX(x, y) - zoomedRadius,
                     radius * 2000 / zoomOut,
                     radius * 2000 / zoomOut,
-                    0, 360, thickness, colorFill
+                    0, 360, THICKNESS_BODIES, colorFill
             );
         }
         else { // if not a circle, then a polygon
@@ -626,7 +625,7 @@ public class GraphicsWorld extends World {
                 yToPX(x, y) - zoomedRadius,
                 radius * 2000 / zoomOut,
                 radius * 2000 / zoomOut,
-                0, 360, THICKNESS_BODIES * 500 / zoomOut * 2, currColWheel
+                0, 360, THICKNESS_BODIES, currColWheel
         );
     }
 
@@ -661,15 +660,16 @@ public class GraphicsWorld extends World {
 
     private void drawArc(Graphics g, int x, int y, int w, int h, int startAngle, int arcAngle, int thickness, int fillColor) {
         int prevColor = g.getColor();
+        int t = thickness * 1000 / zoomOut;
 
-        if (thickness > 1 && betterGraphics) {
-            g.fillArc(x - thickness / 2, y - thickness / 2, w + thickness, h + thickness, startAngle, arcAngle);
+        if (betterGraphics) {
             g.setColor(fillColor);
-            g.fillArc(x + thickness / 2, y + thickness / 2, w - thickness, h - thickness, startAngle, arcAngle);
+            g.fillArc(x - t / 2, y - t / 2, w + t, h + t, startAngle, arcAngle);
             g.setColor(prevColor);
+            g.drawArc(x, y, w, h, startAngle, arcAngle, thickness, zoomOut, true, true, false);
         } else {
             g.setColor(fillColor);
-            g.fillArc(x + thickness / 2, y + thickness / 2, w - thickness, h - thickness, startAngle, arcAngle);
+            g.fillArc(x + t / 2, y + t / 2, w - t, h - t, startAngle, arcAngle);
             g.setColor(prevColor);
             g.drawArc(x, y, w, h, startAngle, arcAngle);
         }
