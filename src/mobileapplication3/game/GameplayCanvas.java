@@ -283,7 +283,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 physicsIterationsSetting = MobappGameSettings.getPhysicsPrecision();
                 maxFrameTime = MobappGameSettings.getFrameTime();
                 showFPS = MobappGameSettings.isFPSShown(showFPS);
-                bottomButtons = MobappGameSettings.buttonsAtTheBottom(scW < scH && RootContainer.displayKbHints);
+                bottomButtons = MobappGameSettings.buttonsAtTheBottom(scW < scH);
                 battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
             } catch (Throwable ex) {
                 Platform.showError("Can't read settings", ex);
