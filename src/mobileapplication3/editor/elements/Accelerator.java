@@ -14,44 +14,18 @@ public class Accelerator extends AbstractRectBodyElement {
     }
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        int dx = l * Mathh.cos(angle) / 1000;
-        int dy = l * Mathh.sin(angle) / 1000;
-
-        g.setColor(getColor(drawAsSelected));
-        g.drawLine(
-                xToPX(x - dx/2, zoomOut, offsetX),
-                yToPX(y - dy/2, zoomOut, offsetY),
-                xToPX(x + dx/2, zoomOut, offsetX),
-                yToPX(y + dy/2, zoomOut, offsetY),
-                thickness,
-                zoomOut,
-                true,
-                true,
-                false,
-                true
-        );
+        super.paint(g, zoomOut, offsetX, offsetY, drawThickness, drawAsSelected);
         int vectorX = m * Mathh.cos(angle + 15 + directionOffset) / 1000;
         int vectorY = m * Mathh.sin(angle + 15 + directionOffset) / 1000;
         g.drawArrow(
-                xToPX(x, zoomOut, offsetX),
-                yToPX(y, zoomOut, offsetY),
-                xToPX(x + vectorX, zoomOut, offsetX),
-                yToPX(y + vectorY, zoomOut, offsetY),
+                xToPX(getX0(), zoomOut, offsetX),
+                yToPX(getY0(), zoomOut, offsetY),
+                xToPX(getX0() + vectorX, zoomOut, offsetX),
+                yToPX(getY0() + vectorY, zoomOut, offsetY),
                 thickness / 4,
                 zoomOut,
                 drawThickness
         );
-    }
-
-    private short[] getZeros() {
-        short x = (short) (this.x - l * Mathh.cos(angle) / 2000);
-        short y = (short) (this.y - l * Mathh.sin(angle) / 2000);
-        return new short[] {x, y};
-    }
-
-    private void setZeros(int x, int y, int l, int angle) {
-        this.x = (short) (x + l * Mathh.cos(angle) / 2000);
-        this.y = (short) (y + l * Mathh.sin(angle) / 2000);
     }
 
     public void setModifierValue(short value) {
@@ -68,12 +42,9 @@ public class Accelerator extends AbstractRectBodyElement {
     }
 
     public Element setArgs(short[] args) {
-//      x = args[0]; // will be in the next mgstruct file format
-//      y = args[1];
-        setZeros(args[0], args[1], args[2], args[4]);
-        l = args[2];
-        thickness = args[3];
-        angle = args[4];
+        super.setArgs(args);
+        x = (short) (args[0] + thickness / 2 * Mathh.sin(angle) / 1000);
+        y = (short) (args[1] - thickness / 2 * Mathh.cos(angle) / 1000);
         directionOffset = args[5];
         setModifierValue(args[6]);
         effectDuration = args[7];
@@ -82,10 +53,9 @@ public class Accelerator extends AbstractRectBodyElement {
     }
 
     public short[] getArgs() {
-        short[] zeros = getZeros();
-        short x = zeros[0];
-        short y = zeros[1];
-        return new short[] {x, y, l, thickness, angle, directionOffset, m, effectDuration};
+        int offsetX = -thickness / 2 * Mathh.sin(angle) / 1000;
+        int offsetY = thickness / 2 * Mathh.cos(angle) / 1000;
+        return new short[] {(short) (x + offsetX), (short) (y + offsetY), l, thickness, angle, directionOffset, m, effectDuration};
     }
 
     public Property[] getProperties() {

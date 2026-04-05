@@ -159,19 +159,19 @@ public abstract class AbstractRectBodyElement extends Element {
         };
     }
 
-    private short getX0() {
+    protected short getX0() {
         return (short) (getX() + l * Mathh.cos(angle) / 2000 + thickness * Mathh.cos(angle + 90) / 2000);
     }
 
-    private short getY0() {
+    protected short getY0() {
         return (short) (getY() + l * Mathh.sin(angle) / 2000 + thickness * Mathh.sin(angle + 90) / 2000);
     }
 
-    private void setX0(short x0) {
+    protected void setX0(short x0) {
         setX((short) (x0 - l * Mathh.cos(angle) / 2000 - thickness * Mathh.cos(angle + 90) / 2000));
     }
 
-    private void setY0(short y0) {
+    protected void setY0(short y0) {
         setY((short) (y0 - l * Mathh.sin(angle) / 2000 - thickness * Mathh.sin(angle + 90) / 2000));
     }
 
