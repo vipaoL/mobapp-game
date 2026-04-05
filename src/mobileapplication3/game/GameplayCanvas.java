@@ -1055,13 +1055,29 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private void drawLoading(Graphics g) {
-        g.setColor(255, 255, 255);
         int l = scW * 2 / 3;
-        int h = scH / 24;
-        g.drawRect(scW / 2 - l / 2, scH * 2 / 3, l, h);
-        g.fillRect(scW / 2 - l / 2, scH * 2 / 3, l*loadingProgress/100, h);
+        int h = g.getFontHeight() * 2;
+        int x = scW / 2;
+        int y = scH - h * 2;
+        int x1 = x - l / 2;
+        int y1 = y - h / 2;
+        int loadingProgressPx = l * loadingProgress / 100;
+        int d = h / 2;
+
+        g.setColor(getLandscapeColor());
+        g.drawRoundRect(x1, y1, l, h, d, d);
+        g.fillRoundRect(x1, y1, loadingProgressPx, h, d, d);
+
         if (statusMessage != null) {
-            g.drawString(statusMessage, this.w/2, this.h, HCENTER | BOTTOM);
+            g.drawString(statusMessage, x, y, HCENTER | VCENTER);
+            int prevClipX = g.getClipX();
+            int prevClipY = g.getClipY();
+            int prevClipW = g.getClipWidth();
+            int prevClipH = g.getClipHeight();
+            g.setClip(x1, y1, loadingProgressPx, h);
+            g.setColor(0x000000);
+            g.drawString(statusMessage, x, y, HCENTER | VCENTER);
+            g.setClip(prevClipX, prevClipY, prevClipW, prevClipH);
         }
     }
     private void setLoadingProgress(int percents) {
