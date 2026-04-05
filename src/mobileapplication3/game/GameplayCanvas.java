@@ -1638,7 +1638,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             pauseTouched = true;
         } else if (inMenuArea) {
             menuTouched = true;
-        } else if (!gameOver) {
+        }
+
+        if (!gameOver) {
             motorTurnedOn = true;
         }
 
