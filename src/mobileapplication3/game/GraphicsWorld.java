@@ -669,7 +669,8 @@ public class GraphicsWorld extends World {
             g.drawArc(x, y, w, h, startAngle, arcAngle, thickness, zoomOut, true, true, false);
         } else {
             g.setColor(fillColor);
-            g.fillArc(x + t / 2, y + t / 2, w - t, h - t, startAngle, arcAngle);
+            g.fillArc(x, y, w + 1, h + 1, startAngle, arcAngle);
+
             g.setColor(prevColor);
             g.drawArc(x, y, w, h, startAngle, arcAngle);
         }
