@@ -1307,14 +1307,16 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         if (statusMessage != null) {
             g.drawString(statusMessage, x, y, HCENTER | VCENTER);
-            int prevClipX = g.getClipX();
-            int prevClipY = g.getClipY();
-            int prevClipW = g.getClipWidth();
-            int prevClipH = g.getClipHeight();
-            g.setClip(x1, y1, loadingProgressPx, h);
-            g.setColor(0x000000);
-            g.drawString(statusMessage, x, y, HCENTER | VCENTER);
-            g.setClip(prevClipX, prevClipY, prevClipW, prevClipH);
+            if (loadingProgressPx > 0) {
+                int prevClipX = g.getClipX();
+                int prevClipY = g.getClipY();
+                int prevClipW = g.getClipWidth();
+                int prevClipH = g.getClipHeight();
+                g.setClip(x1, y1, loadingProgressPx, h);
+                g.setColor(0x000000);
+                g.drawString(statusMessage, x, y, HCENTER | VCENTER);
+                g.setClip(prevClipX, prevClipY, prevClipW, prevClipH);
+            }
         }
     }
     private void setLoadingProgress(int percents) {
