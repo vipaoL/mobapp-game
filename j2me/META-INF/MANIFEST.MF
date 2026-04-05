@@ -5,7 +5,6 @@ MIDlet-Vendor: vipaoL
 MIDlet-Version: 0.9.5
 MIDlet-Name: mobapp-game
 MIDlet-1: mobapp-game,/gameicon.png,mobileapplication3.GameMIDlet
-MIDlet-Jar-URL: mobapp-game-j2me.jar
 Nokia-MIDlet-Category: Game
 Nokia-MIDlet-On-Screen-Keypad: no
 LGE-MIDlet-On-Screen-Keypad: no
