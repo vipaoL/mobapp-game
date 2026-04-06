@@ -12,12 +12,13 @@ import utils.MobappGameSettings;
  * @author vipaol
  */
 public class DebugMenu extends GenericMenu implements Runnable {
+    public static final String GAMING_MODE_SETTING_STR = "GAMING MODE";
     private static final String[] MENU_OPTS = {
         "Enable debug",
         "Show log",
         "Structure debug",
         "Simulation mode",
-        "GAMING MODE",
+        GAMING_MODE_SETTING_STR,
         "Physics precision",
         "Music",
         "Back"
@@ -26,7 +27,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
     public static boolean isDebugEnabled = false;
     public static boolean closerWorldgen = false;
     public static boolean coordinates = false;
-    public static boolean discoMode = false;
+    public static boolean gamingMode = false;
     public static boolean speedo = false;
     public static boolean cheat = false;
     public static boolean music = false;
@@ -47,7 +48,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
 
     public void init() {
         getFontSize();
-        setSpecialOption(0);
+        setSpecialOption(4);
         refreshStates();
         (new Thread(this, "debug menu")).start();
     }
@@ -59,6 +60,10 @@ public class DebugMenu extends GenericMenu implements Runnable {
         while (!isStopped) {
             if (!isPaused) {
                 start = System.currentTimeMillis();
+
+                if (gamingMode) {
+                    setSpecialOptnActColor(MobappGameSettings.getLandscapeColor());
+                }
 
                 repaint();
                 tick();
@@ -82,7 +87,6 @@ public class DebugMenu extends GenericMenu implements Runnable {
             case 0:
                 isDebugEnabled = !isDebugEnabled;
                 coordinates = isDebugEnabled;
-                setIsSpecialOptnActivated(isDebugEnabled);
                 Logger.logToStdout(isDebugEnabled);
                 break;
             case 1:
@@ -100,8 +104,8 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 simulationMode = !simulationMode;
                 break;
             case 4:
-                discoMode = !discoMode;
-                GraphicsWorld.bgOverride = discoMode;
+                gamingMode = !gamingMode;
+                MENU_OPTS[4] = gamingMode ? "<- Check landscape colors" : GAMING_MODE_SETTING_STR;
                 break;
             case 5:
                 int value = MobappGameSettings.getPhysicsPrecision();
@@ -143,11 +147,11 @@ public class DebugMenu extends GenericMenu implements Runnable {
         } else {
             MENU_OPTS[5] += String.valueOf(physicsPrecision);
         }
-        setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
+        setEnabledFor(DebugMenu.isDebugEnabled, 0);
         setEnabledFor(RootContainer.enableOnScreenLog, 1);
         setEnabledFor(structureDebug, 2);
         setEnabledFor(simulationMode, 3);
-        setEnabledFor(discoMode, 4);
+        setIsSpecialOptnActivated(gamingMode);
         setEnabledFor(physicsPrecision != MobappGameSettings.DEFAULT_PHYSICS_PRECISION, 5);
         setStateFor(/*music*/GenericMenu.STATE_INACTIVE, 6); // disable this option. it's not ready yet
     }

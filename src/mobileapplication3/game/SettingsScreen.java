@@ -4,14 +4,12 @@ package mobileapplication3.game;
 
 import mobileapplication3.platform.Battery;
 import mobileapplication3.platform.Logger;
-import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.RootContainer;
+import mobileapplication3.ui.GraphicsUtils;
 import mobileapplication3.ui.IUIComponent;
 import utils.MobappGameSettings;
-
-import java.util.Random;
 
 public class SettingsScreen extends GenericMenu implements Runnable {
     private static final int
@@ -38,6 +36,9 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             0xaaff44, // lime
             0xff44aa, // pink
             0xffaa44, // orange
+
+            MobappGameSettings.LANDSCAPE_COLOR_RGB,
+            MobappGameSettings.LANDSCAPE_COLOR_RGB_WITH_BG,
     };
 
     private static final String[] LANDSCAPE_COLOR_NAMES = {
@@ -50,6 +51,9 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             "lime",
             "pink",
             "orange",
+
+            "RGB",
+            "RGB+background"
     };
 
     private static final String[] menuOpts = new String[BACK + 1];
@@ -108,17 +112,40 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
         // show landscape color
         int color = MobappGameSettings.getLandscapeColor();
-        Random random = new Random(color);
+        float[] hsv = new float[3];
+        GraphicsUtils.RGBToHSV(color, hsv);
+        float m = hsv[0];
+
         int minScreenSide = Math.min(w, h);
-        int d = minScreenSide / 16 + random.nextInt(minScreenSide / 8);
-        int x;
-        do {
-            x = random.nextInt(w - d);
-        } while (Mathh.strictIneq(w / 3, x + d / 2, w * 2 / 3));
-        int y = random.nextInt(h - d);
+
+        // diameter
+        int minD = minScreenSide / 16;
+        int rangeD = minScreenSide / 8;
+        int d = calculatePosition(m, 4, minD, rangeD);
+
+        // X
+        int minX = d / 2;
+        int rangeX = w - d;
+        int x = calculatePosition(m, 3, minX, rangeX);
+
+        // Y
+        int minY = d / 2;
+        int rangeY = h - d;
+        int y = calculatePosition(m, 5, minY, rangeY);
+
         g.setColor(color);
-        g.fillArc(x, y, d, d, 0, 360);
+        g.fillArc(x - d / 2, y - d / 2, d, d, 0, 360);
+
         super.onPaint(g, x0, y0, w, h, forceInactive);
+    }
+
+    private static int calculatePosition(float m, int k, int min, int range) {
+        int maxM = 360;
+
+        int M = (int) ((m * k + k * k * k) % maxM);
+        boolean sign = (M * 2 / maxM) % 2 == 0;
+
+        return min + (range * 2 * ((sign ? M : (maxM - M)) % maxM) / maxM);
     }
 
     void selectPressed() {
@@ -151,7 +178,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 MobappGameSettings.toggleFPSShown();
                 break;
             case LANDSCAPE_COLOR:
-                MobappGameSettings.setLandscapeColor(LANDSCAPE_COLORS[(findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor()) + 1) % LANDSCAPE_COLORS.length]);
+                nextLandscapeColor();
                 break;
             case BOTTOM_BUTTONS:
                 MobappGameSettings.toggleButtonsAtTheBottom();
@@ -198,6 +225,15 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         refreshStates();
     }
 
+    private void nextLandscapeColor() {
+        do {
+            int landscapeColor = MobappGameSettings.getLandscapeColorSetting();
+            int i = findArrayIndex(LANDSCAPE_COLORS, landscapeColor);
+            int newLandscapeColor = LANDSCAPE_COLORS[(i + 1) % LANDSCAPE_COLORS.length];
+            MobappGameSettings.setLandscapeColor(newLandscapeColor);
+        } while (!DebugMenu.gamingMode && MobappGameSettings.getLandscapeColorSetting() > 0xffffff);
+    }
+
     void refreshStates() {
         int frameTime = MobappGameSettings.getFrameTime();
         int cameraRotationMode = MobappGameSettings.getCameraRotationMode();
@@ -218,7 +254,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         menuOpts[FRAME_TIME] = "FPS: " + round(1000f / frameTime) + " (" + frameTime + "ms/frame)";
         menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";
         menuOpts[SHOW_FPS] = "Show FPS";
-        menuOpts[LANDSCAPE_COLOR] = "Landscape color: " + LANDSCAPE_COLOR_NAMES[findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor())];
+        menuOpts[LANDSCAPE_COLOR] = "Landscape color: " + LANDSCAPE_COLOR_NAMES[findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColorSetting())];
         menuOpts[BOTTOM_BUTTONS] = "Buttons at the bottom";
         menuOpts[BATTERY] = "Show battery level";
         menuOpts[DEBUG] = "Debug settings";

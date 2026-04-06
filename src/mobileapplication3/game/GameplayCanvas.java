@@ -675,7 +675,12 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                         // Pause screen
                         wasPaused = true;
                         fpsCounterReady = false;
-                        sleep = 200;
+                        if (!MobappGameSettings.RGBMode) {
+                            sleep = 200;
+                        } else {
+                            sleep = maxFrameTime - (System.currentTimeMillis() - start);
+                            sleep = Math.max(sleep, 0);
+                        }
                         if (isVisible) {
                             paint();
                         }

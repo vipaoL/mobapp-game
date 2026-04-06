@@ -5,6 +5,8 @@ package utils;
 import mobileapplication3.game.GraphicsWorld;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.Settings;
+import mobileapplication3.ui.GraphicsUtils;
+import mobileapplication3.ui.IUIComponent;
 
 public class MobappGameSettings {
     private static final String
@@ -36,8 +38,13 @@ public class MobappGameSettings {
             CAMERA_ROTATION_DEFAULT_VALUE = CAMERA_ROTATION_STATIC,
             CAMERA_ROTATION_MAX_VALUE = CAMERA_ROTATION_FULL;
 
+    public static final int LANDSCAPE_COLOR_RGB = Integer.MAX_VALUE - 1;
+    public static final int LANDSCAPE_COLOR_RGB_WITH_BG = Integer.MAX_VALUE;
+
     private static String mgstructsFolderPath = null;
     private static String detailLevel = Settings.UNDEF;
+    private static int landscapeColor = IUIComponent.NOT_SET;
+    public static boolean RGBMode = false;
 
     private static Settings settingsInst = null;
 
@@ -142,11 +149,45 @@ public class MobappGameSettings {
 
     ///
 
+    public static int getLandscapeColorSetting() {
+        if (landscapeColor == IUIComponent.NOT_SET) {
+            landscapeColor = getSettingsInst().getInt(LANDSCAPE_COLOR, GraphicsWorld.DEFAULT_LANDSCAPE_COLOR);
+        }
+
+        return landscapeColor;
+    }
+
     public static int getLandscapeColor() {
-        return getSettingsInst().getInt(LANDSCAPE_COLOR, GraphicsWorld.DEFAULT_LANDSCAPE_COLOR);
+        int landscapeColor = getLandscapeColorSetting();
+        if (landscapeColor <= 0xffffff) {
+            RGBMode = false;
+            return landscapeColor;
+        } else {
+            RGBMode = true;
+            GraphicsWorld.bgOverride = landscapeColor == LANDSCAPE_COLOR_RGB_WITH_BG;
+
+            double maxSpeed = 360.0 / 1000.0;
+            double minSpeed = 360.0 / 10000.0;
+
+            double baseSpeed = (maxSpeed + minSpeed) / 2.0;
+            double speedAmp = (maxSpeed - minSpeed) / 2.0;
+
+            int cycleDuration = 120000;
+            double n = 2 * Math.PI / cycleDuration;
+
+            long millis = System.currentTimeMillis();
+            int hue = (int) ((baseSpeed * millis + (speedAmp / n) * Math.sin(n * millis)) % 360);
+
+            if (hue < 0) {
+                hue += 360;
+            }
+
+            return GraphicsUtils.HSVToRGB(hue, 1, 1);
+        }
     }
 
     public static void setLandscapeColor(int value) {
+        landscapeColor = value;
         getSettingsInst().set(LANDSCAPE_COLOR, String.valueOf(value));
     }
 

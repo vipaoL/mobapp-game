@@ -8,6 +8,7 @@ import at.emini.physics2D.util.FXVector;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Graphics;
+import mobileapplication3.ui.GraphicsUtils;
 import utils.MobappGameSettings;
 
 import java.util.Random;
@@ -65,7 +66,6 @@ public class GraphicsWorld extends World {
     public Body rightWheel;
     private Joint leftjoint;
     private Joint rightjoint;
-    private final Random random = new Random();
 
     // list of all bodies car touched (for falling platforms)
     public Vector waitingForDynamic = new Vector();
@@ -74,14 +74,14 @@ public class GraphicsWorld extends World {
     public int lowestY;
 
     public GraphicsWorld() {
-        resetColors();
         readSettings();
+        resetColors();
     }
 
     public GraphicsWorld(World w) {
         super(w);
-        resetColors();
         readSettings();
+        resetColors();
     }
 
     private void readSettings() {
@@ -266,6 +266,9 @@ public class GraphicsWorld extends World {
             calcOffset();
 
             drawBg(g);
+            if (MobappGameSettings.RGBMode) {
+                currColLandscape = MobappGameSettings.getLandscapeColor();
+            }
             if (structuresData != null && !legacyDrawingMethod && cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC) {
                 try {
                     drawLandscape(g, structuresData, structureRingBufferOffset, structureCount);
@@ -610,9 +613,8 @@ public class GraphicsWorld extends World {
         int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
         if (game.currentEffects[GameplayCanvas.EFFECT_SPEED] == null) {
             currColWheel = currColBg;
-            if (DebugMenu.discoMode) {
-                currColWheel = random.nextInt(16777216);
-                currColBodies = random.nextInt(16777216);
+            if (MobappGameSettings.RGBMode) {
+                currColWheel = GraphicsUtils.HSVToRGB(System.currentTimeMillis() * 360 / 1100 % 360, 1, 1);
             }
         }
 
@@ -634,16 +636,12 @@ public class GraphicsWorld extends World {
     }
 
     private void drawLine(Graphics g, int x1, int y1, int x2, int y2, int thickness, boolean zoomThickness) {
-        if (DebugMenu.discoMode) {
-            g.setColor(random.nextInt(16777216));
-        }
         g.drawLine(x1, y1, x2, y2, thickness, zoomOut, betterGraphics, zoomThickness);
     }
 
     private void drawGroundLine(Graphics g, int x1, int y1, int x2, int y2, int thickness) {
-        g.setColor(0x333300);
-        if (DebugMenu.discoMode) {
-            g.setColor(random.nextInt(16777216));
+        if (!MobappGameSettings.RGBMode) {
+            g.setColor(0x333300);
         }
         int y3 = Math.max(y1, y2);
         int x3 = x1;
