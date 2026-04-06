@@ -75,7 +75,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
 
         refreshStates();
-        (new Thread(this, "debug menu")).start();
+        (new Thread(this, "settings menu")).start();
     }
 
     public void run() {
