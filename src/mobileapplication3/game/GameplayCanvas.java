@@ -994,18 +994,22 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         // restart gesture hint
         if (hintVisibleTimer > 0 && levelIdVisibleTimer <= 0 && !restartGestureStarted) {
-            int y = scH * 7 / 8;
-            int xLeft = scW / 6;
-            int xRight = scW - xLeft;
-            int x = (RESTART_HINT_TIME - hintVisibleTimer) * w / CIRCLE_ANIM_TIME;
-            int xConstrained = Mathh.constrain(xLeft, x, xRight);
             int landscapeColor = getLandscapeColor();
-            int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(25, (25 * hintVisibleTimer / 10)));
-            if (hintVisibleTimer <= RESTART_HINT_TIME && GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
-                int d = g.getFontHeight() * 2;
-                g.setColor(buttonBgColor);
-                g.fillArc(xConstrained - d / 2, y - d / 2, d, d, 0, 360);
+            int y = scH * 7 / 8;
+
+            if (!RootContainer.displayKbHints) {
+                int xLeft = scW / 6;
+                int xRight = scW - xLeft;
+                int x = (RESTART_HINT_TIME - hintVisibleTimer) * w / CIRCLE_ANIM_TIME;
+                int xConstrained = Mathh.constrain(xLeft, x, xRight);
+                int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(25, (25 * hintVisibleTimer / 10)));
+                if (hintVisibleTimer <= RESTART_HINT_TIME && GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
+                    int d = g.getFontHeight() * 2;
+                    g.setColor(buttonBgColor);
+                    g.fillArc(xConstrained - d / 2, y - d / 2, d, d, 0, 360);
+                }
             }
+
             if (hintVisibleTimer <= RESTART_HINT_TIME) {
                 g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(100, (100 * hintVisibleTimer / 10))));
                 setFont(new Font(Font.SIZE_MEDIUM), g);
