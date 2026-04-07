@@ -237,7 +237,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     private void reset() {
         log("resetting the world");
-        countPoints = true;
         WorldGen.isEnabled = gameMode == GAME_MODE_ENDLESS;
         if (WorldGen.isEnabled) {
             if (worldgen == null) {
