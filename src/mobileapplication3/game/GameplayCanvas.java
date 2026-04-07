@@ -237,8 +237,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     private void reset() {
         log("resetting the world");
-        points = 0;
-        damage = 0;
         countPoints = true;
         WorldGen.isEnabled = gameMode == GAME_MODE_ENDLESS;
         if (WorldGen.isEnabled) {
@@ -308,7 +306,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             Logger.setLogMessageDelay(50);
             currentEffects = new short[1][];
 
-            if (DebugMenu.isDebugEnabled || DebugMenu.simulationMode || deferredStructures != null) {
+            if (DebugMenu.isDebugEnabled || DebugMenu.simulationMode || deferredStructures != null || gameOver) {
                 disablePointCounter();
             }
 
@@ -1493,7 +1491,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         delayedStopThread = null;
         isStopping = false;
         stopped = false;
-        gameOver = false;
         init();
     }
 
@@ -1560,6 +1557,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         if (level != null) {
             loadLevel(level);
         }
+        points = 0;
+        damage = 0;
+        gameOver = false;
         startAgain();
     }
 
@@ -1613,9 +1613,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     pauseButtonPressed();
                 } else {
                     // any other button turns the motor on
-                    if (!gameOver) {
-                        motorTurnedOn = true;
-                    }
+                    motorTurnedOn = true;
                 }
                 break;
         }
@@ -1649,9 +1647,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
             menuTouched = true;
         }
 
-        if (!gameOver) {
-            motorTurnedOn = true;
-        }
+        motorTurnedOn = true;
 
         return true;
     }

@@ -94,10 +94,9 @@ public class MenuCanvas extends GenericMenu implements Runnable {
                 sleep = 100;
             }
 
-            if (c == 3) {
+            if (c == 1) {
                 if (bg != null) {
                     bg.startAgain();
-                    bg.disablePointCounter();
                     RootContainer.setRootUIComponent(bg);
                     bg = null;
                     stop();
@@ -168,15 +167,18 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             }
         } else if (keyCode == Keys.KEY_NUM9) {
             c++;
+        } else {
+            c = 0;
         }
         return super.handleKeyPressed(keyCode, count);
     }
 
     public boolean handlePointerClicked(int x, int y) {
-        if (x < w / 32 && y < h / 32) {
+        if (x < w / 16 && y < h / 16 && bg != null) {
             c++;
             return true;
         } else {
+            c = 0;
             return super.handlePointerClicked(x, y);
         }
     }
