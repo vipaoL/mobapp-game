@@ -21,8 +21,8 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             SHOW_FPS = 5,
             BOTTOM_BUTTONS = 6,
             BATTERY = 7,
-            DEBUG = 8,
-            PLATFORM_SETTINGS = 9,
+            PLATFORM_SETTINGS = 8,
+            DEBUG = 9,
             ABOUT = 10,
             BACK = 11;
 
