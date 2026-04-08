@@ -93,6 +93,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 RootContainer.enableOnScreenLog = !RootContainer.enableOnScreenLog;
                 if (RootContainer.enableOnScreenLog) {
                     Logger.enableOnScreenLog(h);
+                    Logger.log(w + "x" + h);
                 } else {
                     Logger.disableOnScreenLog();
                 }

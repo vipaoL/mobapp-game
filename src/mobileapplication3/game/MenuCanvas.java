@@ -162,6 +162,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         if (keyCode == Keys.KEY_STAR | keyCode == -10) {
             if (!Logger.isOnScreenLogEnabled()) {
                 Logger.enableOnScreenLog(h);
+                Logger.log(w + "x" + h);
             } else {
                 Logger.disableOnScreenLog();
             }
