@@ -65,7 +65,7 @@ public class StructurePlacer {
             l2 += 10; // hack. I don't understand this code anymore. This method should be rewritten entirely
 
             int platformLength = 2*sl*r*3141/1000/360;
-            int platformHeight = r/100;
+            int platformHeight = 20;
 
             Shape rect = Shape.createRectangle(platformLength, platformHeight);
             rect.setMass(1);
