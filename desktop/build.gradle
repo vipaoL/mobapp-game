@@ -5,8 +5,9 @@ plugins {
 
 def getVersionName = { ->
     def description = grgit.describe(tags: true, always: true)
+    def status = grgit.status()
 
-    if (!grgit.status().clean) {
+    if (status.staged.allChanges || status.unstaged.modified || status.unstaged.removed || status.conflicts) {
         return description + "-dirty"
     }
 
@@ -15,6 +16,7 @@ def getVersionName = { ->
 
 group = 'com.vipaol'
 version = getVersionName()
+project.logger.lifecycle("Version: " + version)
 
 repositories {
     mavenCentral()
