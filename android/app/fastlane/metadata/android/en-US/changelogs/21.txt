@@ -1,0 +1,15 @@
+Levels & Structures:
+- New built-in ones.
+- Round & Square bodies.
+- Link element that references another one.
+
+UI:
+- Restart gesture.
+- The surface color is now used as the accent color.
+- Menu and pause buttons have been moved to the bottom (there's an option in the settings).
+
+Miscellaneous:
+- The source code of the physics engine is now open. Huge thanks to Alexander Adensamer for publishing it!
+- The editor can now open built-in structures and levels.
+
+See full changelog on GitHub.

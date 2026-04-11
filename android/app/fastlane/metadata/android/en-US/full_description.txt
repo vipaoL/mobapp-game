@@ -1,0 +1,6 @@
+A crossplatform game based on Emini Physics Engine (Android, J2ME and desktop Java are supported)
+- Endless gameplay with procedural world generation (random combination of predefined or custom structures)
+- Levels (fully predefined tracks where you need to touch the finish element)
+- Built-in level and structure editor
+- Custom structures: You can create create your own structures using the built-in editor and load them into the game by clicking "Load Structures" in the game's main menu. The game will then use your custom structures in world generation on a par with the built-in structures. You can also quickly test structures directly from the editor
+- Custom levels: The built-in editor also allows to create custom levels, which can be loaded from the "Levels" menu or directly from the editor
