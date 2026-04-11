@@ -5,13 +5,14 @@
 
 
 # About
-A crossplatform game on Emini Physics Engine (Android, J2ME and desktop Java are supported)
+A crossplatform game based on Emini Physics Engine (Android, J2ME and desktop Java are supported)
 - Endless gameplay with procedural world generation (random combination of predefined or custom structures)
-- Built-in and custom levels
+- Levels (fully predefined tracks where you need to touch the finish element)
 - Touchscreen and keyboard support
 - Adaptive to screen resolution
-- Custom structures: You can create create your custom structures using the built-in editor and load them into the game by pressing "Load Structures" in the game's main menu. Then the game will use your custom structures in world generation on a par with the built-in structures. You can also test structures quickly right from the editor
-- Custom levels: The built-in editor also allows to create custom levels that can be loaded from the "Levels" menu or right from the editor
+- Built-in level and structure editor
+- Custom structures: You can create create your own structures using the built-in editor and load them into the game by clicking "Load Structures" in the game's main menu. The game will then use your custom structures in world generation on a par with the built-in structures. You can also quickly test structures directly from the editor
+- Custom levels: The built-in editor also allows to create custom levels, which can be loaded from the "Levels" menu or directly from the editor
 
 ![photo](https://github.com/user-attachments/assets/3e4c62eb-3cab-4e38-a75e-28ae485e8d50)
 ![Scr_174](https://github.com/user-attachments/assets/eda7a77e-dba1-4a03-bd94-5cd6fc36dc88)
@@ -20,7 +21,7 @@ A crossplatform game on Emini Physics Engine (Android, J2ME and desktop Java are
 ![Scr_181](https://github.com/user-attachments/assets/37a9b5fe-5aa7-4150-afec-24bfd4c6343b)
 
 # Build
-`git clone https://github.com/vipaoL/mobapp-game.git --recursively`
+`git clone https://github.com/vipaoL/mobapp-game.git --recurse-submodules`
 ## IDE
 ### Android
 Open `android/` folder in Android Studio
@@ -29,4 +30,4 @@ Open `desktop/` folder in IntelliJ IDEA
 ### J2ME
 Use IntelliJ IDEA integration in KEmulator nnmod to open the project (`j2me/` folder is the project root)
 ## Command-line
-See .github/workflows/
+See `.github/workflows/`
