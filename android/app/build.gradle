@@ -31,8 +31,8 @@ android {
         applicationId 'io.github.vipaol.mobapp.game'
         minSdk 1
         targetSdk 34
-        versionName appVersionName
-        versionCode appVersionCode
+        versionName 'v0.9.6'
+        versionCode 21
     }
 
     buildTypes {
