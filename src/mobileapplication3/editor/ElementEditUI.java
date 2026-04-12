@@ -74,7 +74,7 @@ public class ElementEditUI extends AbstractPopupPage {
         };
 
         final IPopupFeedback fb = this;
-        Button advancedEditButton = new Button("AdvancedEdit") {
+        Button advancedEditButton = new Button("Advanced Edit") {
             public void buttonPressed() {
                 showPopup(new AdvancedElementEditUI(element, sb, fb));
             }
