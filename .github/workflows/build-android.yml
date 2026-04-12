@@ -25,11 +25,13 @@ jobs:
         cache: gradle
     - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
-    - name: Build with Gradle
+    - name: Build Debug
       run: cd android/ && ./gradlew build
-    - name: Upload build
+    - name: Build Release
+      run: cd android/ && ./gradlew clean assembleRelease
+    - name: Upload builds
       uses: actions/upload-artifact@v4
       with:
         name: mobapp-game-android
-        path: ${{ github.workspace }}/android/app/build/outputs/apk/debug/*
+        path: ${{ github.workspace }}/android/app/build/outputs/apk/*
 
