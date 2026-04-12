@@ -19,7 +19,7 @@ public class Trampoline extends AbstractRectBodyElement {
     }
 
     public short[] getArgs() {
-        return new short[] {x, y, l, thickness, angle, elasticity};
+        return concatArrays(super.getArgs(), new short[] {elasticity});
     }
 
     public Property[] getProperties() {
