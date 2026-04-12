@@ -1,6 +1,18 @@
-A crossplatform game based on Emini Physics Engine (Android, J2ME and desktop Java are supported)
-- Endless gameplay with procedural world generation (random combination of predefined or custom structures)
-- Levels (fully predefined tracks where you need to touch the finish element)
-- Built-in level and structure editor
-- Custom structures: You can create create your own structures using the built-in editor and load them into the game by clicking "Load Structures" in the game's main menu. The game will then use your custom structures in world generation on a par with the built-in structures. You can also quickly test structures directly from the editor
-- Custom levels: The built-in editor also allows to create custom levels, which can be loaded from the "Levels" menu or directly from the editor
+A cross-platform minimalist arcade game powered by Emini physics engine. Android, desktop Java, and J2ME are supported.
+Two game modes:
+- Endless mode: the track is procedurally generated on the fly, randomly connecting various structures (both built-in and custom).
+- Levels: completely predefined tracks with obstacles, where the main goal is to reach the finish plate.
+
+Built-in editor:
+The game offers complete creative freedom. You can create your own levels and structure blocks for endless mode.
+
+Examples:
+The editor allows you to open the game's built-in structures and levels - they are highlighted and displayed at the end. Built-in structures can be overridden by naming a custom one with the same name (but don't forget to load the structures from the main menu).
+
+Tools:
+Create tracks of any difficulty by combining various objects and adjusting their length, thickness, and other parameters:
+- Surfaces: Lines, Circles (arcs with adjustable radius and scaling), and Sinusoids for smooth transitions.
+- Interactive Platforms: Trampolines with adjustable springiness, deadly "Lava," and "Broken Lines" (slabs that begin to fall when driven over).
+- Accelerators (can also slow down): Plates that change the engine's power and direction.
+- Physics Bodies: Round and Square objects. These are fully-fledged physical entities. You can adjust their mass, friction, elasticity, gravity, and color. Make them static (with a fall timer, like the "Broken Line") or turn them into moving "lava"!
+- Auxiliary elements: Finish, Spawn point for levels and "Link", which copies another element with an offset.
