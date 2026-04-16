@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 MicroEdition-Configuration: CLDC-1.1
 MicroEdition-Profile: MIDP-2.0
 MIDlet-Vendor: vipaoL
-MIDlet-Version: 0.9.5
+MIDlet-Version: 0.9.6
 MIDlet-Name: mobapp-game
 MIDlet-1: mobapp-game,/gameicon.png,mobileapplication3.GameMIDlet
 Nokia-MIDlet-Category: Game

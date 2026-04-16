@@ -26,8 +26,8 @@ android {
         applicationId 'io.github.vipaol.mobapp.game'
         minSdk 1
         targetSdk 34
-        versionName 'v0.9.5'
-        versionCode 20
+        versionName 'v0.9.6'
+        versionCode 22
         resValue 'string', 'git_version', gitVersion
     }
 
