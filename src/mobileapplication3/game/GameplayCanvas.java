@@ -1224,7 +1224,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private int getLandscapeColor() {
-        return world != null ? world.currColLandscape : MobappGameSettings.getLandscapeColor();
+        return world != null && !MobappGameSettings.RGBMode ? world.currColLandscape : MobappGameSettings.getLandscapeColor();
     }
 
     private void drawDebugText(Graphics g, String str) {
