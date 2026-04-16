@@ -38,7 +38,7 @@ public abstract class GenericMenu extends CanvasComponent {
     private boolean isKnownButton = true, isInited = false;
     public boolean isPaused = false;
     public boolean isStopped = false;
-    private Font font;
+    private Font font, pressedFont;
     private int[] stateMap = null;
     public static final int STATE_INACTIVE = -1;
     public static final int STATE_NORMAL = 0;
@@ -68,7 +68,7 @@ public abstract class GenericMenu extends CanvasComponent {
                     g.setColor(selectedColor);
                     if (isPressedByPointerNow) {
                         g.setColor(pressedColor);
-                        g.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, font.getSize()));
+                        g.setFont(pressedFont);
                     }
 
                 }
@@ -129,6 +129,7 @@ public abstract class GenericMenu extends CanvasComponent {
                 }
             }
         }
+        pressedFont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, font.getSize());
         return font.getHeight();
     }
 
