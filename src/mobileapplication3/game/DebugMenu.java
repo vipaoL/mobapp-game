@@ -41,15 +41,20 @@ public class DebugMenu extends GenericMenu implements Runnable {
     public static boolean showContacts = false;
     public static boolean structureDebug = false;
 
+    private Thread thread;
+
     public DebugMenu() {
         loadParams(MENU_OPTS);
         loadStatemap(new int[MENU_OPTS.length]);
+
+        repaintOnlyOnFlushGraphics = true;
     }
 
     public void postInit() {
         setSpecialOption(4);
         refreshStates();
-        (new Thread(this, "debug menu")).start();
+        thread = new Thread(this, "debug menu");
+        thread.start();
     }
 
     public void run() {
@@ -64,7 +69,8 @@ public class DebugMenu extends GenericMenu implements Runnable {
                     setSpecialOptnActColor(MobappGameSettings.getLandscapeColor());
                 }
 
-                repaint();
+                onPaint(getUGraphics(), x0, y0, w, h, false);
+                flushGraphics();
                 tick();
 
                 sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
@@ -131,12 +137,20 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 break;
         }
         if (selected == MENU_OPTS.length - 1) {
-            isStopped = true;
+            stop();
             RootContainer.setRootUIComponent(new SettingsScreen());
         } else {
             refreshStates();
         }
     }
+
+    private void stop() {
+        isStopped = true;
+        try {
+            thread.join();
+        } catch (InterruptedException ignored) { }
+    }
+
     void refreshStates() {
         int physicsPrecision = MobappGameSettings.getPhysicsPrecision();
         MENU_OPTS[5] = "Physics precision: ";

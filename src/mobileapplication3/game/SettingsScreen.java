@@ -61,11 +61,13 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     // array with states of all buttons (active/inactive/enabled)
     private final int[] statemap = new int[menuOpts.length];
     private boolean batFailed = false;
+    private Thread thread;
 
     public SettingsScreen() {
-        bgColor = COLOR_TRANSPARENT;
         loadParams(menuOpts);
         loadStatemap(statemap);
+
+        repaintOnlyOnFlushGraphics = true;
     }
 
     public void init() {
@@ -76,7 +78,8 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     }
 
     public void postInit() {
-        (new Thread(this, "settings menu")).start();
+        thread = new Thread(this, "settings menu");
+        thread.start();
     }
 
     public void run() {
@@ -94,7 +97,8 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 if (!isPaused) {
                     start = System.currentTimeMillis();
 
-                    repaint();
+                    onPaint(getUGraphics(), x0, y0, w, h, false);
+                    flushGraphics();
                     tick();
 
                     sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
@@ -111,6 +115,8 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
+        drawBg(g, x0, y0, w, h, forceInactive);
+
         // show landscape color
         int color = MobappGameSettings.getLandscapeColor();
         float[] hsv = new float[3];
@@ -137,7 +143,10 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         g.setColor(color);
         g.fillArc(x - d / 2, y - d / 2, d, d, 0, 360);
 
+        int bgColor = this.bgColor;
+        this.bgColor = COLOR_TRANSPARENT;
         super.onPaint(g, x0, y0, w, h, forceInactive);
+        this.bgColor = bgColor;
     }
 
     private static int calculatePosition(float m, int k, int min, int range) {
@@ -206,24 +215,32 @@ public class SettingsScreen extends GenericMenu implements Runnable {
                 MobappGameSettings.toggleBattIndicator();
                 break;
             case DEBUG:
-                isStopped = true;
+                stop();
                 RootContainer.setRootUIComponent(new DebugMenu());
                 return;
             case PLATFORM_SETTINGS:
+                stop();
                 RootContainer.setRootUIComponent(getPlatformSettings());
                 return;
             case ABOUT:
-                isStopped = true;
+                stop();
                 RootContainer.setRootUIComponent(new AboutScreen());
                 return;
             case BACK:
-                isStopped = true;
+                stop();
                 RootContainer.setRootUIComponent(new MenuCanvas());
                 return;
             default:
                 break;
         }
         refreshStates();
+    }
+
+    private void stop() {
+        isStopped = true;
+        try {
+            thread.join();
+        } catch (InterruptedException ignored) { }
     }
 
     private void nextLandscapeColor() {

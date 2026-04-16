@@ -32,11 +32,16 @@ public class AboutScreen extends GenericMenu implements Runnable {
 
     private Image qr, qrBig;
     private Font headerFont;
+    private Thread thread;
 
     private int w, h;
     private int headerH, qrSide, menuH;
     private boolean bigQRIsDrawn = false;
     private int counter = 17;
+
+    public AboutScreen() {
+        repaintOnlyOnFlushGraphics = true;
+    }
 
     public void init() {
         loadParams(MENU_OPTS, MENU_OPTS.length - 1);
@@ -44,7 +49,8 @@ public class AboutScreen extends GenericMenu implements Runnable {
     }
 
     public void postInit() {
-        (new Thread(this, "about")).start();
+        thread = new Thread(this, "about");
+        thread.start();
     }
 
     protected void onSetBounds(int x0, int y0, int w, int h) {
@@ -100,7 +106,8 @@ public class AboutScreen extends GenericMenu implements Runnable {
         while (!isStopped) {
             if (!isPaused) {
                 start = System.currentTimeMillis();
-                repaint();
+                onPaint(getUGraphics(), 0, 0, w, h, false);
+                flushGraphics();
                 sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
             } else {
@@ -200,7 +207,7 @@ public class AboutScreen extends GenericMenu implements Runnable {
         if (selected == MENU_OPTS.length - 2) {
             counter+=1;
             if (counter >= 20) {
-                isStopped = true;
+                stop();
                 World test3 = new World();
                 test3.setGravity(FXVector.newVector(10, 100));
                 GraphicsWorld.bgOverride = true;
@@ -210,8 +217,15 @@ public class AboutScreen extends GenericMenu implements Runnable {
             }
         }
         if (selected == MENU_OPTS.length - 1) {
-            isStopped = true;
+            stop();
             RootContainer.setRootUIComponent(new SettingsScreen());
         }
+    }
+
+    private void stop() {
+        isStopped = true;
+        try {
+            thread.join();
+        } catch (InterruptedException ignored) { }
     }
 }

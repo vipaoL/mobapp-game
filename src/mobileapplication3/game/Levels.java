@@ -50,6 +50,8 @@ public class Levels extends GenericMenu implements Runnable {
         }
         // TODO: separate with pages -----------------------!
         refreshButtons();
+
+        repaintOnlyOnFlushGraphics = true;
     }
 
     private void refreshButtons() {
@@ -171,8 +173,8 @@ public class Levels extends GenericMenu implements Runnable {
                         gameCanvas = openLevel(path);
                     }
                     if (gameCanvas != null) {
+                        stop();
                         RootContainer.setRootUIComponent(gameCanvas);
-                        isStopped = true;
                     }
                 } catch (Exception ex) {
                     Platform.showError(ex);
@@ -180,6 +182,13 @@ public class Levels extends GenericMenu implements Runnable {
                 }
             }
         })).start();
+    }
+
+    private void stop() {
+        isStopped = true;
+        try {
+            thread.join();
+        } catch (InterruptedException ignored) { }
     }
 
     private static GameplayCanvas openLevel(String path) {
@@ -210,7 +219,7 @@ public class Levels extends GenericMenu implements Runnable {
     public synchronized void selectPressed() {
         defaultSelected = selected;
         if (selected == buttons.length - 1) {
-            isStopped = true;
+            stop();
             RootContainer.setRootUIComponent(new MenuCanvas());
         } else {
             if (builtinLevelsCount > 0) {
@@ -219,11 +228,11 @@ public class Levels extends GenericMenu implements Runnable {
                 } else {
                     if (!isStopped && !loadingLevel) {
                         loadingLevel = true;
+                        stop();
                         boolean success = openBuiltinLevel(selected);
-                        if (success) {
-                            isStopped = true;
-                        } else {
+                        if (!success) {
                             loadingLevel = false;
+                            init();
                         }
                     }
                 }
@@ -247,7 +256,8 @@ public class Levels extends GenericMenu implements Runnable {
             if (!isPaused) {
                 start = System.currentTimeMillis();
 
-                repaint();
+                onPaint(getUGraphics(), x0, y0, w, h, false);
+                flushGraphics();
                 tick();
 
                 sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);

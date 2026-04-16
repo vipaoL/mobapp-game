@@ -13,6 +13,7 @@ import mobileapplication3.platform.ui.RootContainer;
 public class RecordsScreen extends GenericMenu implements Runnable {
 
     private String[] buttons;
+    private Thread thread;
 
     public RecordsScreen() {
         int[] records = new int[0];
@@ -29,18 +30,28 @@ public class RecordsScreen extends GenericMenu implements Runnable {
         }
         loadParams(buttons);
         setFirstReachable(buttons.length-1);
+
+        repaintOnlyOnFlushGraphics = true;
     }
 
     public void postInit() {
         isStopped = false;
-        (new Thread(this, "records")).start();
+        thread = new Thread(this, "records");
+        thread.start();
     }
 
     public void selectPressed() {
         if (selected == buttons.length - 1) {
-            isStopped = true;
+            stop();
             RootContainer.setRootUIComponent(new MenuCanvas());
         }
+    }
+
+    private void stop() {
+        isStopped = true;
+        try {
+            thread.join();
+        } catch (InterruptedException ignored) { }
     }
 
     public void run() {
@@ -52,7 +63,8 @@ public class RecordsScreen extends GenericMenu implements Runnable {
             if (!isPaused) {
                 start = System.currentTimeMillis();
 
-                repaint();
+                onPaint(getUGraphics(), x0, y0, w, h, false);
+                flushGraphics();
                 tick();
 
                 sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);

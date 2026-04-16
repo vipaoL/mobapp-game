@@ -43,9 +43,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
     public MenuCanvas(GameplayCanvas bg) {
         this();
         this.bg = bg;
-        if (bg != null) {
-            bgColor = COLOR_TRANSPARENT;
-        }
     }
 
     public MenuCanvas() {
@@ -55,6 +52,8 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         // placeholders
         setFirstReachable(1);
         setLastReachable(menuOptions.length - 2);
+
+        repaintOnlyOnFlushGraphics = true;
     }
 
     public void init() {
@@ -86,7 +85,8 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         while (!isStopped) { // *** main cycle of menu drawing ***
             if (!isPaused && hasParent()) {
                 start = System.currentTimeMillis();
-                repaint(); // refresh picture on screen
+                onPaint(getUGraphics(), x0, y0, w, h, false);
+                flushGraphics();
                 int min_frame_time = bg != null ? GameplayCanvas.TICK_DURATION : MIN_FRAME_TIME;
                 sleep = min_frame_time - (System.currentTimeMillis() - start);
                 sleep = Math.max(sleep, 0);
@@ -120,7 +120,12 @@ public class MenuCanvas extends GenericMenu implements Runnable {
                 }
             }
             if (isInited) {
+                int bgColor = this.bgColor;
+                if (bg != null) {
+                    this.bgColor = COLOR_TRANSPARENT;
+                }
                 super.onPaint(g, x0, y0, w, h, forceInactive);
+                this.bgColor = bgColor;
                 tick();
             }
         } catch (Exception ex) { }
@@ -141,12 +146,11 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         Logger.log("menu:startGame()");
         repaint();
         try {
-            stopBG();
+            stop();
             log("menu:new gCanvas");
             GameplayCanvas gameCanvas = new GameplayCanvas();
             log("menu:setting gCanvas displayable");
             RootContainer.setRootUIComponent(gameCanvas);
-            stop();
         } catch (Exception ex) {
             ex.printStackTrace();
             Platform.showError(ex);
@@ -221,6 +225,11 @@ public class MenuCanvas extends GenericMenu implements Runnable {
 
     private void stop() {
         isStopped = true;
+        if (menuThread != null) {
+            try {
+                menuThread.join();
+            } catch (InterruptedException ignored) { }
+        }
         stopBG();
     }
 
