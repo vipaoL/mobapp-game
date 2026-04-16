@@ -13,7 +13,7 @@
         android:label="mobapp-game"
         android:roundIcon="@mipmap/icon_round"
         android:theme="@android:style/Theme.Black.NoTitleBar"
-        tools:targetApi="35"
+        tools:targetApi="34"
         android:appCategory="game">
 
         <provider
