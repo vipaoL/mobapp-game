@@ -16,7 +16,7 @@ import mobileapplication3.ui.Keys;
  * @author vipaol
  */
 public abstract class GenericMenu extends CanvasComponent {
-    protected static final int MIN_FRAME_TIME = 8; // limit menu refresh rate to 125 FPS
+    protected static final int MIN_FRAME_TIME = 20; // limit menu refresh rate to 50 FPS
     private static final int PAUSE_DELAY = 5;
     public int x0, y0, w, h;
     private int fontH, k = 10, keyPressDelay = 0,
