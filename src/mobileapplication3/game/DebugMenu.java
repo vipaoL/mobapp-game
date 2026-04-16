@@ -46,8 +46,7 @@ public class DebugMenu extends GenericMenu implements Runnable {
         loadStatemap(new int[MENU_OPTS.length]);
     }
 
-    public void init() {
-        getFontSize();
+    public void postInit() {
         setSpecialOption(4);
         refreshStates();
         (new Thread(this, "debug menu")).start();

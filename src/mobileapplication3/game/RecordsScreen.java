@@ -31,9 +31,8 @@ public class RecordsScreen extends GenericMenu implements Runnable {
         setFirstReachable(buttons.length-1);
     }
 
-    public void init() {
+    public void postInit() {
         isStopped = false;
-        getFontSize();
         (new Thread(this, "records")).start();
     }
 

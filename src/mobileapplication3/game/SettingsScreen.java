@@ -69,12 +69,13 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     }
 
     public void init() {
-        getFontSize();
-
         setSpecialOption(DEBUG); // highlight "Debug settings" if enabled
         setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
 
         refreshStates();
+    }
+
+    public void postInit() {
         (new Thread(this, "settings menu")).start();
     }
 

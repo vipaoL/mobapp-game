@@ -32,6 +32,8 @@ public class Levels extends GenericMenu implements Runnable {
 
     private boolean loadingLevel = false;
 
+    private Thread thread;
+
     public Levels() {
         Logger.log("Levels:constr");
         buttons = new String[2];
@@ -132,10 +134,12 @@ public class Levels extends GenericMenu implements Runnable {
         return false;
     }
 
-    public void init() {
+    public void postInit() {
         isStopped = false;
-        getFontSize();
-        (new Thread(this, "levels")).start();
+        if (thread == null || !thread.isAlive()) {
+            thread = new Thread(this, "levels");
+            thread.start();
+        }
     }
 
     public String[] getLevels() {
