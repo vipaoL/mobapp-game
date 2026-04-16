@@ -14,14 +14,9 @@ def getVersionName = { ->
     return description
 }
 
-def getVersionCode = { ->
-    return grgit.tag.list().size()
-}
+def gitVersion = getVersionName()
 
-def appVersionName = getVersionName()
-def appVersionCode = getVersionCode()
-
-project.logger.lifecycle("Version: " + appVersionName + " (" + appVersionCode + ")")
+project.logger.lifecycle("Version (git): " + gitVersion)
 
 android {
     namespace 'io.github.vipaol.mobapp.game'
@@ -31,8 +26,9 @@ android {
         applicationId 'io.github.vipaol.mobapp.game'
         minSdk 1
         targetSdk 34
-        versionName appVersionName
-        versionCode appVersionCode
+        versionName 'v0.9.5'
+        versionCode 20
+        resValue 'string', 'git_version', gitVersion
     }
 
     buildTypes {
