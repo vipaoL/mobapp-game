@@ -1309,7 +1309,10 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
         g.setColor(getLandscapeColor());
         g.drawRoundRect(x1, y1, l, h, d, d);
-        g.fillRoundRect(x1, y1, loadingProgressPx, h, d, d);
+
+        if (loadingProgressPx > 0) {
+            g.fillRoundRect(x1, y1, loadingProgressPx, h, d, d);
+        }
 
         if (statusMessage != null) {
             g.drawString(statusMessage, x, y, HCENTER | VCENTER);
