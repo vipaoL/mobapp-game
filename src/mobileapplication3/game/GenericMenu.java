@@ -27,7 +27,7 @@ public abstract class GenericMenu extends CanvasComponent {
 
     // colors
     protected int normalColor = 0xffffff, selectedColor = 0xff4040,
-            pressedColor = 0xE03838, specialOptionActivatedColor = 0xffff00,
+            pressedColor = 0xbb2222, specialOptionActivatedColor = 0xffff00,
             colUnreachable = 0x888888, colReachableEnabled = 0x88ff00, bgColor = 0x000000;
     private String[] options;
 
@@ -171,9 +171,11 @@ public abstract class GenericMenu extends CanvasComponent {
     }
 
     public boolean handlePointerClicked(int x, int y) {
+        isPressedByPointerNow = true;
         if (handlePointer(x, y)) {
             selectPressed();
         }
+        isPressedByPointerNow = false;
         return true;
     }
 
