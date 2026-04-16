@@ -165,6 +165,11 @@ public abstract class GenericMenu extends CanvasComponent {
         return true;
     }
 
+    protected boolean handlePointerReleased(int x, int y) {
+        isPressedByPointerNow = false;
+        return false;
+    }
+
     public boolean handlePointerClicked(int x, int y) {
         if (handlePointer(x, y)) {
             selectPressed();
