@@ -106,7 +106,15 @@ public class MgStruct {
         } else {
             loadFromRes();
         }
-        String[] paths = GameFileUtils.listFilesInAllPlaces("MobappGame/MGStructs");
+
+        String[] paths;
+        try {
+            paths = GameFileUtils.listFilesInAllPlaces("MobappGame/MGStructs");
+        } catch (SecurityException ex) {
+            loadCancelled = true;
+            Logger.log(ex);
+            return false;
+        }
 
         loadCancelled = false;
         loadedTotal = loadedFromRes;

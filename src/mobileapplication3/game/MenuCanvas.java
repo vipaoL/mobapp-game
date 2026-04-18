@@ -246,7 +246,13 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             public void run() {
                 menuOptions[2] = "Loading...";
                 setStateFor(1, 2);
-                if (MgStruct.loadFromFiles()) {
+                boolean success = false;
+                try {
+                    success = MgStruct.loadFromFiles();
+                } catch (Exception ex) {
+                    Logger.log(ex);
+                }
+                if (success) {
                     areExtStructsLoaded = true;
                     menuOptions[2] = (MgStruct.loadedTotal - MgStruct.loadedFromRes) + " loaded";
                     setColorEnabledOption(0x0099ff00);
