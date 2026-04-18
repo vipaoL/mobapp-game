@@ -105,9 +105,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
 
             try {
                 Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            } catch (InterruptedException ignored) { }
         }
         menuThread = null;
     }
@@ -128,7 +126,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
                 this.bgColor = bgColor;
                 tick();
             }
-        } catch (Exception ex) { }
+        } catch (Exception ignored) { }
     }
 
     protected void onSetBounds(int x0, int y0, int w, int h) {
@@ -152,7 +150,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             log("menu:setting gCanvas displayable");
             RootContainer.setRootUIComponent(gameCanvas);
         } catch (Exception ex) {
-            ex.printStackTrace();
             Platform.showError(ex);
             Logger.enableOnScreenLog(h);
             Logger.log("ex in startGame():");
@@ -255,9 +252,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
                     setColorEnabledOption(0x0099ff00);
                     try {
                         Thread.sleep(2000);
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                    }
+                    } catch (InterruptedException ignored) { }
                     menuOptions[2] = "Reload";
                 } else {
                     areExtStructsLoaded = false;

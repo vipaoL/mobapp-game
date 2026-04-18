@@ -119,10 +119,10 @@ public class MgStruct {
                 dis = FileUtils.fileToDataInputStream(path);
             } catch (SecurityException sex) {
                 Logger.log("mgs:load cancelled");
-                sex.printStackTrace();
+                Logger.log(sex);
                 loadCancelled = true;
             } catch (NullPointerException ex) {
-                ex.printStackTrace();
+                Logger.log(ex);
             } catch (NoClassDefFoundError err) {
                 Platform.showError(err);
                 return false;
@@ -144,12 +144,11 @@ public class MgStruct {
                         Logger.log(path + " loaded");
                     }
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    Logger.log(ex);
                 }
                 try {
                     dis.close();
-                } catch (Exception ignored) {
-                }
+                } catch (Exception ignored) { }
             }
         }
         Logger.log("mg:loaded: " + loadedFromFiles);
