@@ -204,7 +204,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         return this;
     }
 
-    public synchronized void init() {
+    public synchronized void postInit() {
         if (gameThread == null || !gameThread.isAlive()) {
             setLoadingProgress(0);
             log("starting game thread");
@@ -1493,7 +1493,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         delayedStopThread = null;
         isStopping = false;
         stopped = false;
-        init();
+        postInit();
     }
 
     private void resume() {
