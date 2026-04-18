@@ -8,3 +8,4 @@ MIDlet-1: mobapp-game,/gameicon.png,mobileapplication3.GameMIDlet
 Nokia-MIDlet-Category: Game
 Nokia-MIDlet-On-Screen-Keypad: no
 LGE-MIDlet-On-Screen-Keypad: no
+Commit: fix1
