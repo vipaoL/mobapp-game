@@ -26,7 +26,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x android/gradlew
     - name: Build Release
-      run: cd android/ && ./gradlew clean assembleRelease
+      run: cd android/ && ./gradlew clean assembleRelease --max-workers=1
     - name: Build Debug
       run: cd android/ && ./gradlew build
     - name: Upload builds
