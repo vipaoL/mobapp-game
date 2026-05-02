@@ -1562,6 +1562,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         points = 0;
         damage = 0;
         gameOver = false;
+
+        resume();
         startAgain();
     }
 
