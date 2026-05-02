@@ -34,6 +34,8 @@
         <activity
             android:name="GameActivity"
             android:exported="true"
+            android:taskAffinity=""
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale"
             android:resizeableActivity="true"

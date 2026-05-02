@@ -29,16 +29,7 @@ public class GameActivity extends MobappActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // handle file open intents
-        try {
-            Intent intent = getIntent();
-            if (Objects.equals(intent.getAction(), Intent.ACTION_VIEW)) {
-                root = IntentsUtil.handleFileOpenIntent(intent, this);
-                RootContainer.setRootUIComponent(root);
-            }
-        } catch (Throwable ex) {
-            Platform.showError(ex);
-        }
+        handleIntent(getIntent());
 
         // ------- migrate records to use a unified way to storing them
         try {
@@ -62,6 +53,24 @@ public class GameActivity extends MobappActivity {
         if (Platform.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             // Enable legacy drawing method by default
             MobappGameSettings.isLegacyDrawingMethodEnabled(true);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        // handle file open intents
+        try {
+            if (Objects.equals(intent.getAction(), Intent.ACTION_VIEW)) {
+                root = IntentsUtil.handleFileOpenIntent(intent, this);
+                RootContainer.setRootUIComponent(root);
+            }
+        } catch (Throwable ex) {
+            Platform.showError(ex);
         }
     }
 
