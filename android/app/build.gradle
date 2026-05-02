@@ -3,21 +3,6 @@ plugins {
     alias(libs.plugins.grgit)
 }
 
-def getVersionName = { ->
-    def description = grgit.describe(tags: true, always: true)
-    def status = grgit.status()
-
-    if (status.staged.allChanges || status.unstaged.modified || status.unstaged.removed || status.conflicts) {
-        return description + "-dirty"
-    }
-
-    return description
-}
-
-def gitVersion = getVersionName()
-
-project.logger.lifecycle("Version (git): " + gitVersion)
-
 android {
     namespace 'io.github.vipaol.mobapp.game'
     compileSdk 34
@@ -28,7 +13,7 @@ android {
         targetSdk 34
         versionName 'v0.9.6'
         versionCode 22
-        resValue 'string', 'git_version', gitVersion
+        resValue 'string', 'git_version', 'v0.9.6'
     }
 
     buildTypes {
