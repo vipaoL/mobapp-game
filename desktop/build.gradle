@@ -24,6 +24,7 @@ repositories {
 
 dependencies {
     implementation 'net.sf.jopt-simple:jopt-simple:6.0-alpha-3'
+    implementation 'com.github.oshi:oshi-core:6.12.0'
 }
 
 sourceSets {
@@ -52,5 +53,8 @@ jar {
         attributes 'Implementation-Version': version
         attributes 'Main-Class': 'com.vipaol.MobappGameDesktopMain'
     }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }
