@@ -1047,7 +1047,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         debugTextOffset = 0;
         if (battIndicator) {
             if (batLevel < 6) {
-                g.setColor(0x00ff00);
+                g.setColor(0xff0000);
             } else if (batLevel < 10) {
                 g.setColor(0xff8000);
             } else if (batLevel < 30) {
