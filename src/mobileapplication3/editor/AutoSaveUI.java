@@ -56,18 +56,26 @@ public abstract class AutoSaveUI extends AbstractPopupPage {
     public abstract void onDelete();
 
     public static void autoSaveWrite(StructureBuilder data, String filePath, int storeID) throws Exception {
-        String storeName;
+        String storeName = null;
         switch (storeID) {
             case STRUCTURE:
                 storeName = STORE_NAME_STRUCTURE_AUTOSAVE;
-                Platform.storeShorts(data.asShortArray(), storeName);
-                Platform.storeString(filePath, storeName + STORE_NAME_SUFFIX_FILE_PATH);
                 break;
             case LEVEL:
                 storeName = STORE_NAME_LEVEL_AUTOSAVE;
-                Platform.storeShorts(data.asShortArray(), storeName);
-                Platform.storeString(filePath, storeName + STORE_NAME_SUFFIX_FILE_PATH);
                 break;
+        }
+
+        if (storeName == null) {
+            return;
+        }
+
+        short[] shorts = data.asShortArray();
+        if (shorts != null) {
+            Platform.storeShorts(shorts, storeName);
+            Platform.storeString(filePath, storeName + STORE_NAME_SUFFIX_FILE_PATH);
+        } else {
+            Platform.showError("Autosave failed: data is null");
         }
     }
 

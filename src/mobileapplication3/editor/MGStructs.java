@@ -2,6 +2,7 @@
 
 package mobileapplication3.editor;
 
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.editor.elements.Link;
 import mobileapplication3.platform.FileUtils;
@@ -35,7 +36,11 @@ public class MGStructs {
             Logger.log("elements count: " + elementsCount);
             Element[] elements = new Element[elementsCount];
             for (int i = 0; i < elementsCount; i++) {
-                elements[i] = readNextElement(dis);
+                if (fileVer >= 2) {
+                    elements[i] = readShortenedElement(dis);
+                } else {
+                    elements[i] = readNextElement(dis);
+                }
                 if (elements[i] == null) {
                     Logger.log("got null. stopping read");
                     break;
@@ -99,6 +104,30 @@ public class MGStructs {
             logLine += Utils.shortArrayToString(args);
             Logger.logReplaceLast(prevLogLine, logLine);
 
+            element.setArgs(args);
+
+            return element;
+        } catch (IOException ex) {
+            Logger.log(ex);
+            return null;
+        }
+    }
+
+    private static Element readShortenedElement(DataInputStream is) {
+        try {
+            int id = is.readByte() & 0xFF;
+            if (id == 0) {
+                return null;
+            }
+
+            short[] data = MGStructsCommon.readShortenedElement(id, is);
+            Element element = Element.createTypedInstance((short) id);
+            if (element == null) {
+                return null;
+            }
+
+            short[] args = new short[data.length - 1];
+            System.arraycopy(data, 1, args, 0, args.length);
             element.setArgs(args);
 
             return element;

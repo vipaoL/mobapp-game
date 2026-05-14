@@ -2,9 +2,13 @@
 
 package mobileapplication3.editor.elements;
 
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class Accelerator extends AbstractRectBodyElement {
     private short directionOffset, m = 150, effectDuration = 30;
@@ -56,6 +60,33 @@ public class Accelerator extends AbstractRectBodyElement {
         int offsetX = -thickness / 2 * Mathh.sin(angle) / 1000;
         int offsetY = thickness / 2 * Mathh.cos(angle) / 1000;
         return new short[] {(short) (x + offsetX), (short) (y + offsetY), l, thickness, angle, directionOffset, m, effectDuration};
+    }
+
+    public int getOptionalArgsMask() {
+        int mask = 0;
+        if (directionOffset != 0) {
+            mask |= MGStructsCommon.MASK_ACCELERATOR_OFFSET;
+        }
+        if (m != 150) {
+            mask |= MGStructsCommon.MASK_ACCELERATOR_SPEED;
+        }
+        if (effectDuration != 30) {
+            mask |= MGStructsCommon.MASK_ACCELERATOR_DURATION;
+        }
+        return mask;
+    }
+
+    protected void writeOptionalArgs(DataOutputStream dos) throws IOException {
+        int mask = getOptionalArgsMask();
+        if ((mask & MGStructsCommon.MASK_ACCELERATOR_OFFSET) != 0) {
+            dos.writeShort(directionOffset);
+        }
+        if ((mask & MGStructsCommon.MASK_ACCELERATOR_SPEED) != 0) {
+            dos.writeShort(m);
+        }
+        if ((mask & MGStructsCommon.MASK_ACCELERATOR_DURATION) != 0) {
+            dos.writeShort(effectDuration);
+        }
     }
 
     public Property[] getProperties() {

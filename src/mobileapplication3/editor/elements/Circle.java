@@ -2,9 +2,13 @@
 
 package mobileapplication3.editor.elements;
 
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 /**
  *
@@ -146,6 +150,39 @@ public class Circle extends AbstractCurve {
 
     public short[] getArgs() {
         return new short[]{x, y, r, arcAngle, startAngle, kx, ky};
+    }
+
+    public int getOptionalArgsMask() {
+        int mask = 0;
+        if (arcAngle != 360) {
+            mask |= MGStructsCommon.MASK_CIRCLE_ARC_ANGLE;
+        }
+        if (startAngle != 0) {
+            mask |= MGStructsCommon.MASK_CIRCLE_START_ANGLE;
+        }
+        if (kx != 100) {
+            mask |= MGStructsCommon.MASK_CIRCLE_KX;
+        }
+        if (ky != 100) {
+            mask |= MGStructsCommon.MASK_CIRCLE_KY;
+        }
+        return mask;
+    }
+
+    protected void writeOptionalArgs(DataOutputStream dos) throws IOException {
+        int mask = getOptionalArgsMask();
+        if ((mask & MGStructsCommon.MASK_CIRCLE_ARC_ANGLE) != 0) {
+            dos.writeShort(arcAngle);
+        }
+        if ((mask & MGStructsCommon.MASK_CIRCLE_START_ANGLE) != 0) {
+            dos.writeShort(startAngle);
+        }
+        if ((mask & MGStructsCommon.MASK_CIRCLE_KX) != 0) {
+            dos.writeShort(kx);
+        }
+        if ((mask & MGStructsCommon.MASK_CIRCLE_KY) != 0) {
+            dos.writeShort(ky);
+        }
     }
 
     public Property[] getProperties() {

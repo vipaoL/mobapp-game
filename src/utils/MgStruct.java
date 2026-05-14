@@ -2,6 +2,7 @@
 
 package utils;
 
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Platform;
@@ -17,33 +18,15 @@ import java.io.InputStream;
  * @author vipaol
  */
 public class MgStruct {
-    private static final int[] ARGS_NUMBER = {
-            0,    // id0    EOF
-            2,    // id1    END_POINT
-            4,    // id2    LINE
-            7,    // id3    CIRCLE
-            9,    // id4    BROKEN_LINE
-            10,   // id5    BROKEN_CIRCLE
-            6,    // id6    SINE
-            8,    // id7    ACCELERATOR
-            6,    // id8    TRAMPOLINE
-            2,    // id9    LEVEL_START
-            5,    // id10   LEVEL_FINISH
-            5,    // id11   LAVA
-            10,   // id12   SQUARE_BODY
-            8,    // id13   ROUND_BODY
-            6,    // id14   SINE_FACE_UP
-            6,    // id15   SINE_FACE_DOWN
-            4,    // id16   LINE_FACE_UP
-            4,    // id17   LINE_FACE_DOWN
-            7,    // id18   CIRCLE_FACE_OUTSIDE
-            7,    // id19   CIRCLE_FACE_INSIDE
-            3,    // id20   LINK
-    };
-
     private static final int STRUCTURE_STORAGE_SIZE = 32;
     public static final String PREFIX = "/s";
     public static final String EXTENSION = ".mgstruct";
+
+    public static final short[] SUPPORTED_FORMAT_VERSIONS = {
+            2,
+            1,
+            0
+    };
 
     public static short[][][] structStorage = new short[STRUCTURE_STORAGE_SIZE][][];
 
@@ -170,7 +153,7 @@ public class MgStruct {
 
         try {
             short fileFormatVersion = dis.readShort();
-            if (Utils.isArrContain(new short[]{0, 1}, fileFormatVersion)) {
+            if (Utils.isArrContain(SUPPORTED_FORMAT_VERSIONS, fileFormatVersion)) {
                 // number of elements in the structure
                 int count = 16;
                 if (fileFormatVersion > 0) {
@@ -179,34 +162,73 @@ public class MgStruct {
                 Logger.log("reading: ver=" + fileFormatVersion + " count=" + count);
 
                 short[][] structure = new short[count][];
-                for (int c = 0; true; c++) {
-                    short id = dis.readShort();
+                int c = 0;
 
-                    // structID 0 means end of file
-                    if (id == 0) {
+                for (int e = 0; e < count; e++) {
+                    int id;
+                    try {
+                        if (fileFormatVersion >= 2) {
+                            id = dis.readByte() & 0xFF;
+                        } else {
+                            id = dis.readShort();
+                        }
+                    } catch (EOFException ex) {
                         break;
                     }
 
-                    /* read a primitive (e.g., line or circle)
+                    if (id == 0) { // EOF mark
+                        break;
+                    }
+
+                    /*
                      *
-                     * for example:
+                     * Old format (v0, v1):
+                     * Example:
                      * data = {2, 0, 0, 100, 0}:
                      * id=2 (LINE), x1=0, y1=0, x2=100, y2=0
+                     *
+                     * data = {3, 400, -50, 100, 90, 0, 100, 50}
+                     * id=3 (CIRCLE), x=400, y=-50, r=100, arcAngle=90, startAngle=0, kX=100, kY=50
+                     *
+                     *
+                     * v2:
+                     * Example:
+                     * data = {(2,0b00000000), 0, 0, 100, 0}:
+                     * id=2 (LINE), flags=0b00000000 (no optional arguments, no extra flags), x1=0, y1=0, x2=100, y2=0
+                     *
+                     * data = {(3,0b00001001), 400, -50, 100, 90, 50}
+                     * id=3 (CIRCLE), flags=0b00001001 (Bit 3: kY, Bit 0: arcAngle),
+                     * x=400, y=-50, r=100 (mandatory), arcAngle=90, kY=50 (optional)
+                     * (startAngle and kX are default)
+                     *
+                     * Flags bitmask structure (1 byte):
+                     * [ 7 ] - HAS_EXTENDED_FLAGS (if 1, read next byte for more flag bits)
+                     * [ 6 ] - MASK_VARIABLE_LENGTH (if 1, read variable length blocks)
+                     * [0-5] - Optional arguments mask (specific for each element ID)
                      */
-                    short[] data = new short[ARGS_NUMBER[id] + 1];
-                    // first cell is ID of primitive, next cells are arguments
-                    data[0] = id;
                     try {
-                        for (int i = 1; i < data.length; i++) {
-                            data[i] = dis.readShort();
+                        if (fileFormatVersion >= 2) {
+                            structure[e] = MGStructsCommon.readShortenedElement(id, dis);
+                        } else {
+                            short[] data = new short[MGStructsCommon.ARGS_NUMBER[id] + 1];
+                            // first cell is ID of the element, next cells are arguments (properties)
+                            data[0] = (short) id;
+                            for (int i = 1; i < data.length; i++) {
+                                data[i] = dis.readShort();
+                            }
+                            structure[e] = data;
                         }
                     } catch (EOFException ex) {
-                        try {
-                            dis.close();
-                        } catch (Exception ignored) { }
-                        throw ex;
+                        break;
                     }
-                    structure[c] = data;
+                    c++;
+                }
+
+                // always return array of exact size without null elements
+                if (c < structure.length) {
+                    short[][] finalStructure = new short[c][];
+                    System.arraycopy(structure, 0, finalStructure, 0, c);
+                    structure = finalStructure;
                 }
 
                 try {
@@ -220,7 +242,7 @@ public class MgStruct {
                 } catch (Exception ignored) { }
                 return null;
             }
-        } catch (ArrayIndexOutOfBoundsException ex) {
+        } catch (Exception ex) {
             Logger.log("error parsing file " + ex);
             ex.printStackTrace();
             try {

@@ -1,6 +1,10 @@
 package mobileapplication3.editor.elements;
 
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.ui.Property;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public abstract class Body extends Element {
     protected short fallDelay = DYNAMIC;
@@ -46,6 +50,47 @@ public abstract class Body extends Element {
                 fallDelay,
                 (short) ((red << 11) | (green << 5) | blue)
         };
+    }
+
+    public int getOptionalArgsMask() {
+        short[] bodyArgs = getBodyArgsValues();
+        int mask = 0;
+        if (bodyArgs[0] != 0) {
+            mask |= MGStructsCommon.MASK_BODY_ELASTICITY;
+        }
+        if (bodyArgs[1] != 1) {
+            mask |= MGStructsCommon.MASK_BODY_MASS;
+        }
+        if (bodyArgs[2] != 10) {
+            mask |= MGStructsCommon.MASK_BODY_FRICTION;
+        }
+        if (bodyArgs[3] != DYNAMIC) {
+            mask |= MGStructsCommon.MASK_BODY_FALL_DELAY;
+        }
+        if (bodyArgs[4] != (short) 0xFFFF) {
+            mask |= MGStructsCommon.MASK_BODY_COLOR;
+        }
+        return mask;
+    }
+
+    protected void writeOptionalArgs(DataOutputStream dos) throws IOException {
+        int mask = getOptionalArgsMask();
+        short[] bodyArgs = getBodyArgsValues();
+        if ((mask & MGStructsCommon.MASK_BODY_ELASTICITY) != 0) {
+            dos.writeShort(bodyArgs[0]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_MASS) != 0) {
+            dos.writeShort(bodyArgs[1]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_FRICTION) != 0) {
+            dos.writeShort(bodyArgs[2]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_FALL_DELAY) != 0) {
+            dos.writeShort(bodyArgs[3]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_COLOR) != 0) {
+            dos.writeShort(bodyArgs[4]);
+        }
     }
 
     public Property[] getBodyProperties() {

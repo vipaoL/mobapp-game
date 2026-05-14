@@ -2,10 +2,14 @@
 
 package mobileapplication3.editor.elements;
 
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 /**
  *
@@ -155,6 +159,37 @@ public abstract class Element {
         arr[0] = getID();
         System.arraycopy(args, 0, arr, 1, args.length);
         return arr;
+    }
+
+    public void writeShortened(DataOutputStream dos) throws IOException {
+        int id = getID();
+        int mask = getOptionalArgsMask();
+        dos.writeByte(id);
+
+        if (mask > 0x7F) {
+            // bits 0-6 + continuation bit
+            dos.writeByte((mask & 0x7F) | MGStructsCommon.MASK_HAS_EXTENDED_FLAGS);
+            // bits 8-15
+            dos.writeByte((mask >> 8) & 0xFF);
+        } else {
+            dos.writeByte(mask & 0x7F);
+        }
+
+        short[] args = getArgs();
+        int required = MGStructsCommon.REQUIRED_ARGS_NUMBER[id];
+        for (int i = 0; i < required; i++) {
+            dos.writeShort(args[i]);
+        }
+
+        writeOptionalArgs(dos);
+    }
+
+    public int getOptionalArgsMask() {
+        return 0;
+    }
+
+    protected void writeOptionalArgs(DataOutputStream dos) throws IOException {
+        // default implementation for elements with no optional args
     }
 
     public int getStepsToPlace() {

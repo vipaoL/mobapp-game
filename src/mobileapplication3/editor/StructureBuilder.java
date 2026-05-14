@@ -10,6 +10,8 @@ import mobileapplication3.editor.elements.Link;
 import mobileapplication3.platform.FileUtils;
 import mobileapplication3.platform.Logger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
@@ -104,29 +106,36 @@ public abstract class StructureBuilder {
         }
     }
 
+    // {file format version, count of elements, ...data..., eof mark}
     public short[] asShortArray() {
         fixLinks();
 
-        int carriage = 0;
-        // {file format version, count of elements, ...data..., eof mark}
-        short[] data = new short[1 + 1 + getDataLengthInShorts() + 1];
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
 
-        data[carriage] = 1;
-        carriage++;
-        data[carriage] = (short) getElementsCount();
-        carriage++;
+        try {
+            dos.writeShort(2); // mgstruct v2
+            dos.writeShort(getElementsCount());
 
-        for (int i = 0; i < getElementsCount(); i++) {
-            Element element = (Element) buffer.elementAt(i);
-            short[] elementArgs = element.getAsShortArray();
-            for (int j = 0; j < elementArgs.length; j++) {
-                data[carriage] = elementArgs[j];
-                carriage++;
+            for (int i = 0; i < getElementsCount(); i++) {
+                Element element = (Element) buffer.elementAt(i);
+                element.writeShortened(dos);
             }
+
+            dos.writeByte(0); // EOF ID
+            dos.writeByte(0); // EOF Flags
+            dos.flush();
+        } catch (IOException ex) {
+            Logger.log("Serialization failed: " + ex);
+            return null;
         }
 
-        data[carriage] = 0;
-        return data;
+        byte[] bytes = baos.toByteArray();
+        short[] shorts = new short[bytes.length / 2];
+        for (int i = 0; i < shorts.length; i++) {
+            shorts[i] = (short) (((bytes[i * 2] & 0xFF) << 8) | (bytes[i * 2 + 1] & 0xFF));
+        }
+        return shorts;
     }
 
     public short[][] asShortArrays() {
@@ -167,7 +176,11 @@ public abstract class StructureBuilder {
     }
 
     public void saveToFile(String path) throws IOException, SecurityException {
-        FileUtils.saveShortArrayToFile(asShortArray(), path);
+        short[] data = asShortArray();
+        if (data == null) {
+            throw new IOException("Failed to serialize structure (asShortArray returned null)");
+        }
+        FileUtils.saveShortArrayToFile(data, path);
     }
 
     public void loadFile(String path) {

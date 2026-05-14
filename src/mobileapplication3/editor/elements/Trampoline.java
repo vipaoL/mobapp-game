@@ -2,7 +2,11 @@
 
 package mobileapplication3.editor.elements;
 
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.ui.Property;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
 
 public class Trampoline extends AbstractRectBodyElement {
     public static final int COLOR = 0xffaa00;
@@ -20,6 +24,21 @@ public class Trampoline extends AbstractRectBodyElement {
 
     public short[] getArgs() {
         return concatArrays(super.getArgs(), new short[] {elasticity});
+    }
+
+    public int getOptionalArgsMask() {
+        int mask = 0;
+        if (elasticity != 100) {
+            mask |= MGStructsCommon.MASK_TRAMPOLINE_ELASTICITY;
+        }
+        return mask;
+    }
+
+    protected void writeOptionalArgs(DataOutputStream dos) throws IOException {
+        int mask = getOptionalArgsMask();
+        if ((mask & MGStructsCommon.MASK_TRAMPOLINE_ELASTICITY) != 0) {
+            dos.writeShort(elasticity);
+        }
     }
 
     public Property[] getProperties() {
