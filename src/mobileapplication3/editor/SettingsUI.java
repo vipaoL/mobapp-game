@@ -97,6 +97,11 @@ public class SettingsUI extends AbstractPopupPage {
                     }));
                 }
             },
+//            new Button("Bulk re-save built-in structures and levels") {
+//                public void buttonPressed() {
+//                    showPopup(new BulkResaverUI(feedback));
+//                }
+//            },
             new Button("Reset settings") {
                 public void buttonPressed() {
                     EditorSettings.resetSettings();
