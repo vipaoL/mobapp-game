@@ -1,6 +1,7 @@
 package mobileapplication3.editor.elements;
 
 import mobileapplication3.MGStructsCommon;
+import mobileapplication3.ui.BitmaskProperty;
 import mobileapplication3.ui.Property;
 
 import java.io.DataOutputStream;
@@ -9,6 +10,7 @@ import java.io.IOException;
 public abstract class Body extends Element {
     protected short fallDelay = DYNAMIC;
     protected short elasticity = 0, mass = 1, friction = 10;
+    protected short collisionMask = 0; // collide with everything by default
     protected boolean gravityAffected = true;
     protected boolean isLava = false;
 
@@ -40,6 +42,10 @@ public abstract class Body extends Element {
         int color = args[startIndex + 4] & 0xFFFF;
 
         setColorRGB565(((color >> 11) & 0x1F), ((color >> 5) & 0x3F), (color & 0x1F));
+
+        if (args.length > startIndex + 5) {
+            collisionMask = args[startIndex + 5];
+        }
     }
 
     public short[] getBodyArgsValues() {
@@ -48,7 +54,8 @@ public abstract class Body extends Element {
                 gravityAffected ? mass : (short) -mass,
                 !isLava ? friction : (short) (-friction - 1),
                 fallDelay,
-                (short) ((red << 11) | (green << 5) | blue)
+                (short) ((red << 11) | (green << 5) | blue),
+                collisionMask,
         };
     }
 
@@ -70,6 +77,9 @@ public abstract class Body extends Element {
         if (bodyArgs[4] != (short) 0xFFFF) {
             mask |= MGStructsCommon.MASK_BODY_COLOR;
         }
+        if (collisionMask != 0) {
+            mask |= MGStructsCommon.MASK_BODY_COLLISION_MASK;
+        }
         return mask;
     }
 
@@ -90,6 +100,9 @@ public abstract class Body extends Element {
         }
         if ((mask & MGStructsCommon.MASK_BODY_COLOR) != 0) {
             dos.writeShort(bodyArgs[4]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_COLLISION_MASK) != 0) {
+            dos.writeShort(bodyArgs[5]);
         }
     }
 
@@ -232,6 +245,14 @@ public abstract class Body extends Element {
                     public int getValue() { return blue; }
                     public int getMinValue() { return 0; }
                     public int getMaxValue() { return 31; }
+                },
+                new BitmaskProperty("Collision mask", 16) {
+                    public void setValue(int value) {
+                        collisionMask = (short) value;
+                    }
+                    public int getValue() {
+                        return collisionMask & 0xFFFF;
+                    }
                 }
         };
     }

@@ -56,7 +56,9 @@ public class AdvancedElementEditUI extends AbstractPopupPage {
         IUIComponent[] rows = new IUIComponent[properties.length + 1];
         for (int i = 0; i < properties.length; i++) {
             final Property property = properties[i];
-            if (property.getMinValue() != 0 || property.getMaxValue() != 1) {
+            if (property instanceof BitmaskProperty) {
+                rows[i] = new BitmaskSelector((BitmaskProperty) property);
+            } else if (property.getMinValue() != 0 || property.getMaxValue() != 1) {
                 rows[i] = new Slider(property);
             } else {
                 rows[i] = new ButtonComponent(new Switch(property.getName()) {

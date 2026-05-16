@@ -5,6 +5,7 @@ package mobileapplication3.game;
 import at.emini.physics2D.*;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Graphics;
@@ -23,7 +24,7 @@ public class GraphicsWorld extends World {
     public static final int THICKNESS_LANDSCAPE = 24;
     public static int DEFAULT_LANDSCAPE_COLOR = 0x4444ff;
     private static final int BIG_SCREEN_SIDE = 480;
-    private static final int CAR_COLLISION_LAYER = 1;
+    private static final int CAR_COLLISION_LAYER = MGStructsCommon.COLLISION_LAYER_CAR;
 
     public int colBg = 0x000000;
     public int colLandscape = DEFAULT_LANDSCAPE_COLOR;
@@ -76,12 +77,14 @@ public class GraphicsWorld extends World {
     public GraphicsWorld() {
         readSettings();
         resetColors();
+        getLandscape().getBody().addCollisionLayer(MGStructsCommon.COLLISION_LAYER_GROUND);
     }
 
     public GraphicsWorld(World w) {
         super(w);
         readSettings();
         resetColors();
+        getLandscape().getBody().addCollisionLayer(MGStructsCommon.COLLISION_LAYER_GROUND);
     }
 
     private void readSettings() {
@@ -374,39 +377,54 @@ public class GraphicsWorld extends World {
             }
         }
 
+        boolean hollow = b != carbody && b != leftWheel && b != rightWheel &&
+                (b.getColissionBitFlag() & (1 << CAR_COLLISION_LAYER)) != 0;
+
         if (vertices.length == 1) { // if shape of the body is circle
             int radius = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
             g.setColor(colorStroke);
             int x = b.positionFX().xAsInt();
             int y = b.positionFX().yAsInt();
             int zoomedRadius = radius * 1000 / zoomOut;
-            drawArc(g,
-                    xToPX(x, y) - zoomedRadius,
-                    yToPX(x, y) - zoomedRadius,
-                    radius * 2000 / zoomOut,
-                    radius * 2000 / zoomOut,
-                    0, 360, THICKNESS_BODIES, colorFill
-            );
+            if (hollow) {
+                g.drawArc(
+                        xToPX(x, y) - zoomedRadius,
+                        yToPX(x, y) - zoomedRadius,
+                        radius * 2000 / zoomOut,
+                        radius * 2000 / zoomOut,
+                        0, 360, THICKNESS_BODIES, zoomOut, true, true, false
+                );
+            } else {
+                drawArc(g,
+                        xToPX(x, y) - zoomedRadius,
+                        yToPX(x, y) - zoomedRadius,
+                        radius * 2000 / zoomOut,
+                        radius * 2000 / zoomOut,
+                        0, 360, THICKNESS_BODIES, colorFill
+                );
+            }
         }
         else { // if not a circle, then a polygon
             // fill
-            g.setColor(colorFill);
             int p0X = vertices[0].xAsInt();
             int p0Y = vertices[0].yAsInt();
-            for (int i = 0; i < vertices.length - 1; i++) {
-                if (b != carbody) {
-                    int piX = vertices[i].xAsInt();
-                    int piY = vertices[i].yAsInt();
-                    int pi1X = vertices[i + 1].xAsInt();
-                    int pi1Y = vertices[i + 1].yAsInt();
-                    g.fillTriangle(
-                            xToPX(p0X, p0Y),
-                            yToPX(p0X, p0Y),
-                            xToPX(piX, piY),
-                            yToPX(piX, piY),
-                            xToPX(pi1X, pi1Y),
-                            yToPX(pi1X, pi1Y)
-                    );
+            if (!hollow) {
+                g.setColor(colorFill);
+                for (int i = 0; i < vertices.length - 1; i++) {
+                    if (b != carbody) {
+                        int piX = vertices[i].xAsInt();
+                        int piY = vertices[i].yAsInt();
+                        int pi1X = vertices[i + 1].xAsInt();
+                        int pi1Y = vertices[i + 1].yAsInt();
+                        g.fillTriangle(
+                                xToPX(p0X, p0Y),
+                                yToPX(p0X, p0Y),
+                                xToPX(piX, piY),
+                                yToPX(piX, piY),
+                                xToPX(pi1X, pi1Y),
+                                yToPX(pi1X, pi1Y)
+                        );
+                    }
                 }
             }
 

@@ -7,6 +7,7 @@ import at.emini.physics2D.Contact;
 import at.emini.physics2D.UserData;
 import at.emini.physics2D.util.FXUtil;
 import at.emini.physics2D.util.FXVector;
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.platform.*;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.Graphics;
@@ -710,8 +711,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
 
     private void tryReduceLags() {
         if (gameMode == GAME_MODE_ENDLESS) {
-            int layer = 5;
-            world.getLandscape().getBody().addCollisionLayer(layer);
+            int layer = MGStructsCommon.COLLISION_LAYER_GROUND;
             Body[] bodies = world.getBodies();
             for (int i = 0; i < world.getBodyCount(); i++) {
                 Body body = bodies[i];

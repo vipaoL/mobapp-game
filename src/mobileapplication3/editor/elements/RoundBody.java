@@ -1,5 +1,6 @@
 package mobileapplication3.editor.elements;
 
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
 
@@ -7,9 +8,15 @@ public class RoundBody extends Body {
     private short r = 1;
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
+        int cX = xToPX(x, zoomOut, offsetX);
+        int cY = yToPX(y, zoomOut, offsetY);
         int r = this.r * 1000 / zoomOut;
         g.setColor(getColor(drawAsSelected));
-        g.fillArc(xToPX(x, zoomOut, offsetX) - r, yToPX(y, zoomOut, offsetY) - r, r*2, r*2, 0, 360);
+        if ((collisionMask & (1 << MGStructsCommon.COLLISION_LAYER_CAR)) != 0) {
+            g.drawArc(cX - r, cY - r, r * 2, r * 2, 0, 360, 10, zoomOut, true, true, false);
+        } else {
+            g.fillArc(cX - r, cY - r, r * 2, r * 2, 0, 360);
+        }
     }
 
     public PlacementStep[] getPlacementSteps() {

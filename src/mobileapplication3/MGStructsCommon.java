@@ -61,6 +61,11 @@ public class MGStructsCommon {
     public static final int MASK_BODY_FRICTION      = (1 << 2);
     public static final int MASK_BODY_FALL_DELAY    = (1 << 3);
     public static final int MASK_BODY_COLOR         = (1 << 4);
+    public static final int MASK_BODY_COLLISION_MASK = (1 << 5);
+
+    // Reserved layers
+    public static final int COLLISION_LAYER_CAR = 0;
+    public static final int COLLISION_LAYER_GROUND = 15;
 
     // ACCELERATOR
     public static final int MASK_ACCELERATOR_OFFSET   = (1 << 0);
@@ -87,8 +92,8 @@ public class MGStructsCommon {
             2,    // id9    LEVEL_START
             5,    // id10   LEVEL_FINISH
             5,    // id11   LAVA
-            10,   // id12   SQUARE_BODY
-            8,    // id13   ROUND_BODY
+            11,   // id12   SQUARE_BODY
+            9,    // id13   ROUND_BODY
             6,    // id14   SINE_FACE_UP
             6,    // id15   SINE_FACE_DOWN
             4,    // id16   LINE_FACE_UP
@@ -204,6 +209,9 @@ public class MGStructsCommon {
                 if ((flags & MASK_BODY_COLOR) != 0) {
                     data[startIdx+4] = dis.readShort();
                 }
+                if ((flags & MASK_BODY_COLLISION_MASK) != 0) {
+                    data[startIdx+5] = dis.readShort();
+                }
                 break;
             case ACCELERATOR:
                 if ((flags & MASK_ACCELERATOR_OFFSET) != 0) {
@@ -273,6 +281,7 @@ public class MGStructsCommon {
                 if (i == base + 2) return 10; // friction
                 if (i == base + 3) return Short.MIN_VALUE; // fallDelay: DYNAMIC
                 if (i == base + 4) return (short) 0xFFFF; // color: White (RGB565)
+                if (i == base + 5) return 0; // collision mask (0 = collides with everything)
                 break;
         }
         return 0;

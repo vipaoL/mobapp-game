@@ -2,6 +2,7 @@
 
 package mobileapplication3.editor.elements;
 
+import mobileapplication3.MGStructsCommon;
 import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.Property;
@@ -14,24 +15,46 @@ public class SquareBody extends Body {
     protected short l, thickness = 100, angle;
 
     public void paint(Graphics g, int zoomOut, int offsetX, int offsetY, boolean drawThickness, boolean drawAsSelected) {
-        int x0 = getX0();
-        int y0 = getY0();
-        int dx = l * Mathh.cos(angle) / 1000;
-        int dy = l * Mathh.sin(angle) / 1000;
-
         g.setColor(getColor(drawAsSelected));
-        g.drawLine(
-                xToPX(x0 - dx/2, zoomOut, offsetX),
-                yToPX(y0 - dy/2, zoomOut, offsetY),
-                xToPX(x0 + dx/2, zoomOut, offsetX),
-                yToPX(y0 + dy/2, zoomOut, offsetY),
-                thickness,
-                zoomOut,
-                true,
-                true,
-                false,
-                false
-        );
+
+        if ((collisionMask & (1 << MGStructsCommon.COLLISION_LAYER_CAR)) != 0) {
+            short[] p0 = getCornerPoint(0);
+            short[] p1 = getCornerPoint(1);
+            short[] p2 = getCornerPoint(2);
+            short[] p3 = getCornerPoint(3);
+
+            int x0 = xToPX(p0[0], zoomOut, offsetX);
+            int y0 = yToPX(p0[1], zoomOut, offsetY);
+            int x1 = xToPX(p1[0], zoomOut, offsetX);
+            int y1 = yToPX(p1[1], zoomOut, offsetY);
+            int x2 = xToPX(p2[0], zoomOut, offsetX);
+            int y2 = yToPX(p2[1], zoomOut, offsetY);
+            int x3 = xToPX(p3[0], zoomOut, offsetX);
+            int y3 = yToPX(p3[1], zoomOut, offsetY);
+
+            g.drawLine(x0, y0, x1, y1, 10, zoomOut, true, true);
+            g.drawLine(x1, y1, x2, y2, 10, zoomOut, true, true);
+            g.drawLine(x2, y2, x3, y3, 10, zoomOut, true, true);
+            g.drawLine(x3, y3, x0, y0, 10, zoomOut, true, true);
+        } else {
+            int x0 = getX0();
+            int y0 = getY0();
+            int dx = l * Mathh.cos(angle) / 1000;
+            int dy = l * Mathh.sin(angle) / 1000;
+
+            g.drawLine(
+                    xToPX(x0 - dx / 2, zoomOut, offsetX),
+                    yToPX(y0 - dy / 2, zoomOut, offsetY),
+                    xToPX(x0 + dx / 2, zoomOut, offsetX),
+                    yToPX(y0 + dy / 2, zoomOut, offsetY),
+                    thickness,
+                    zoomOut,
+                    true,
+                    true,
+                    false,
+                    false
+            );
+        }
     }
 
     public PlacementStep[] getPlacementSteps() {
