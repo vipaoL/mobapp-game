@@ -11,6 +11,7 @@ public abstract class Body extends Element {
     protected short fallDelay = DYNAMIC;
     protected short elasticity = 0, mass = 1, friction = 10;
     protected short collisionMask = 0; // collide with everything by default
+    protected short vx = 0, vy = 0;
     protected boolean gravityAffected = true;
     protected boolean isLava = false;
 
@@ -46,6 +47,12 @@ public abstract class Body extends Element {
         if (args.length > startIndex + 5) {
             collisionMask = args[startIndex + 5];
         }
+        if (args.length > startIndex + 6) {
+            vx = args[startIndex + 6];
+        }
+        if (args.length > startIndex + 7) {
+            vy = args[startIndex + 7];
+        }
     }
 
     public short[] getBodyArgsValues() {
@@ -56,6 +63,8 @@ public abstract class Body extends Element {
                 fallDelay,
                 (short) ((red << 11) | (green << 5) | blue),
                 collisionMask,
+                vx,
+                vy,
         };
     }
 
@@ -80,6 +89,12 @@ public abstract class Body extends Element {
         if (collisionMask != 0) {
             mask |= MGStructsCommon.MASK_BODY_COLLISION_MASK;
         }
+        if (vx != 0) {
+            mask |= MGStructsCommon.MASK_BODY_VX;
+        }
+        if (vy != 0) {
+            mask |= MGStructsCommon.MASK_BODY_VY;
+        }
         return mask;
     }
 
@@ -103,6 +118,12 @@ public abstract class Body extends Element {
         }
         if ((mask & MGStructsCommon.MASK_BODY_COLLISION_MASK) != 0) {
             dos.writeShort(bodyArgs[5]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_VX) != 0) {
+            dos.writeShort(bodyArgs[6]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_VY) != 0) {
+            dos.writeShort(bodyArgs[7]);
         }
     }
 
@@ -252,6 +273,22 @@ public abstract class Body extends Element {
                     }
                     public int getValue() {
                         return collisionMask & 0xFFFF;
+                    }
+                },
+                new Property("Initial VX") {
+                    public void setValue(int value) {
+                        vx = (short) value;
+                    }
+                    public int getValue() {
+                        return vx;
+                    }
+                },
+                new Property("Initial VY") {
+                    public void setValue(int value) {
+                        vy = (short) value;
+                    }
+                    public int getValue() {
+                        return vy;
                     }
                 }
         };

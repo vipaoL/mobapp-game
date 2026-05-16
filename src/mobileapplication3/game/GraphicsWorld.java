@@ -230,6 +230,9 @@ public class GraphicsWorld extends World {
                 if (userData.getFallDelay() <= 0) {
                     userData.setFallDelay(Integer.MIN_VALUE);
                     body.setDynamic(true);
+                    if (userData.getVx() != 0 || userData.getVy() != 0) {
+                        body.velocityFX().assignFX(FXUtil.toFX(userData.getVx()), FXUtil.toFX(userData.getVy()));
+                    }
                     waitingForDynamic.removeElementAt(i);
                 }
             } catch (ArrayIndexOutOfBoundsException ignored) { }
