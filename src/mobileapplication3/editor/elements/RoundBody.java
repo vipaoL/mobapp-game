@@ -70,6 +70,10 @@ public class RoundBody extends Body {
         return "Round body";
     }
 
+    protected boolean isCentroidSupported() {
+        return false;
+    }
+
     public short[] getStartPoint() {
         return new short[]{(short) (x - r), y};
     }

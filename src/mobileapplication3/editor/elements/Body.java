@@ -12,6 +12,7 @@ public abstract class Body extends Element {
     protected short elasticity = 0, mass = 1, friction = 10;
     protected short collisionMask = 0; // collide with everything by default
     protected short vx = 0, vy = 0, va = 0;
+    protected short cx = 0, cy = 0;
     protected boolean gravityAffected = true;
     protected boolean isLava = false;
 
@@ -56,6 +57,12 @@ public abstract class Body extends Element {
         if (args.length > startIndex + 8) {
             va = args[startIndex + 8];
         }
+        if (args.length > startIndex + 9) {
+            cx = args[startIndex + 9];
+        }
+        if (args.length > startIndex + 10) {
+            cy = args[startIndex + 10];
+        }
     }
 
     public short[] getBodyArgsValues() {
@@ -69,6 +76,8 @@ public abstract class Body extends Element {
                 vx,
                 vy,
                 va,
+                cx,
+                cy,
         };
     }
 
@@ -102,6 +111,12 @@ public abstract class Body extends Element {
         if (va != 0) {
             mask |= MGStructsCommon.MASK_BODY_VA;
         }
+        if (cx != 0) {
+            mask |= MGStructsCommon.MASK_BODY_CX;
+        }
+        if (cy != 0) {
+            mask |= MGStructsCommon.MASK_BODY_CY;
+        }
         return mask;
     }
 
@@ -134,6 +149,12 @@ public abstract class Body extends Element {
         }
         if ((mask & MGStructsCommon.MASK_BODY_VA) != 0) {
             dos.writeShort(bodyArgs[8]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_CX) != 0) {
+            dos.writeShort(bodyArgs[9]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_CY) != 0) {
+            dos.writeShort(bodyArgs[10]);
         }
     }
 
@@ -308,8 +329,22 @@ public abstract class Body extends Element {
                     public int getValue() {
                         return va;
                     }
+                },
+                new Property("Centroid CX") {
+                    public void setValue(int value) { cx = (short) value; }
+                    public int getValue() { return cx; }
+                    public boolean isActive() { return isCentroidSupported(); }
+                },
+                new Property("Centroid CY") {
+                    public void setValue(int value) { cy = (short) value; }
+                    public int getValue() { return cy; }
+                    public boolean isActive() { return isCentroidSupported(); }
                 }
         };
+    }
+
+    protected boolean isCentroidSupported() {
+        return true;
     }
 
     protected void setColorRGB565(int r5, int g6, int b5) {
