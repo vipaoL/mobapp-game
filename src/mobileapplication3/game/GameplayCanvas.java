@@ -768,6 +768,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private void setSimulationArea() {
+        if (gameMode == GAME_MODE_LEVEL) {
+            return;
+        }
         world.refreshCarPos();
         world.setSimulationArea(world.carX - world.viewField, world.carX + world.viewField);
     }
