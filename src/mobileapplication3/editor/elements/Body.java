@@ -11,7 +11,7 @@ public abstract class Body extends Element {
     protected short fallDelay = DYNAMIC;
     protected short elasticity = 0, mass = 1, friction = 10;
     protected short collisionMask = 0; // collide with everything by default
-    protected short vx = 0, vy = 0;
+    protected short vx = 0, vy = 0, va = 0;
     protected boolean gravityAffected = true;
     protected boolean isLava = false;
 
@@ -53,6 +53,9 @@ public abstract class Body extends Element {
         if (args.length > startIndex + 7) {
             vy = args[startIndex + 7];
         }
+        if (args.length > startIndex + 8) {
+            va = args[startIndex + 8];
+        }
     }
 
     public short[] getBodyArgsValues() {
@@ -65,6 +68,7 @@ public abstract class Body extends Element {
                 collisionMask,
                 vx,
                 vy,
+                va,
         };
     }
 
@@ -95,6 +99,9 @@ public abstract class Body extends Element {
         if (vy != 0) {
             mask |= MGStructsCommon.MASK_BODY_VY;
         }
+        if (va != 0) {
+            mask |= MGStructsCommon.MASK_BODY_VA;
+        }
         return mask;
     }
 
@@ -124,6 +131,9 @@ public abstract class Body extends Element {
         }
         if ((mask & MGStructsCommon.MASK_BODY_VY) != 0) {
             dos.writeShort(bodyArgs[7]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_VA) != 0) {
+            dos.writeShort(bodyArgs[8]);
         }
     }
 
@@ -289,6 +299,14 @@ public abstract class Body extends Element {
                     }
                     public int getValue() {
                         return vy;
+                    }
+                },
+                new Property("Initial VA") {
+                    public void setValue(int value) {
+                        va = (short) value;
+                    }
+                    public int getValue() {
+                        return va;
                     }
                 }
         };

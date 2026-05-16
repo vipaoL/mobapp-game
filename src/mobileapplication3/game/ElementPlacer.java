@@ -168,7 +168,7 @@ public class ElementPlacer {
                 mUserData.setColor(color);
                 mUserData.setColorStroke(color);
 
-                w.addBody(squareBody(centerX, centerY, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0));
+                w.addBody(squareBody(centerX, centerY, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0, 0));
 
                 updateLowestY(y + Math.max(l, thickness));
                 break;
@@ -184,7 +184,7 @@ public class ElementPlacer {
                 MUserData mUserData = new MUserData();
                 mUserData.setColor(0xffaa00);
 
-                Body body = squareBody(x, y, l, thickness, ang, elasticity, 1, 100, true, false, mUserData, 0, 0, 0);
+                Body body = squareBody(x, y, l, thickness, ang, elasticity, 1, 100, true, false, mUserData, 0, 0, 0, 0);
                 w.addBody(body);
 
                 updateLowestY(y + Math.max(l, thickness));
@@ -199,7 +199,7 @@ public class ElementPlacer {
 
                 MUserData mUserData = new MUserData(MUserData.TYPE_LEVEL_FINISH);
 
-                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0);
+                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0, 0);
                 w.addBody(body);
 
                 updateLowestY(y + Math.max(l, thickness));
@@ -214,7 +214,7 @@ public class ElementPlacer {
 
                 MUserData mUserData = new MUserData().setIsLava(true);
 
-                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0);
+                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0, 0);
                 w.addBody(body);
 
                 updateLowestY(y + Math.max(l, thickness));
@@ -236,6 +236,7 @@ public class ElementPlacer {
                 int collisionMask = data[11];
                 int vx = data[12];
                 int vy = data[13];
+                int va = data[14];
 
                 int r5 = (colorRGB565 >> 11) & 0x1F;
                 int g6 = (colorRGB565 >> 5) & 0x3F;
@@ -258,7 +259,7 @@ public class ElementPlacer {
                 );
                 mUserData.setFallDelay(fallDelay);
                 mUserData.setIsLava(isLava);
-                mUserData.setVelocity(vx, vy);
+                mUserData.setVelocity(vx, vy, va);
 
                 Body body = squareBody(
                         x,
@@ -273,7 +274,7 @@ public class ElementPlacer {
                         fallDelay < MUserData.STATIC,
                         mUserData,
                         collisionMask,
-                        vx, vy
+                        vx, vy, va
                 );
                 w.addBody(body);
 
@@ -294,6 +295,7 @@ public class ElementPlacer {
                 int collisionMask = data[9];
                 int vx = data[10];
                 int vy = data[11];
+                int va = data[12];
 
                 int r5 = (colorRGB565 >> 11) & 0x1F;
                 int g6 = (colorRGB565 >> 5) & 0x3F;
@@ -316,7 +318,7 @@ public class ElementPlacer {
                 );
                 mUserData.setFallDelay(fallDelay);
                 mUserData.setIsLava(isLava);
-                mUserData.setVelocity(vx, vy);
+                mUserData.setVelocity(vx, vy, va);
 
                 Body body = roundBody(
                         x, y, r,
@@ -327,7 +329,7 @@ public class ElementPlacer {
                         fallDelay < MUserData.STATIC,
                         mUserData,
                         collisionMask,
-                        vx, vy
+                        vx, vy, va
                 );
                 w.addBody(body);
 
@@ -346,17 +348,17 @@ public class ElementPlacer {
         }
     }
 
-    public Body squareBody(int x, int y, int w, int h, int rotationDeg, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy) {
-        Body body = body(Shape.createRectangle(w, h), x, y, elasticity, mass, friction, gravityAffected, dynamic, data, collisionMask, vx, vy);
+    public Body squareBody(int x, int y, int w, int h, int rotationDeg, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy, int va) {
+        Body body = body(Shape.createRectangle(w, h), x, y, elasticity, mass, friction, gravityAffected, dynamic, data, collisionMask, vx, vy, va);
         body.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * rotationDeg);
         return body;
     }
 
-    public Body roundBody(int x, int y, int r, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy) {
-        return body(Shape.createCircle(r), x, y, elasticity, mass, friction, gravityAffected, dynamic, data, collisionMask, vx, vy);
+    public Body roundBody(int x, int y, int r, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy, int va) {
+        return body(Shape.createCircle(r), x, y, elasticity, mass, friction, gravityAffected, dynamic, data, collisionMask, vx, vy, va);
     }
 
-    public Body body(Shape shape, int x, int y, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy) {
+    public Body body(Shape shape, int x, int y, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy, int va) {
         shape.setElasticity(elasticity);
         shape.setMass(mass);
         shape.setFriction(friction);
@@ -366,6 +368,9 @@ public class ElementPlacer {
 
         if (dynamic && (vx != 0 || vy != 0)) {
             body.velocityFX().assignFX(FXUtil.toFX(vx), FXUtil.toFX(vy));
+        }
+        if (dynamic && va != 0) {
+            body.angularVelocity2FX((int) ((long) va * FXUtil.TWO_PI_2FX / 360));
         }
 
         for (int i = 0; i < 16; i++) {

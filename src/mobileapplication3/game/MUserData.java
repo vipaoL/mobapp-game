@@ -26,7 +26,7 @@ public class MUserData implements UserData {
     private int colorStroke = COLOR_DEFAULT;
     private int fallDelay = STATIC;
     private boolean isLava = false;
-    private int vx, vy;
+    private int vx, vy, va;
 
     public MUserData(int bodyType) {
         this.bodyType = bodyType;
@@ -51,7 +51,7 @@ public class MUserData implements UserData {
             }
             newUserData.setColor(color);
             newUserData.setFallDelay(fallDelay);
-            newUserData.setVelocity(vx, vy);
+            newUserData.setVelocity(vx, vy, va);
             return newUserData;
         }
 
@@ -114,9 +114,10 @@ public class MUserData implements UserData {
         this.colorStroke = colorStroke;
     }
 
-    public void setVelocity(int vx, int vy) {
+    public void setVelocity(int vx, int vy, int va) {
         this.vx = vx;
         this.vy = vy;
+        this.va = va;
     }
 
     public int getVx() {
@@ -125,5 +126,9 @@ public class MUserData implements UserData {
 
     public int getVy() {
         return vy;
+    }
+
+    public int getVa() {
+        return va;
     }
 }
