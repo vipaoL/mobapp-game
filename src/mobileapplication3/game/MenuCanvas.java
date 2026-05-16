@@ -13,7 +13,7 @@ import utils.MgStruct;
  *
  * @author vipaol
  */
-public class MenuCanvas extends GenericMenu implements Runnable {
+public class MenuCanvas extends GenericMenu {
 
     private final String[] menuOptions = {
             "",
@@ -38,11 +38,10 @@ public class MenuCanvas extends GenericMenu implements Runnable {
 
     private static boolean areExtStructsLoaded = false;
 
-    private Thread menuThread = null;
-
     public MenuCanvas(GameplayCanvas bg) {
         this();
         this.bg = bg;
+        targetFPS = 1000 / GameplayCanvas.TICK_DURATION;
     }
 
     public MenuCanvas() {
@@ -52,8 +51,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         // placeholders
         setFirstReachable(1);
         setLastReachable(menuOptions.length - 2);
-
-        repaintOnlyOnFlushGraphics = true;
     }
 
     public void init() {
@@ -71,43 +68,15 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         isInited = true;
     }
 
-    public void postInit() {
-        if (menuThread == null) {
-            menuThread = new Thread(this, "menu canvas");
-            menuThread.start();
-        }
-    }
-
-    public void run() {
-        long sleep = 0; // for FPS/TPS control
-        long start = 0; //
-
-        while (!isStopped) { // *** main cycle of menu drawing ***
-            if (!isPaused && hasParent()) {
-                start = System.currentTimeMillis();
-                onPaint(getUGraphics(), x0, y0, w, h, false);
-                flushGraphics();
-                int min_frame_time = bg != null ? GameplayCanvas.TICK_DURATION : MIN_FRAME_TIME;
-                sleep = min_frame_time - (System.currentTimeMillis() - start);
-                sleep = Math.max(sleep, 0);
-            } else {
-                sleep = 100;
+    public void tick() {
+        super.tick();
+        if (c == 1) {
+            if (bg != null) {
+                bg.startAgain();
+                RootContainer.setRootUIComponent(bg);
+                bg = null;
             }
-
-            if (c == 1) {
-                if (bg != null) {
-                    bg.startAgain();
-                    RootContainer.setRootUIComponent(bg);
-                    bg = null;
-                    stop();
-                }
-            }
-
-            try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException ignored) { }
         }
-        menuThread = null;
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
@@ -115,6 +84,7 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             if (bg != null) {
                 if (!bg.drawAsBG(g)) {
                     bg = null;
+                    setTargetFPS(DEFAULT_FPS);
                 }
             }
             if (isInited) {
@@ -144,7 +114,6 @@ public class MenuCanvas extends GenericMenu implements Runnable {
         Logger.log("menu:startGame()");
         repaint();
         try {
-            stop();
             log("menu:new gCanvas");
             GameplayCanvas gameCanvas = new GameplayCanvas();
             log("menu:setting gCanvas displayable");
@@ -194,11 +163,9 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             loadMG();
         }
         if (selected == 3) { // Levels
-            stop();
             RootContainer.setRootUIComponent(new Levels());
         }
         if (selected == 4) { // Editor
-            stop();
             try {
                 Class.forName("mobileapplication3.editor.Editor").newInstance();
             } catch (Exception ex) {
@@ -207,32 +174,13 @@ public class MenuCanvas extends GenericMenu implements Runnable {
             Logger.log("opened editor");
         }
         if (selected == 5) { // Records
-            stop();
             RootContainer.setRootUIComponent(new RecordsScreen());
         }
         if (selected == 6) { // Settings
-            stop();
             RootContainer.setRootUIComponent(new SettingsScreen());
         }
         if (selected == 7) { // Exit
-            stop();
             Platform.exit();
-        }
-    }
-
-    private void stop() {
-        isStopped = true;
-        if (menuThread != null) {
-            try {
-                menuThread.join();
-            } catch (InterruptedException ignored) { }
-        }
-        stopBG();
-    }
-
-    private void stopBG() {
-        if (bg != null) {
-            bg.stop(false, true);
         }
     }
 

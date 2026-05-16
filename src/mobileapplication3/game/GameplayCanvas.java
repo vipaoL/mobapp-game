@@ -24,7 +24,7 @@ import java.util.Vector;
  *
  * @author vipaol
  */
-public class GameplayCanvas extends CanvasComponent implements Runnable {
+public class GameplayCanvas extends CanvasComponent {
     public static final int TICK_DURATION = 50;
     public static final String MENU_HINT = "MENU";
     public static final String MENU_HINT_KB = "#, 9";
@@ -91,7 +91,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private int fps;
     private int tps;
     private int physicsIterations;
-    private int measuredTickTime, measuredPaintTime;
+    private int measuredTickTime;
     private String statusMessage = null;
 
     // debug
@@ -134,7 +134,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private FlipCounter flipCounter;
     private IUIComponent prevScreen = null;
 
-    private Thread gameThread = null;
     private int baseTimestepFX = 0;
 
     private Vector deferredStructures = null;
@@ -142,9 +141,24 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private Thread delayedStopThread;
     private Thread delayedRestartThread;
 
+    private long lastFPSMeasureTime = 0;
+    private long lastPhysicsTickTime = 0;
+    private long lastBattUpdateTime = 0;
+    private int physicsIterationsUnalteredCount = 0;
+    private int targetTPS = 60;
+    private int measureSeconds = 0;
+    private int physicsTimeTotal = 0;
+    private int ticksTotal = 0;
+    private boolean performanceEvaluated = false;
+    private boolean lockPhysicsPrecision = false;
+    private boolean dynamicPhysicsPrecision = false;
+    private int physicsIterationsSetting;
+    private int bigTickN = 0;
+    private int targetFPS;
+
     public GameplayCanvas() {
         log("game: constructor");
-        repaintOnlyOnFlushGraphics = true;
+        setTargetFPS(60);
     }
 
     public GameplayCanvas(GraphicsWorld w) {
@@ -206,11 +220,100 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     public synchronized void postInit() {
-        if (gameThread == null || !gameThread.isAlive()) {
-            setLoadingProgress(0);
-            log("starting game thread");
-            gameThread = new Thread(this, "game canvas");
-            gameThread.start();
+        setLoadingProgress(0);
+        new Thread(new Runnable() {
+            public void run() {
+                loadSettingsAndWorld();
+            }
+        }, "game loader").start();
+    }
+
+    private void loadSettingsAndWorld() {
+        try {
+            log("loading...");
+            timeFlying = 10;
+
+            wasPaused = true;
+            fpsCounterReady = false;
+            tickTime = TICK_DURATION;
+            try {
+                log("reading settings");
+                physicsIterationsSetting = MobappGameSettings.getPhysicsPrecision();
+                targetFPS = MobappGameSettings.getTargetFPS();
+                showFPS = MobappGameSettings.isFPSShown(showFPS);
+                bottomButtons = MobappGameSettings.buttonsAtTheBottom(scW < scH);
+                battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
+            } catch (Throwable ex) {
+                Platform.showError("Can't read settings", ex);
+            }
+            dynamicPhysicsPrecision = physicsIterationsSetting == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
+            lockPhysicsPrecision = !dynamicPhysicsPrecision && physicsIterationsSetting != MobappGameSettings.AUTO_PHYSICS_PRECISION;
+            physicsIterations = physicsIterationsSetting;
+            if (physicsIterations <= 0) {
+                physicsIterations = 2;
+            }
+
+            if (world == null) {
+                // new world
+                setDefaultWorld();
+            } else {
+                // re-init an existing world
+                initWorld();
+            }
+
+            world.refreshScreenParameters(scW, scH);
+
+            Logger.setLogMessageDelay(50);
+            currentEffects = new short[1][];
+
+            if (DebugMenu.isDebugEnabled || DebugMenu.simulationMode || deferredStructures != null || gameOver) {
+                disablePointCounter();
+            }
+
+            if (gameMode == GAME_MODE_LEVEL) {
+                levelIdVisibleTimer = 40;
+            }
+
+            setLoadingProgress(80);
+
+            // init music player if enabled
+            if (DebugMenu.music) {
+                log("starting sound");
+                Sound sound = new Sound();
+                sound.start();
+            }
+
+            if (DebugMenu.simulationMode) {
+                world.rightWheel.setDynamic(false);
+                world.carbody.setDynamic(false);
+                world.leftWheel.setDynamic(false);
+            }
+
+            setLoadingProgress(100);
+            log("ready");
+            if (hintVisibleTimer > 0) {
+                hintVisibleTimer = HINT_TIMER_MAX; // ticks
+            }
+
+            Logger.setLogMessageDelay(0);
+            if (baseTimestepFX == 0) {
+                baseTimestepFX = world.getTimestepFX();
+            }
+
+            lastFPSMeasureTime = System.currentTimeMillis();
+            lastPhysicsTickTime = System.currentTimeMillis();
+            lastBattUpdateTime = 0;
+            physicsIterationsUnalteredCount = 0;
+
+            targetTPS = 60;
+            measureSeconds = 0;
+            performanceEvaluated = false;
+            physicsTimeTotal = 0;
+            ticksTotal = 0;
+
+            resume();
+        } catch (Exception ex) {
+            Platform.showError(ex);
         }
     }
 
@@ -262,451 +365,313 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
         setLoadingProgress(60);
     }
 
-    // game thread with main cycle and preparing
-    public void run() {
-        try {
-            log("game thread started");
-
-            timeFlying = 10;
-
-            boolean wasPaused = true;
-            fpsCounterReady = false;
-            tickTime = TICK_DURATION;
-            int physicsIterationsSetting = MobappGameSettings.DEFAULT_PHYSICS_PRECISION;
-            boolean lockPhysicsPrecision;
-            boolean dynamicPhysicsPrecision;
-            int maxFrameTime = MobappGameSettings.DEFAULT_FRAME_TIME;
-            try {
-                log("reading settings");
-                physicsIterationsSetting = MobappGameSettings.getPhysicsPrecision();
-                maxFrameTime = MobappGameSettings.getFrameTime();
-                showFPS = MobappGameSettings.isFPSShown(showFPS);
-                bottomButtons = MobappGameSettings.buttonsAtTheBottom(scW < scH);
-                battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
-            } catch (Throwable ex) {
-                Platform.showError("Can't read settings", ex);
-            }
-            dynamicPhysicsPrecision = physicsIterationsSetting == MobappGameSettings.DYNAMIC_PHYSICS_PRECISION;
-            lockPhysicsPrecision = !dynamicPhysicsPrecision && physicsIterationsSetting != MobappGameSettings.AUTO_PHYSICS_PRECISION;
-            physicsIterations = physicsIterationsSetting;
-            if (physicsIterations <= 0) {
-                physicsIterations = 2;
-            }
-
-            if (world == null) {
-                // new world
-                setDefaultWorld();
-            } else {
-                // re-init an existing world
-                initWorld();
-            }
-
-            world.refreshScreenParameters(scW, scH);
-
-            Logger.setLogMessageDelay(50);
-            currentEffects = new short[1][];
-
-            if (DebugMenu.isDebugEnabled || DebugMenu.simulationMode || deferredStructures != null || gameOver) {
-                disablePointCounter();
-            }
-
-            if (gameMode == GAME_MODE_LEVEL) {
-                levelIdVisibleTimer = 40;
-            }
-
-            setLoadingProgress(80);
-
-            // init music player if enabled
-            if (DebugMenu.music) {
-                log("starting sound");
-                Sound sound = new Sound();
-                sound.start();
-            }
-
-            if (DebugMenu.simulationMode) {
-                world.rightWheel.setDynamic(false);
-                world.carbody.setDynamic(false);
-                world.leftWheel.setDynamic(false);
-            }
-
-            setLoadingProgress(100);
-
-            log("starting game cycle");
-
-            if (hintVisibleTimer > 0) {
-                hintVisibleTimer = HINT_TIMER_MAX; // ticks
-            }
-
-            Logger.setLogMessageDelay(0);
-            if (baseTimestepFX == 0) {
-                baseTimestepFX = world.getTimestepFX();
-            }
-            long lastFPSMeasureTime = System.currentTimeMillis();
-            long lastBattUpdateTime = 0;
-            int physicsIterationsUnalteredCount = 0;
-
-            try {
-                for (int i = 0; !hasParent() && i < 30; i++) {
-                    Thread.sleep(100);
-                }
-            } catch (InterruptedException ignored) { }
-
-            long sleep;
-            long start = System.currentTimeMillis();
-            int bigTickN = 0;
-
-            int targetTPS = 60;
-            int measureSeconds = 0;
-            boolean performanceEvaluated = false;
-            int physicsTimeTotal = 0;
-            int ticksTotal = 0;
-
-            // Main game cycle
-            while (!stopped && hasParent()) {
-                try {
-                    if (!paused) {
-                        // FPS & TPS counter
-                        int dtFromLastFPSMeasure = (int) (System.currentTimeMillis() - lastFPSMeasureTime);
-                        if (dtFromLastFPSMeasure > 1000) {
-                            lastFPSMeasureTime = System.currentTimeMillis();
-                            if (!wasPaused) {
-                                fps = framesFromLastFPSMeasure * 1000 / dtFromLastFPSMeasure;
-                                tps = ticksFromLastTPSMeasure * 1000 / dtFromLastFPSMeasure;
-
-                                if (!lockPhysicsPrecision && !performanceEvaluated) {
-                                    measureSeconds++;
-                                    if (measureSeconds >= 3) {
-                                        if (fps < 100) {
-                                            int physTickAvg10x = (int) (physicsTimeTotal * 10 / Math.max(1, ticksTotal));
-                                            Logger.log("perf test (avg): phys=" + (physTickAvg10x / 10) + "." + (physTickAvg10x % 10) + "ms");
-                                            if (physTickAvg10x <= 10) {
-                                                targetTPS = 140;
-                                                Logger.log("device is powerful enough, doubling physics precision...");
-                                            } else {
-                                                Logger.log("keeping low-precision physics");
-                                            }
-                                        } else {
-                                            Logger.log("refresh rate is high, keeping standard multiplier.");
-                                        }
-
-                                        performanceEvaluated = true;
-                                        physicsIterationsUnalteredCount = 0;
-                                    }
-                                }
-
-                                framesFromLastFPSMeasure = 0;
-                                ticksFromLastTPSMeasure = 0;
-                                fpsCounterReady = true;
-                            }
-                        }
-
-                        if (!lockPhysicsPrecision) {
-                            if (framesFromLastFPSMeasure == 0) {
-                                int prevValue = physicsIterations;
-                                if (fps != 0) {
-                                    physicsIterations = Mathh.constrain(1, targetTPS / fps + 1, 10);
-                                    if (physicsIterations == prevValue) {
-                                        physicsIterationsUnalteredCount++;
-                                        if (performanceEvaluated && !dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
-                                            Logger.log("locking precision multiplier: ", physicsIterations);
-                                            lockPhysicsPrecision = true;
-                                        }
-                                    } else {
-                                        physicsIterationsUnalteredCount = 0;
-                                    }
-                                } else {
-                                    physicsIterationsUnalteredCount = 0;
-                                }
-                            }
-                        }
-
-                        if (fpsCounterReady && fps < 15) {
-                            tryReduceLags();
-                        }
-
-                        // Adjust physics engine tick time to current TPS
-                        if (!wasPaused) {
-                            tickTime = (int) (System.currentTimeMillis() - start);
-                            world.setTimestepFX(Math.max(1, baseTimestepFX * Math.min(tickTime, 100) / 50 / physicsIterations));
-                        } else {
-                            wasPaused = false;
-                        }
-
-                        start = System.currentTimeMillis();
-
-                        // Tick and draw
-                        Contact[][] carContacts = getCarContacts();
-                        setSimulationArea();
-
-                        long tickStart = System.currentTimeMillis();
-                        for (int i = 0; i < physicsIterations; i++) {
-                            world.tick();
-                            // Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
-                            carContacts = getCarContacts();
-                            tickCustomBodyInteractions(carContacts);
-                            ticksFromLastTPSMeasure++;
-                            ticksTotal++;
-                        }
-                        measuredTickTime = (int) (System.currentTimeMillis() - tickStart);
-                        physicsTimeTotal += measuredTickTime;
-
-                        long paintStart = System.currentTimeMillis();
-                        paint();
-                        measuredPaintTime = (int) (System.currentTimeMillis() - paintStart);
-
-                        boolean leftWheelContacts = carContacts[0][0] != null;
-                        boolean carBodyContacts = carContacts[1][0] != null;
-                        boolean rightWheelContacts = carContacts[2][0] != null;
-
-                        // some things should be performed once at a fixed interval (50ms, or 20 times per second)
-                        boolean bigTick = start - lastBigTickTime > TICK_DURATION;
-                        if (bigTick) {
-                            if ((!leftWheelContacts && !rightWheelContacts)) {
-                                timeFlying += 1;
-                            } else {
-                                timeFlying = 0;
-                            }
-
-                            // Hide keyboard/touch buttons hint
-                            if (isWorldLoaded) {
-                                if (levelIdVisibleTimer <= 0) {
-                                    hintVisibleTimer--;
-                                }
-                                levelIdVisibleTimer--;
-                            }
-
-                            // Prevent pause right after resume to work around some Siemens bug
-                            if (pauseDelay > 0) {
-                                pauseDelay--;
-                            }
-
-                            // flip counter and debug posReset indicator
-                            if (WorldGen.isEnabled) {
-                                // highlight the score counter on flip
-                                if (flipIndicatorTimer < FLIP_INDICATOR_TIMER_MAX) {
-                                    flipIndicatorTimer += 64;
-                                    if (flipIndicatorTimer >= FLIP_INDICATOR_TIMER_MAX) {
-                                        flipIndicatorTimer = FLIP_INDICATOR_TIMER_MAX;
-                                    }
-                                }
-                                flipCounter.tick();
-
-                                if (posResetIndicator > 0) {
-                                    posResetIndicator-=16;
-                                    if (posResetIndicator <= 0) {
-                                        posResetIndicator = 0;
-                                    }
-                                }
-                            }
-
-                            // move the car to the right in the simulation mode
-                            if (DebugMenu.simulationMode) {
-                                world.carbody.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-                                world.leftWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-                                world.rightWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-                            }
-
-                            // tick effect timers (speed, slowness, ...)
-                            tickEffects();
-
-                            // distribute some tasks over the ticks to offload the CPU
-                            if (bigTickN < 3) {
-                                if (bigTickN == 1) {
-                                    // tick the timers of falling platforms, removing bodies felt out of the world
-                                    world.tickCustomBodies();
-                                }
-
-                                bigTickN++;
-                            } else {
-                                bigTickN = 0;
-                                tickDamage();
-                                if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD && battIndicator) {
-                                    batLevel = Battery.getBatteryLevel();
-                                    lastBattUpdateTime = System.currentTimeMillis();
-                                }
-                            }
-                            lastBigTickTime = start;
-                        }
-
-                        // getting car angle
-                        carAngle = 360 - FXUtil.angleInDegrees2FX(world.carbody.rotation2FX());
-
-                        FXVector carVelocityFX = world.carbody.velocityFX();
-                        int vX = carVelocityFX.xAsInt();
-                        int vY = carVelocityFX.yAsInt();
-
-                        limitTopHeight();
-
-                        // Gas and brake
-                        boolean isNotFlying = timeFlying <= 2;
-                        if (motorTurnedOn) {
-                            ticksMotorTurnedOff = 0;
-                            // apply motor force when on the ground
-                            if (isNotFlying || uninterestingDebug) {
-                                // set motor power according to car speed
-                                // (start quickly and limit max speed)
-                                if (currentEffects[EFFECT_SPEED] != null) {
-                                    if (currentEffects[EFFECT_SPEED][0] > 0 && currentEffects[EFFECT_SPEED][2] != 0) {
-                                        vX = vX * 100 / currentEffects[EFFECT_SPEED][2];
-                                        vY = vY * 100 / currentEffects[EFFECT_SPEED][2];
-                                    }
-                                }
-
-                                int speedMultiplier;
-                                if (uninterestingDebug) {
-                                    speedMultiplier = 250000;
-                                } else {
-                                    carVelocitySqr = (vX * vX + vY * vY) / 4;
-                                    if (carVelocitySqr > 1000000) {
-                                        speedMultiplier = 16000;
-                                        speedoState = 2;
-                                    } else if (carVelocitySqr > 100000) {
-                                        speedMultiplier = 123000;
-                                        speedoState = 1;
-                                    } else {
-                                        speedMultiplier = 160000;
-                                        speedoState = 0;
-                                    }
-                                }
-
-                                int directionOffset = 0;
-                                if (currentEffects[EFFECT_SPEED] != null) {
-                                    if (currentEffects[EFFECT_SPEED][0] > 0) {
-                                        directionOffset = currentEffects[EFFECT_SPEED][1];
-                                        speedMultiplier = speedMultiplier * currentEffects[EFFECT_SPEED][2] / 100;
-                                    }
-                                }
-                                int motorForceX = Mathh.cos(carAngle - 15 + directionOffset) * speedMultiplier / 50;
-                                int motorForceY = Mathh.sin(carAngle - 15 + directionOffset) * speedMultiplier / -50;
-                                world.carbody.applyMomentum(new FXVector(convertByTimestep(motorForceX), convertByTimestep(motorForceY)));
-
-                                if ((!leftWheelContacts && carBodyContacts) || rightWheelContacts) {
-                                    int torque;
-                                    if (rightWheelContacts) {
-                                        torque = -100000000;
-                                    } else {
-                                        torque = -50000000;
-                                    }
-                                    world.carbody.applyTorque(convertByTimestep(torque));
-                                }
-                            } else {
-                                // apply rotational force
-                                if (world.carbody.rotationVelocity2FX() < 100000000) {
-                                    int torque = convertByTimestep(-80000000);
-                                    if (carBodyContacts && carAngle > 170 && carAngle < 300) {
-                                        torque = torque << 1;
-                                    }
-                                    world.carbody.applyTorque(torque);
-                                }
-                            }
-                        } else {
-                            // brake for two seconds after the motor is turned off
-                            if (ticksMotorTurnedOff < 40 && !uninterestingDebug) {
-                                try {
-                                    if (world.carbody.angularVelocity2FX() > 0) {
-                                        world.carbody.applyTorque(2 * convertByTimestep(world.carbody.angularVelocity2FX()));
-                                    }
-                                    if (isNotFlying && !uninterestingDebug) {
-                                        world.carbody.applyMomentum(new FXVector(convertByTimestep(-world.carbody.velocityFX().xFX/2), convertByTimestep(-world.carbody.velocityFX().yFX/2)));
-                                    }
-                                    if (bigTick) {
-                                        ticksMotorTurnedOff++;
-                                        if (isNotFlying) {
-                                            ticksMotorTurnedOff++;
-                                        }
-                                    }
-                                } catch (NullPointerException ex) {
-                                    Logger.log(ex);
-                                }
-                            }
-                        }
-
-                        if (motorTurnedOn && Math.abs(world.carX - prevCarX) <= 1 && Math.abs(world.carY - prevCarY) <= 1) {
-                            for (int i = 0; i < carContacts.length; i++) {
-                                for (int j = 0; j < carContacts[i].length; j++) {
-                                    if (carContacts[i][j] == null) {
-                                        continue;
-                                    }
-                                    Body body = carContacts[i][j].body1();
-                                    UserData userData = body.getUserData();
-                                    if (!(userData instanceof MUserData)) {
-                                        body = carContacts[i][j].body2();
-                                        userData = body.getUserData();
-                                    }
-                                    if (userData instanceof MUserData) {
-                                        boolean staticForever = ((MUserData) userData).getFallDelay() == MUserData.STATIC;
-                                        if (!staticForever && !body.isDynamic()) {
-                                            timeStuck = 0;
-                                        }
-                                    }
-                                }
-                            }
-                            timeStuck += tickTime;
-                            if (timeStuck > GAME_OVER_STUCK_TIME) {
-                                gameOver();
-                            }
-                        } else {
-                            timeStuck = 0;
-                        }
-
-                        prevCarX = world.carX;
-                        prevCarY = world.carY;
-
-                        sleep = maxFrameTime - (System.currentTimeMillis() - start);
-
-                        if (worldgen != null) {
-                            if (
-                                    sleep > 0 // skip world generator tick if the device can't keep up
-                                    || worldgen.needMoreTicks // but force it if necessary
-                                    || world.carX + world.viewField > worldgen.lastX
-                                    || System.currentTimeMillis() - lastWgTickTime > 2000
-                            ) {
-                                worldgen.tick();
-                                lastWgTickTime = System.currentTimeMillis();
-                            }
-                        }
-
-                        Thread.yield(); // fixes input lag on Sony Ericsson phones
-                        sleep = maxFrameTime - (System.currentTimeMillis() - start);
-                        sleep = Math.max(sleep, 0);
-                    } else {
-                        // Pause screen
-                        wasPaused = true;
-                        fpsCounterReady = false;
-                        if (!MobappGameSettings.RGBMode) {
-                            sleep = 200;
-                        } else {
-                            sleep = maxFrameTime - (System.currentTimeMillis() - start);
-                            sleep = Math.max(sleep, 0);
-                        }
-                        if (isVisible) {
-                            paint();
-                        }
-                    }
-
-                    // FPS/TPS control
-                    try {
-                        if (sleep > 0) {
-                            Thread.sleep(sleep);
-                        } else if (System.currentTimeMillis() == start) {
-                            Thread thread = Thread.currentThread();
-                            while (System.currentTimeMillis() == start) {
-                                synchronized (thread) {
-                                    thread.wait(0, 30);
-                                }
-                            }
-                        }
-                    } catch (InterruptedException e) {
-                        Logger.log(e);
-                    }
-                } catch (Exception ex) {
-                    Logger.log(ex);
-                }
-            }
-        } catch (NullPointerException ex) {
-            Platform.showError(ex);
+    public void tick() {
+        if (loadingProgress < 100 || paused || stopped || !hasParent()) {
+            return;
         }
-        Logger.log("game thread stopped");
+
+        long tickStartTime = System.currentTimeMillis();
+
+        try {
+            // FPS & TPS counter
+            int dtFromLastFPSMeasure = (int) (System.currentTimeMillis() - lastFPSMeasureTime);
+            if (dtFromLastFPSMeasure > 1000) {
+                lastFPSMeasureTime = System.currentTimeMillis();
+                if (!wasPaused) {
+                    fps = framesFromLastFPSMeasure * 1000 / dtFromLastFPSMeasure;
+                    tps = ticksFromLastTPSMeasure * 1000 / dtFromLastFPSMeasure;
+
+                    if (!lockPhysicsPrecision && !performanceEvaluated) {
+                        measureSeconds++;
+                        if (measureSeconds >= 3) {
+                            if (fps < 100) {
+                                int physTickAvg10x = (int) (physicsTimeTotal * 10 / Math.max(1, ticksTotal));
+                                Logger.log("perf test (avg): phys=" + (physTickAvg10x / 10) + "." + (physTickAvg10x % 10) + "ms");
+                                if (physTickAvg10x <= 10) {
+                                    targetTPS = 140;
+                                    Logger.log("device is powerful enough, doubling physics precision...");
+                                } else {
+                                    Logger.log("keeping low-precision physics");
+                                }
+                            } else {
+                                Logger.log("refresh rate is high, keeping standard multiplier.");
+                            }
+
+                            performanceEvaluated = true;
+                            physicsIterationsUnalteredCount = 0;
+                        }
+                    }
+
+                    framesFromLastFPSMeasure = 0;
+                    ticksFromLastTPSMeasure = 0;
+                    fpsCounterReady = true;
+                }
+            }
+
+            if (!lockPhysicsPrecision) {
+                if (framesFromLastFPSMeasure == 0) {
+                    int prevValue = physicsIterations;
+                    if (fps != 0) {
+                        physicsIterations = Mathh.constrain(1, targetTPS / fps + 1, 10);
+                        if (physicsIterations == prevValue) {
+                            physicsIterationsUnalteredCount++;
+                            if (performanceEvaluated && !dynamicPhysicsPrecision && physicsIterationsUnalteredCount >= 3) {
+                                Logger.log("locking precision multiplier: ", physicsIterations);
+                                lockPhysicsPrecision = true;
+                            }
+                        } else {
+                            physicsIterationsUnalteredCount = 0;
+                        }
+                    } else {
+                        physicsIterationsUnalteredCount = 0;
+                    }
+                }
+            }
+
+            if (fpsCounterReady && fps < 15) {
+                tryReduceLags();
+            }
+
+            // Adjust physics engine tick time to current TPS
+            if (!wasPaused) {
+                tickTime = (int) (System.currentTimeMillis() - lastPhysicsTickTime);
+                world.setTimestepFX(Math.max(1, baseTimestepFX * Math.min(tickTime, 100) / 50 / physicsIterations));
+            } else {
+                wasPaused = false;
+            }
+
+            lastPhysicsTickTime = System.currentTimeMillis();
+
+            // Tick
+            Contact[][] carContacts = getCarContacts();
+            setSimulationArea();
+
+            long tickStart = System.currentTimeMillis();
+            for (int i = 0; i < physicsIterations; i++) {
+                world.tick();
+                // Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
+                carContacts = getCarContacts();
+                tickCustomBodyInteractions(carContacts);
+                ticksFromLastTPSMeasure++;
+                ticksTotal++;
+            }
+            measuredTickTime = (int) (System.currentTimeMillis() - tickStart);
+            physicsTimeTotal += measuredTickTime;
+
+            boolean leftWheelContacts = carContacts[0][0] != null;
+            boolean carBodyContacts = carContacts[1][0] != null;
+            boolean rightWheelContacts = carContacts[2][0] != null;
+
+            // some things should be performed once at a fixed interval (50ms, or 20 times per second)
+            boolean bigTick = System.currentTimeMillis() - lastBigTickTime > TICK_DURATION;
+            if (bigTick) {
+                if ((!leftWheelContacts && !rightWheelContacts)) {
+                    timeFlying += 1;
+                } else {
+                    timeFlying = 0;
+                }
+
+                // Hide keyboard/touch buttons hint
+                if (isWorldLoaded) {
+                    if (levelIdVisibleTimer <= 0) {
+                        hintVisibleTimer--;
+                    }
+                    levelIdVisibleTimer--;
+                }
+
+                // Prevent pause right after resume to work around some Siemens bug
+                if (pauseDelay > 0) {
+                    pauseDelay--;
+                }
+
+                // flip counter and debug posReset indicator
+                if (WorldGen.isEnabled) {
+                    // highlight the score counter on flip
+                    if (flipIndicatorTimer < FLIP_INDICATOR_TIMER_MAX) {
+                        flipIndicatorTimer += 64;
+                        if (flipIndicatorTimer >= FLIP_INDICATOR_TIMER_MAX) {
+                            flipIndicatorTimer = FLIP_INDICATOR_TIMER_MAX;
+                        }
+                    }
+                    flipCounter.tick();
+
+                    if (posResetIndicator > 0) {
+                        posResetIndicator-=16;
+                        if (posResetIndicator <= 0) {
+                            posResetIndicator = 0;
+                        }
+                    }
+                }
+
+                // move the car to the right in the simulation mode
+                if (DebugMenu.simulationMode) {
+                    world.carbody.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                    world.leftWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                    world.rightWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                }
+
+                // tick effect timers (speed, slowness, ...)
+                tickEffects();
+
+                // distribute some tasks over the ticks to offload the CPU
+                if (bigTickN < 3) {
+                    if (bigTickN == 1) {
+                        // tick the timers of falling platforms, removing bodies felt out of the world
+                        world.tickCustomBodies();
+                    }
+
+                    bigTickN++;
+                } else {
+                    bigTickN = 0;
+                    tickDamage();
+                    if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD && battIndicator) {
+                        batLevel = Battery.getBatteryLevel();
+                        lastBattUpdateTime = System.currentTimeMillis();
+                    }
+                }
+                lastBigTickTime = System.currentTimeMillis();
+            }
+
+            // getting car angle
+            carAngle = 360 - FXUtil.angleInDegrees2FX(world.carbody.rotation2FX());
+
+            FXVector carVelocityFX = world.carbody.velocityFX();
+            int vX = carVelocityFX.xAsInt();
+            int vY = carVelocityFX.yAsInt();
+
+            limitTopHeight();
+
+            // Gas and brake
+            boolean isNotFlying = timeFlying <= 2;
+            if (motorTurnedOn) {
+                ticksMotorTurnedOff = 0;
+                // apply motor force when on the ground
+                if (isNotFlying || uninterestingDebug) {
+                    // set motor power according to car speed
+                    // (start quickly and limit max speed)
+                    if (currentEffects[EFFECT_SPEED] != null) {
+                        if (currentEffects[EFFECT_SPEED][0] > 0 && currentEffects[EFFECT_SPEED][2] != 0) {
+                            vX = vX * 100 / currentEffects[EFFECT_SPEED][2];
+                            vY = vY * 100 / currentEffects[EFFECT_SPEED][2];
+                        }
+                    }
+
+                    int speedMultiplier;
+                    if (uninterestingDebug) {
+                        speedMultiplier = 250000;
+                    } else {
+                        carVelocitySqr = (vX * vX + vY * vY) / 4;
+                        if (carVelocitySqr > 1000000) {
+                            speedMultiplier = 16000;
+                            speedoState = 2;
+                        } else if (carVelocitySqr > 100000) {
+                            speedMultiplier = 123000;
+                            speedoState = 1;
+                        } else {
+                            speedMultiplier = 160000;
+                            speedoState = 0;
+                        }
+                    }
+
+                    int directionOffset = 0;
+                    if (currentEffects[EFFECT_SPEED] != null) {
+                        if (currentEffects[EFFECT_SPEED][0] > 0) {
+                            directionOffset = currentEffects[EFFECT_SPEED][1];
+                            speedMultiplier = speedMultiplier * currentEffects[EFFECT_SPEED][2] / 100;
+                        }
+                    }
+                    int motorForceX = Mathh.cos(carAngle - 15 + directionOffset) * speedMultiplier / 50;
+                    int motorForceY = Mathh.sin(carAngle - 15 + directionOffset) * speedMultiplier / -50;
+                    world.carbody.applyMomentum(new FXVector(convertByTimestep(motorForceX), convertByTimestep(motorForceY)));
+
+                    if ((!leftWheelContacts && carBodyContacts) || rightWheelContacts) {
+                        int torque;
+                        if (rightWheelContacts) {
+                            torque = -100000000;
+                        } else {
+                            torque = -50000000;
+                        }
+                        world.carbody.applyTorque(convertByTimestep(torque));
+                    }
+                } else {
+                    // apply rotational force
+                    if (world.carbody.rotationVelocity2FX() < 100000000) {
+                        int torque = convertByTimestep(-80000000);
+                        if (carBodyContacts && carAngle > 170 && carAngle < 300) {
+                            torque = torque << 1;
+                        }
+                        world.carbody.applyTorque(torque);
+                    }
+                }
+            } else {
+                // brake for two seconds after the motor is turned off
+                if (ticksMotorTurnedOff < 40 && !uninterestingDebug) {
+                    try {
+                        if (world.carbody.angularVelocity2FX() > 0) {
+                            world.carbody.applyTorque(2 * convertByTimestep(world.carbody.angularVelocity2FX()));
+                        }
+                        if (isNotFlying && !uninterestingDebug) {
+                            world.carbody.applyMomentum(new FXVector(convertByTimestep(-world.carbody.velocityFX().xFX/2), convertByTimestep(-world.carbody.velocityFX().yFX/2)));
+                        }
+                        if (bigTick) {
+                            ticksMotorTurnedOff++;
+                            if (isNotFlying) {
+                                ticksMotorTurnedOff++;
+                            }
+                        }
+                    } catch (NullPointerException ex) {
+                        Logger.log(ex);
+                    }
+                }
+            }
+
+            if (motorTurnedOn && Math.abs(world.carX - prevCarX) <= 1 && Math.abs(world.carY - prevCarY) <= 1) {
+                for (int i = 0; i < carContacts.length; i++) {
+                    for (int j = 0; j < carContacts[i].length; j++) {
+                        if (carContacts[i][j] == null) {
+                            continue;
+                        }
+                        Body body = carContacts[i][j].body1();
+                        UserData userData = body.getUserData();
+                        if (!(userData instanceof MUserData)) {
+                            body = carContacts[i][j].body2();
+                            userData = body.getUserData();
+                        }
+                        if (userData instanceof MUserData) {
+                            boolean staticForever = ((MUserData) userData).getFallDelay() == MUserData.STATIC;
+                            if (!staticForever && !body.isDynamic()) {
+                                timeStuck = 0;
+                            }
+                        }
+                    }
+                }
+                timeStuck += tickTime;
+                if (timeStuck > GAME_OVER_STUCK_TIME) {
+                    gameOver();
+                }
+            } else {
+                timeStuck = 0;
+            }
+
+            prevCarX = world.carX;
+            prevCarY = world.carY;
+
+            if (worldgen != null) {
+                int targetFrameTime = 1000 / Math.max(1, getTargetFPS());
+                boolean hasFreeTime = (System.currentTimeMillis() - tickStartTime) < targetFrameTime * 7 / 8;
+                if (
+                        hasFreeTime
+                        | worldgen.needMoreTicks // force it if necessary
+                        | world.carX + world.viewField > worldgen.lastX
+                        | System.currentTimeMillis() - lastWgTickTime > 2000
+                ) {
+                    worldgen.tick();
+                    lastWgTickTime = System.currentTimeMillis();
+                }
+            }
+        } catch (Exception ex) {
+            Logger.log(ex);
+        }
     }
 
     private void tryReduceLags() {
@@ -891,6 +856,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
+        framesFromLastFPSMeasure++;
         drawBg(g);
         if (loadingProgress < 100) {
             drawLoading(g);
@@ -908,17 +874,6 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 world.drawWorld(g, null, 0, 0);
             }
             drawHUD(g);
-        }
-    }
-
-    private synchronized void paint() {
-        try {
-            Graphics g = getUGraphics();
-            paint(g);
-            flushGraphics();
-            framesFromLastFPSMeasure++;
-        } catch (Exception ex) {
-            Logger.log(ex);
         }
     }
 
@@ -1097,7 +1052,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                 }
                 drawDebugText(g, String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())));
             }
-            drawDebugText(g, "physics: " + measuredTickTime + "ms, paint: " + measuredPaintTime + "ms");
+            drawDebugText(g, "physics: " + measuredTickTime + "ms");
 
             if (flipCounter != null) {
                 int x = world.xToPX(flipCounter.lastFlipX, 0);
@@ -1334,7 +1289,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private void setLoadingProgress(int percents) {
         loadingProgress = percents;
         Logger.log(percents + "%");
-        paint();
+        repaint();
     }
 
     private void setFont(Font font, Graphics g) {
@@ -1347,8 +1302,8 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     private void log(String text) {
         statusMessage = text;
         Logger.log(text);
-        if (Thread.currentThread() == gameThread && (Logger.isOnScreenLogEnabled() || loadingProgress < 100)) {
-            paint();
+        if (Logger.isOnScreenLogEnabled() || loadingProgress < 100) {
+            repaint();
         }
     }
 
@@ -1456,16 +1411,7 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
                     }, "record saver").start();
                 }
 
-                boolean succeed = gameThread == null;
-                try {
-                    while (!succeed) {
-                        gameThread.join();
-                        succeed = true;
-                    }
-                    log("game: stopped");
-                } catch (InterruptedException ex) {
-                    Logger.log(ex);
-                }
+                log("game: stopped");
                 if (openMenu) {
                     backToPreviousScreen();
                 }
@@ -1500,7 +1446,13 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     }
 
     private void resume() {
+        wasPaused = paused;
         paused = false;
+
+        framesFromLastFPSMeasure = 0;
+        ticksFromLastTPSMeasure = 0;
+
+        setTargetFPS(targetFPS);
     }
 
     public void onPosReset(int dx) {
@@ -1513,6 +1465,9 @@ public class GameplayCanvas extends CanvasComponent implements Runnable {
     public void onHide() {
         log("onHide");
         paused = true;
+        if (!MobappGameSettings.RGBMode) {
+            setTargetFPS(5);
+        }
         // to prevent siemens' bug that calls hideNotify right after showing canvas
         if (pauseDelay > 0) {
             if (!wasPaused) {

@@ -5,13 +5,14 @@ package mobileapplication3.game;
 import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.Sound;
 import mobileapplication3.platform.ui.RootContainer;
+import mobileapplication3.ui.IUIComponent;
 import utils.MobappGameSettings;
 
 /**
  *
  * @author vipaol
  */
-public class DebugMenu extends GenericMenu implements Runnable {
+public class DebugMenu extends GenericMenu {
     public static final String GAMING_MODE_SETTING_STR = "GAMING MODE";
     private static final String[] MENU_OPTS = {
         "Enable debug",
@@ -41,49 +42,21 @@ public class DebugMenu extends GenericMenu implements Runnable {
     public static boolean showContacts = false;
     public static boolean structureDebug = false;
 
-    private Thread thread;
-
     public DebugMenu() {
         loadParams(MENU_OPTS);
         loadStatemap(new int[MENU_OPTS.length]);
-
-        repaintOnlyOnFlushGraphics = true;
     }
 
     public void postInit() {
         setSpecialOption(4);
         refreshStates();
-        thread = new Thread(this, "debug menu");
-        thread.start();
     }
 
-    public void run() {
-        long sleep;
-        long start;
-
-        while (!isStopped) {
-            if (!isPaused) {
-                start = System.currentTimeMillis();
-
-                if (gamingMode) {
-                    setSpecialOptnActColor(MobappGameSettings.getLandscapeColor());
-                }
-
-                onPaint(getUGraphics(), x0, y0, w, h, false);
-                flushGraphics();
-                tick();
-
-                sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
-                sleep = Math.max(sleep, 0);
-            } else {
-                sleep = 200;
-            }
-            try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+    public void tick() {
+        if (gamingMode) {
+            setSpecialOptnActColor(MobappGameSettings.getLandscapeColor());
         }
+        super.tick();
     }
 
     void selectPressed() {
@@ -137,18 +110,10 @@ public class DebugMenu extends GenericMenu implements Runnable {
                 break;
         }
         if (selected == MENU_OPTS.length - 1) {
-            stop();
             RootContainer.setRootUIComponent(new SettingsScreen());
         } else {
             refreshStates();
         }
-    }
-
-    private void stop() {
-        isStopped = true;
-        try {
-            thread.join();
-        } catch (InterruptedException ignored) { }
     }
 
     void refreshStates() {

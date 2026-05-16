@@ -11,13 +11,13 @@ import mobileapplication3.ui.GraphicsUtils;
 import mobileapplication3.ui.IUIComponent;
 import utils.MobappGameSettings;
 
-public class SettingsScreen extends GenericMenu implements Runnable {
+public class SettingsScreen extends GenericMenu {
     private static final int
             LANDSCAPE_COLOR = 0,
             HI_RES_GRAPHICS = 1,
             LEGACY_DRAWING_METHOD = 2,
             CAMERA_ROTATION_MODE = 3,
-            FRAME_TIME = 4,
+            TARGET_FPS = 4,
             SHOW_FPS = 5,
             BOTTOM_BUTTONS = 6,
             BATTERY = 7,
@@ -56,18 +56,17 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             "RGB+background"
     };
 
+    public static final int[] FPS_PRESETS = {20, 30, 40, 50, 60, 90, 120, 144, 240, 1000};
+
     private static final String[] menuOpts = new String[BACK + 1];
 
     // array with states of all buttons (active/inactive/enabled)
     private final int[] statemap = new int[menuOpts.length];
     private boolean batFailed = false;
-    private Thread thread;
 
     public SettingsScreen() {
         loadParams(menuOpts);
         loadStatemap(statemap);
-
-        repaintOnlyOnFlushGraphics = true;
     }
 
     public void init() {
@@ -75,43 +74,8 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         setIsSpecialOptnActivated(DebugMenu.isDebugEnabled);
 
         refreshStates();
-    }
-
-    public void postInit() {
-        thread = new Thread(this, "settings menu");
-        thread.start();
-    }
-
-    public void run() {
-        long sleep;
-        long start;
-
-        if (!isMenuInited()) {
-            init();
-        }
 
         MobappGameSettings.setAutoSaveEnabled(false);
-
-        try {
-            while (!isStopped) {
-                if (!isPaused) {
-                    start = System.currentTimeMillis();
-
-                    onPaint(getUGraphics(), x0, y0, w, h, false);
-                    flushGraphics();
-                    tick();
-
-                    sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
-                    sleep = Math.max(sleep, 0);
-                } else {
-                    sleep = 200;
-                }
-                Thread.sleep(sleep);
-            }
-        } catch (InterruptedException ignored) { }
-
-        MobappGameSettings.save();
-        MobappGameSettings.setAutoSaveEnabled(true);
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
@@ -160,7 +124,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
 
     void selectPressed() {
         int selected = this.selected;
-        int value;
         switch (selected) {
             case LEGACY_DRAWING_METHOD:
                 MobappGameSettings.toggleLegacyDrawingMethod();
@@ -168,18 +131,10 @@ public class SettingsScreen extends GenericMenu implements Runnable {
             case CAMERA_ROTATION_MODE:
                 MobappGameSettings.toggleCameraRotationMode();
                 break;
-            case FRAME_TIME:
-                value = MobappGameSettings.getFrameTime();
-                int newFrameTime = value;
-                if (newFrameTime <= 1) {
-                    newFrameTime = MobappGameSettings.MAX_FRAME_TIME;
-                } else {
-                    int prevFps = 1000 / value;
-                    while (1000 / newFrameTime <= prevFps) {
-                        newFrameTime--;
-                    }
-                }
-                MobappGameSettings.setFrameTime(newFrameTime);
+            case TARGET_FPS:
+                int i = findArrayIndex(FPS_PRESETS, MobappGameSettings.getTargetFPS());
+                MobappGameSettings.setTargetFPS(FPS_PRESETS[(i + 1) % FPS_PRESETS.length]);
+                setTargetFPS(FPS_PRESETS[(i + 1) % FPS_PRESETS.length]);
                 break;
             case HI_RES_GRAPHICS:
                 MobappGameSettings.toggleBetterGraphics();
@@ -237,10 +192,12 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     }
 
     private void stop() {
-        isStopped = true;
-        try {
-            thread.join();
-        } catch (InterruptedException ignored) { }
+        new Thread(new Runnable() {
+            public void run() {
+                MobappGameSettings.save();
+                MobappGameSettings.setAutoSaveEnabled(true);
+            }
+        }, "save settings").start();
     }
 
     private void nextLandscapeColor() {
@@ -253,7 +210,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
     }
 
     void refreshStates() {
-        int frameTime = MobappGameSettings.getFrameTime();
+        int currentFPS = MobappGameSettings.getTargetFPS();
         int cameraRotationMode = MobappGameSettings.getCameraRotationMode();
         String cameraRotationModeString = "?";
         switch (cameraRotationMode) {
@@ -269,7 +226,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         }
         menuOpts[LEGACY_DRAWING_METHOD] = "Legacy drawing method";
         menuOpts[CAMERA_ROTATION_MODE] = "Camera rotation: " + cameraRotationModeString;
-        menuOpts[FRAME_TIME] = "FPS: " + round(1000f / frameTime) + " (" + frameTime + "ms/frame)";
+        menuOpts[TARGET_FPS] = "Target FPS: " + currentFPS;
         menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";
         menuOpts[SHOW_FPS] = "Show FPS";
         menuOpts[LANDSCAPE_COLOR] = "Landscape color: " + LANDSCAPE_COLOR_NAMES[findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColorSetting())];
@@ -279,7 +236,7 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         menuOpts[PLATFORM_SETTINGS] = "Platform settings";
         menuOpts[ABOUT] = "About";
         menuOpts[BACK] = "Back";
-        setEnabledFor(frameTime != MobappGameSettings.DEFAULT_FRAME_TIME, FRAME_TIME);
+        setEnabledFor(currentFPS != MobappGameSettings.DEFAULT_TARGET_FPS, TARGET_FPS);
         setEnabledFor(cameraRotationMode != MobappGameSettings.CAMERA_ROTATION_DEFAULT_VALUE, CAMERA_ROTATION_MODE);
         if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC) {
             setEnabledFor(MobappGameSettings.isLegacyDrawingMethodEnabled(), LEGACY_DRAWING_METHOD);
@@ -301,11 +258,6 @@ public class SettingsScreen extends GenericMenu implements Runnable {
         } catch (ClassNotFoundException ex) {
             setStateFor(STATE_INACTIVE, PLATFORM_SETTINGS);
         }
-    }
-
-    // round to two decimal places
-    private double round(float d) {
-        return (Math.floor(d * 100 + 0.5)) / 100;
     }
 
     private int findArrayIndex(int[] arr, int a) {

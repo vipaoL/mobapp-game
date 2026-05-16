@@ -17,7 +17,7 @@ public class MobappGameSettings {
             CAMERA_ROTATION = "camRotation",
             PHYSICS_PRECISION = "PhyPrecision",
             DETAIL_LEVEL = "DetailLvl",
-            FRAME_TIME = "FrameTime",
+            TARGET_FPS = "fpsTarget",
             SHOW_FPS = "showFPS",
             SHOW_BG = "enBG",
             BOTTOM_BUTTONS = "bottBtns",
@@ -27,8 +27,8 @@ public class MobappGameSettings {
     public static final int
             DEFAULT_PHYSICS_PRECISION = AUTO_PHYSICS_PRECISION,
             DEFAULT_DETAIL_LEVEL = 1,
-            DEFAULT_FRAME_TIME = 16;
-    public static final int MAX_PHYSICS_PRECISION = 16, MAX_DETAIL_LEVEL = 3, MAX_FRAME_TIME = 100;
+            DEFAULT_TARGET_FPS = 60;
+    public static final int MAX_PHYSICS_PRECISION = 16, MAX_DETAIL_LEVEL = 3;
 
     public static final int
             CAMERA_ROTATION_STATIC = 0,
@@ -59,7 +59,7 @@ public class MobappGameSettings {
                     CAMERA_ROTATION,
                     PHYSICS_PRECISION,
                     DETAIL_LEVEL,
-                    FRAME_TIME,
+                    TARGET_FPS,
                     SHOW_FPS,
                     SHOW_BG,
                     BOTTOM_BUTTONS,
@@ -221,12 +221,12 @@ public class MobappGameSettings {
 
     ///
 
-    public static int getFrameTime() {
-        return Mathh.constrain(1, getSettingsInst().getInt(FRAME_TIME, DEFAULT_FRAME_TIME), MAX_FRAME_TIME);
+    public static int getTargetFPS() {
+        return getSettingsInst().getInt(TARGET_FPS, DEFAULT_TARGET_FPS);
     }
 
-    public static void setFrameTime(int valueMs) {
-        getSettingsInst().set(FRAME_TIME, String.valueOf(Mathh.constrain(1, valueMs, MAX_FRAME_TIME)));
+    public static void setTargetFPS(int value) {
+        getSettingsInst().set(TARGET_FPS, String.valueOf(value));
     }
 
     ///

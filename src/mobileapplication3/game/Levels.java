@@ -19,8 +19,7 @@ import java.io.InputStream;
  *
  * @author vipaol
  */
-public class Levels extends GenericMenu implements Runnable {
-
+public class Levels extends GenericMenu {
     private static final String LEVELS_FOLDER_NAME = "MobappGame/Levels";
 
     private static int defaultSelected = 1; // currently selected option in menu
@@ -31,8 +30,6 @@ public class Levels extends GenericMenu implements Runnable {
     private int builtinLevelsCount = 0;
 
     private boolean loadingLevel = false;
-
-    private Thread thread;
 
     public Levels() {
         Logger.log("Levels:constr");
@@ -50,8 +47,6 @@ public class Levels extends GenericMenu implements Runnable {
         }
         // TODO: separate with pages -----------------------!
         refreshButtons();
-
-        repaintOnlyOnFlushGraphics = true;
     }
 
     private void refreshButtons() {
@@ -136,14 +131,6 @@ public class Levels extends GenericMenu implements Runnable {
         return false;
     }
 
-    public void postInit() {
-        isStopped = false;
-        if (thread == null || !thread.isAlive()) {
-            thread = new Thread(this, "levels");
-            thread.start();
-        }
-    }
-
     public String[] getLevels() {
         Logger.log("Levels:getLevels()");
         return GameFileUtils.listFilesInAllPlaces(LEVELS_FOLDER_NAME);
@@ -158,7 +145,7 @@ public class Levels extends GenericMenu implements Runnable {
     }
 
     public synchronized void openFromFS(final String path) {
-        if (isStopped || loadingLevel) {
+        if (loadingLevel) {
             return;
         }
         loadingLevel = true;
@@ -173,7 +160,6 @@ public class Levels extends GenericMenu implements Runnable {
                         gameCanvas = openLevel(path);
                     }
                     if (gameCanvas != null) {
-                        stop();
                         RootContainer.setRootUIComponent(gameCanvas);
                     }
                 } catch (Exception ex) {
@@ -182,13 +168,6 @@ public class Levels extends GenericMenu implements Runnable {
                 }
             }
         })).start();
-    }
-
-    private void stop() {
-        isStopped = true;
-        try {
-            thread.join();
-        } catch (InterruptedException ignored) { }
     }
 
     private static GameplayCanvas openLevel(String path) {
@@ -219,16 +198,14 @@ public class Levels extends GenericMenu implements Runnable {
     public synchronized void selectPressed() {
         defaultSelected = selected;
         if (selected == buttons.length - 1) {
-            stop();
             RootContainer.setRootUIComponent(new MenuCanvas());
         } else {
             if (builtinLevelsCount > 0) {
                 if (selected == buttons.length - 2) {
                     seekForLevelsInFS();
                 } else {
-                    if (!isStopped && !loadingLevel) {
+                    if (!loadingLevel) {
                         loadingLevel = true;
-                        stop();
                         boolean success = openBuiltinLevel(selected);
                         if (!success) {
                             loadingLevel = false;
@@ -243,31 +220,6 @@ public class Levels extends GenericMenu implements Runnable {
                     Platform.showError(ex);
                 }
             }
-        }
-    }
-
-    public void run() {
-        Logger.log("Levels:run()");
-        long sleep;
-        long start;
-
-        isPaused = false;
-        while (!isStopped) {
-            if (!isPaused) {
-                start = System.currentTimeMillis();
-
-                onPaint(getUGraphics(), x0, y0, w, h, false);
-                flushGraphics();
-                tick();
-
-                sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
-                sleep = Math.max(sleep, 0);
-            } else {
-                sleep = 100;
-            }
-            try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException ignored) { }
         }
     }
 }

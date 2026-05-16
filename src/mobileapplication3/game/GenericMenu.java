@@ -16,7 +16,7 @@ import mobileapplication3.ui.Keys;
  * @author vipaol
  */
 public abstract class GenericMenu extends CanvasComponent {
-    protected static final int MIN_FRAME_TIME = 20; // limit menu refresh rate to 50 FPS
+    protected static final int DEFAULT_FPS = 60;
     private static final int PAUSE_DELAY = 5;
     public int x0, y0, w, h;
     private int fontH, k = 10, keyPressDelay = 0,
@@ -37,7 +37,6 @@ public abstract class GenericMenu extends CanvasComponent {
 
     private boolean isKnownButton = true, isInited = false;
     public boolean isPaused = false;
-    public boolean isStopped = false;
     private Font font, pressedFont;
     private int[] stateMap = null;
     public static final int STATE_INACTIVE = -1;
@@ -49,6 +48,10 @@ public abstract class GenericMenu extends CanvasComponent {
     public static final int SIEMENS_KEY_DOWN = -60;
     public static final int SIEMENS_KEY_LEFT = -61;
     public static final int SIEMENS_KEY_RIGHT = -62;
+
+    public GenericMenu() {
+        targetFPS = DEFAULT_FPS;
+    }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
         if (bgColor >= 0) {

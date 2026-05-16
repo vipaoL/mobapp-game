@@ -17,7 +17,7 @@ import java.io.IOException;
  *
  * @author vipaol
  */
-public class AboutScreen extends GenericMenu implements Runnable {
+public class AboutScreen extends GenericMenu {
     private static final String URL = "https://github.com/vipaoL/mobap-game";
     private static final String URL_PREVIEW = "GitHub: vipaoL/mobap-game";
     private static final String URL2 = "https://t.me/mobapp_game";
@@ -32,25 +32,15 @@ public class AboutScreen extends GenericMenu implements Runnable {
 
     private Image qr, qrBig;
     private Font headerFont;
-    private Thread thread;
 
     private int w, h;
     private int headerH, qrSide, menuH;
     private boolean bigQRIsDrawn = false;
     private int counter = 17;
 
-    public AboutScreen() {
-        repaintOnlyOnFlushGraphics = true;
-    }
-
     public void init() {
         loadParams(MENU_OPTS, MENU_OPTS.length - 1);
         setFirstDrawable(1);
-    }
-
-    public void postInit() {
-        thread = new Thread(this, "about");
-        thread.start();
     }
 
     protected void onSetBounds(int x0, int y0, int w, int h) {
@@ -82,8 +72,8 @@ public class AboutScreen extends GenericMenu implements Runnable {
             try {
                 qr = Image.createImage("resource://qr.png").scale(qrSide, qrSide);
             } catch (IOException e) {
-                ex.printStackTrace();
-                e.printStackTrace();
+                Logger.log(ex);
+                Logger.log(e);
             }
         }
 
@@ -93,30 +83,8 @@ public class AboutScreen extends GenericMenu implements Runnable {
             try {
                 qrBig = Image.createImage("resource://qr.png").scale(Math.min(this.w, this.h), Math.min(this.w, this.h));
             } catch (IOException e) {
-                ex.printStackTrace();
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void run() {
-        long sleep;
-        long start;
-
-        while (!isStopped) {
-            if (!isPaused) {
-                start = System.currentTimeMillis();
-                onPaint(getUGraphics(), 0, 0, w, h, false);
-                flushGraphics();
-                sleep = MIN_FRAME_TIME - (System.currentTimeMillis() - start);
-                sleep = Math.max(sleep, 0);
-            } else {
-                sleep = 200;
-            }
-            try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                Logger.log(ex);
+                Logger.log(e);
             }
         }
     }
@@ -207,7 +175,6 @@ public class AboutScreen extends GenericMenu implements Runnable {
         if (selected == MENU_OPTS.length - 2) {
             counter+=1;
             if (counter >= 20) {
-                stop();
                 World test3 = new World();
                 test3.setGravity(FXVector.newVector(10, 100));
                 GraphicsWorld.bgOverride = true;
@@ -217,15 +184,7 @@ public class AboutScreen extends GenericMenu implements Runnable {
             }
         }
         if (selected == MENU_OPTS.length - 1) {
-            stop();
             RootContainer.setRootUIComponent(new SettingsScreen());
         }
-    }
-
-    private void stop() {
-        isStopped = true;
-        try {
-            thread.join();
-        } catch (InterruptedException ignored) { }
     }
 }
