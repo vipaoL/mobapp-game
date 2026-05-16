@@ -213,9 +213,12 @@ public class MgStruct {
                             short[] data = new short[MGStructsCommon.ARGS_NUMBER[id] + 1];
                             // first cell is ID of the element, next cells are arguments (properties)
                             data[0] = (short) id;
-                            for (int i = 1; i < data.length; i++) {
+                            int legacyCount = MGStructsCommon.ARGS_NUMBER_V1[id];
+                            for (int i = 1; i <= legacyCount; i++) {
                                 data[i] = dis.readShort();
                             }
+                            // fill all v2+ fields with defaults
+                            MGStructsCommon.fillDefaults(id, data, 1 + legacyCount);
                             structure[e] = data;
                         }
                     } catch (EOFException ex) {

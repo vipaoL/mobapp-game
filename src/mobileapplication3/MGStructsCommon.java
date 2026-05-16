@@ -98,6 +98,30 @@ public class MGStructsCommon {
             3,    // id20   LINK
     };
 
+    public static final int[] ARGS_NUMBER_V1 = {
+            0,    // id0    EOF
+            2,    // id1    END_POINT
+            4,    // id2    LINE
+            7,    // id3    CIRCLE
+            9,    // id4    BROKEN_LINE
+            10,   // id5    BROKEN_CIRCLE
+            6,    // id6    SINE
+            8,    // id7    ACCELERATOR
+            6,    // id8    TRAMPOLINE
+            2,    // id9    LEVEL_START
+            5,    // id10   LEVEL_FINISH
+            5,    // id11   LAVA
+            10,   // id12   SQUARE_BODY
+            8,    // id13   ROUND_BODY
+            6,    // id14   SINE_FACE_UP
+            6,    // id15   SINE_FACE_DOWN
+            4,    // id16   LINE_FACE_UP
+            4,    // id17   LINE_FACE_DOWN
+            7,    // id18   CIRCLE_FACE_OUTSIDE
+            7,    // id19   CIRCLE_FACE_INSIDE
+            3,    // id20   LINK
+    };
+
     public static final int[] REQUIRED_ARGS_NUMBER = {
             0,    // id0    EOF
             2,    // id1    END_POINT
@@ -217,7 +241,7 @@ public class MGStructsCommon {
         return data;
     }
 
-    private static void fillDefaults(int id, short[] data, int startIndex) {
+    public static void fillDefaults(int id, short[] data, int startIndex) {
         for (int i = startIndex; i < data.length; i++) {
             data[i] = getDefaultForArg(id, i);
         }
