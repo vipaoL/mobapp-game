@@ -34,9 +34,9 @@ public abstract class Body extends Element {
 
     protected void parseBodyArgs(short[] args, int startIndex) {
         elasticity = args[startIndex];
-        mass = args[startIndex + 1] > 0 ? args[startIndex + 1] : (short) -args[startIndex + 1];
+        mass = args[startIndex + 1] >= 0 ? args[startIndex + 1] : (short) -args[startIndex + 1];
         gravityAffected = args[startIndex + 1] >= 0; // use the sign bit as a boolean
-        friction = args[startIndex + 2] > 0 ? args[startIndex + 2] : (short) (-args[startIndex + 2] - 1);
+        friction = args[startIndex + 2] >= 0 ? args[startIndex + 2] : (short) (-args[startIndex + 2] - 1);
         isLava = args[startIndex + 2] < 0;
 
         fallDelay = args[startIndex + 3];
