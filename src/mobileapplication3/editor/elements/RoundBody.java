@@ -17,6 +17,7 @@ public class RoundBody extends Body {
         } else {
             g.fillArc(cX - r, cY - r, r * 2, r * 2, 0, 360);
         }
+        drawPhysics(g, zoomOut, cX, cY, this.r, 0);
     }
 
     public PlacementStep[] getPlacementSteps() {

@@ -1,7 +1,10 @@
 package mobileapplication3.editor.elements;
 
 import mobileapplication3.MGStructsCommon;
+import mobileapplication3.platform.Mathh;
+import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.ui.BitmaskProperty;
+import mobileapplication3.ui.GraphicsUtils;
 import mobileapplication3.ui.Property;
 
 import java.io.DataOutputStream;
@@ -364,5 +367,67 @@ public abstract class Body extends Element {
 
     public boolean isBody() {
         return true;
+    }
+
+    protected void drawPhysics(Graphics g, int zoomOut, int centerX, int centerY, int r, int bodyAngle) {
+        int cosA = Mathh.cos(bodyAngle);
+        int sinA = Mathh.sin(bodyAngle);
+        int cmX = centerX + (cx * cosA - cy * sinA) / zoomOut;
+        int cmY = centerY + (cx * sinA + cy * cosA) / zoomOut;
+
+        int distanceToMassCenter = Mathh.calcDistance(cx, cy);
+        int rEff = r + distanceToMassCenter;
+
+        int arrowThickness = 4;
+
+        int bodyColor = getColor(false);
+        int contrastTarget = (GraphicsUtils.getLuma(bodyColor) > 63) ? 0x000000 : 0xFFFFFF;
+        g.setColor(GraphicsUtils.blendColor(bodyColor, contrastTarget, 1, 4));
+
+        if (cx != 0 || cy != 0) {
+            g.drawLine(centerX, centerY, cmX, cmY);
+            int mR = 4;
+            g.drawLine(cmX - mR, cmY - mR, cmX + mR, cmY + mR);
+            g.drawLine(cmX + mR, cmY - mR, cmX - mR, cmY + mR);
+        }
+
+        if (vx != 0 || vy != 0) {
+            int limit = Math.max(40, rEff * 10) * 1000 / zoomOut;
+
+            int vxPx = vx * 1000 / zoomOut;
+            int vyPx = vy * 1000 / zoomOut;
+
+            int len = Mathh.calcDistance((short) vxPx, (short) vyPx);
+            if (len > limit) {
+                vxPx = vxPx * limit / len;
+                vyPx = vyPx * limit / len;
+            }
+
+            g.drawArrow(cmX, cmY, cmX + vxPx, cmY + vyPx, arrowThickness, zoomOut, true);
+        }
+
+        if (va != 0) {
+            int limit = Math.max(20, rEff) * 1000 / zoomOut;
+
+            int vaPx = Mathh.constrain(-limit, va * 1000 / zoomOut, limit);
+
+            int offsetR = Math.max(rEff + 2, rEff * 9 / 8) * 1000 / zoomOut;
+            int offsetX = offsetR * cosA / 1000;
+            int offsetY = offsetR * sinA / 1000;
+
+            int p1x = cmX + offsetX;
+            int p1y = cmY + offsetY;
+            int v1x = -vaPx * Mathh.cos(bodyAngle + 90) / 1000;
+            int v1y = -vaPx * Mathh.sin(bodyAngle + 90) / 1000;
+
+            int p2x = cmX - offsetX;
+            int p2y = cmY - offsetY;
+            int v2x = -v1x;
+            int v2y = -v1y;
+
+            g.drawLine(p1x, p1y, p2x, p2y);
+            g.drawArrow(p1x, p1y, p1x + v1x, p1y + v1y, arrowThickness, zoomOut, true);
+            g.drawArrow(p2x, p2y, p2x + v2x, p2y + v2y, arrowThickness, zoomOut, true);
+        }
     }
 }

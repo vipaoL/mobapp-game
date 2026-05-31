@@ -55,6 +55,11 @@ public class SquareBody extends Body {
                     false
             );
         }
+
+        int maxDim = Math.max(l, thickness);
+        int radiusWorld = maxDim / 2;
+        int vectorAngle = (l >= thickness) ? angle : angle + 90;
+        drawPhysics(g, zoomOut, xToPX(getX0(), zoomOut, offsetX), yToPX(getY0(), zoomOut, offsetY), radiusWorld, vectorAngle);
     }
 
     public PlacementStep[] getPlacementSteps() {
