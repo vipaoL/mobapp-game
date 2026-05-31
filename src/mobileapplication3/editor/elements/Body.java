@@ -18,6 +18,7 @@ public abstract class Body extends Element {
     protected short cx = 0, cy = 0;
     protected boolean gravityAffected = true;
     protected boolean isLava = false;
+    protected boolean canRotate = true;
 
     // RGB565
     protected int red = 31;
@@ -66,6 +67,9 @@ public abstract class Body extends Element {
         if (args.length > startIndex + 10) {
             cy = args[startIndex + 10];
         }
+        if (args.length > startIndex + 11) {
+            canRotate = args[startIndex + 11] != 0;
+        }
     }
 
     public short[] getBodyArgsValues() {
@@ -81,6 +85,7 @@ public abstract class Body extends Element {
                 va,
                 cx,
                 cy,
+                (short) (canRotate ? 1 : 0),
         };
     }
 
@@ -120,6 +125,9 @@ public abstract class Body extends Element {
         if (cy != 0) {
             mask |= MGStructsCommon.MASK_BODY_CY;
         }
+        if (!canRotate) {
+            mask |= MGStructsCommon.MASK_BODY_CAN_ROTATE;
+        }
         return mask;
     }
 
@@ -158,6 +166,9 @@ public abstract class Body extends Element {
         }
         if ((mask & MGStructsCommon.MASK_BODY_CY) != 0) {
             dos.writeShort(bodyArgs[10]);
+        }
+        if ((mask & MGStructsCommon.MASK_BODY_CAN_ROTATE) != 0) {
+            dos.writeShort(bodyArgs[11]);
         }
     }
 
@@ -331,6 +342,26 @@ public abstract class Body extends Element {
                     }
                     public int getValue() {
                         return va;
+                    }
+                    public boolean isActive() {
+                        return canRotate;
+                    }
+                },
+                new Property("Can rotate") {
+                    public void setValue(int value) {
+                        canRotate = value == 1;
+                        if (!canRotate) {
+                            va = 0;
+                        }
+                    }
+                    public int getValue() {
+                        return (short) (canRotate ? 1 : 0);
+                    }
+                    public int getMinValue() {
+                        return 0;
+                    }
+                    public int getMaxValue() {
+                        return 1;
                     }
                 },
                 new Property("Centroid CX") {

@@ -67,6 +67,7 @@ public class MGStructsCommon {
     public static final int MASK_BODY_VA             = (1 << 10);
     public static final int MASK_BODY_CX             = (1 << 11);
     public static final int MASK_BODY_CY             = (1 << 12);
+    public static final int MASK_BODY_CAN_ROTATE     = (1 << 13);
 
     // Reserved layers
     public static final int COLLISION_LAYER_CAR = 0;
@@ -97,8 +98,8 @@ public class MGStructsCommon {
             2,    // id9    LEVEL_START
             5,    // id10   LEVEL_FINISH
             5,    // id11   LAVA
-            16,   // id12   SQUARE_BODY
-            14,   // id13   ROUND_BODY
+            17,   // id12   SQUARE_BODY
+            15,   // id13   ROUND_BODY
             6,    // id14   SINE_FACE_UP
             6,    // id15   SINE_FACE_DOWN
             4,    // id16   LINE_FACE_UP
@@ -232,6 +233,9 @@ public class MGStructsCommon {
                 if ((flags & MASK_BODY_CY) != 0) {
                     data[startIdx+10] = dis.readShort();
                 }
+                if ((flags & MASK_BODY_CAN_ROTATE) != 0) {
+                    data[startIdx+11] = dis.readShort();
+                }
                 break;
             case ACCELERATOR:
                 if ((flags & MASK_ACCELERATOR_OFFSET) != 0) {
@@ -307,6 +311,7 @@ public class MGStructsCommon {
                 if (i == base + 8) return 0; // VA
                 if (i == base + 9) return 0; // CX
                 if (i == base + 10) return 0; // CY
+                if (i == base + 11) return 1; // canRotate
                 break;
         }
         return 0;

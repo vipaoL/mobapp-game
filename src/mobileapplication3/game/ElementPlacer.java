@@ -168,7 +168,7 @@ public class ElementPlacer {
                 mUserData.setColor(color);
                 mUserData.setColorStroke(color);
 
-                w.addBody(squareBody(centerX, centerY, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0, 0, 0, 0));
+                w.addBody(squareBody(centerX, centerY, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0, 0, 0, 0, true));
 
                 updateLowestY(y + Math.max(l, thickness));
                 break;
@@ -184,7 +184,7 @@ public class ElementPlacer {
                 MUserData mUserData = new MUserData();
                 mUserData.setColor(0xffaa00);
 
-                Body body = squareBody(x, y, l, thickness, ang, elasticity, 1, 100, true, false, mUserData, 0, 0, 0, 0, 0, 0);
+                Body body = squareBody(x, y, l, thickness, ang, elasticity, 1, 100, true, false, mUserData, 0, 0, 0, 0, 0, 0, true);
                 w.addBody(body);
 
                 updateLowestY(y + Math.max(l, thickness));
@@ -199,7 +199,7 @@ public class ElementPlacer {
 
                 MUserData mUserData = new MUserData(MUserData.TYPE_LEVEL_FINISH);
 
-                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0, 0, 0, 0);
+                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0, 0, 0, 0, true);
                 w.addBody(body);
 
                 updateLowestY(y + Math.max(l, thickness));
@@ -214,7 +214,7 @@ public class ElementPlacer {
 
                 MUserData mUserData = new MUserData().setIsLava(true);
 
-                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0, 0, 0, 0);
+                Body body = squareBody(x, y, l, thickness, ang, 0, 1, 0, true, false, mUserData, 0, 0, 0, 0, 0, 0, true);
                 w.addBody(body);
 
                 updateLowestY(y + Math.max(l, thickness));
@@ -239,6 +239,7 @@ public class ElementPlacer {
                 int va = data[14];
                 int cx = data[15];
                 int cy = data[16];
+                boolean canRotate = data[17] != 0;
 
                 int r5 = (colorRGB565 >> 11) & 0x1F;
                 int g6 = (colorRGB565 >> 5) & 0x3F;
@@ -277,7 +278,8 @@ public class ElementPlacer {
                         mUserData,
                         collisionMask,
                         vx, vy, va,
-                        cx, cy
+                        cx, cy,
+                        canRotate
                 );
                 w.addBody(body);
 
@@ -301,6 +303,7 @@ public class ElementPlacer {
                 int va = data[12];
                 int cx = data[13];
                 int cy = data[14];
+                boolean canRotate = data[15] != 0;
 
                 int r5 = (colorRGB565 >> 11) & 0x1F;
                 int g6 = (colorRGB565 >> 5) & 0x3F;
@@ -335,7 +338,8 @@ public class ElementPlacer {
                         mUserData,
                         collisionMask,
                         vx, vy, va,
-                        cx, cy
+                        cx, cy,
+                        canRotate
                 );
                 w.addBody(body);
 
@@ -354,7 +358,7 @@ public class ElementPlacer {
         }
     }
 
-    public Body squareBody(int x, int y, int w, int h, int rotationDeg, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy, int va, int cx, int cy) {
+    public Body squareBody(int x, int y, int w, int h, int rotationDeg, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy, int va, int cx, int cy, boolean canRotate) {
         int widthFX = w << FXUtil.DECIMAL;
         int heightFX = h << FXUtil.DECIMAL;
         int cxFX = FXUtil.toFX(cx);
@@ -375,22 +379,23 @@ public class ElementPlacer {
         int rotatedCx = (int) Math.floor((cx * cos - cy * sin) + 0.5);
         int rotatedCy = (int) Math.floor((cx * sin + cy * cos) + 0.5);
 
-        Body body = body(shape, x + rotatedCx, y + rotatedCy, elasticity, mass, friction, gravityAffected, dynamic, data, collisionMask, vx, vy, va);
+        Body body = body(shape, x + rotatedCx, y + rotatedCy, elasticity, mass, friction, gravityAffected, dynamic, data, collisionMask, vx, vy, va, canRotate);
 
         body.setRotation2FX(FXUtil.TWO_PI_2FX / 360 * rotationDeg);
         return body;
     }
 
-    public Body roundBody(int x, int y, int r, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy, int va, int cx, int cy) {
-        return body(Shape.createCircle(r), x, y, elasticity, mass, friction, gravityAffected, dynamic, data, collisionMask, vx, vy, va);
+    public Body roundBody(int x, int y, int r, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy, int va, int cx, int cy, boolean canRotate) {
+        return body(Shape.createCircle(r), x, y, elasticity, mass, friction, gravityAffected, dynamic, data, collisionMask, vx, vy, va, canRotate);
     }
 
-    public Body body(Shape shape, int x, int y, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy, int va) {
+    public Body body(Shape shape, int x, int y, int elasticity, int mass, int friction, boolean gravityAffected, boolean dynamic, MUserData data, int collisionMask, int vx, int vy, int va, boolean canRotate) {
         shape.setElasticity(elasticity);
         shape.setMass(mass);
         shape.setFriction(friction);
         Body body = new Body(x, y, shape, dynamic);
         body.setGravityAffected(gravityAffected);
+        body.setRotatable(canRotate);
         body.setUserData(data);
 
         if (dynamic && (vx != 0 || vy != 0)) {
