@@ -83,6 +83,28 @@ public class SquareBody extends Body {
         });
     }
 
+    public PlacementStep[] getExtraEditingSteps() {
+        return new PlacementStep[] {
+                new PlacementStep() {
+                    public void place(short pointX, short pointY) {
+                        short dx = (short) (pointX - getX0());
+                        short dy = (short) (pointY - getY0());
+
+                        cx = (short) ((dx * Mathh.cos(angle) + dy * Mathh.sin(angle)) / 1000);
+                        cy = (short) ((dx * Mathh.cos(angle + 90) + dy * Mathh.sin(angle + 90)) / 1000);
+                    }
+
+                    public String getName() {
+                        return "Set center of mass";
+                    }
+
+                    public String getCurrentStepInfo() {
+                        return "cX=" + cx + " cY=" + cy;
+                    }
+                }
+        };
+    }
+
     public Element setArgs(short[] args) {
         l = args[2];
         thickness = args[3];
