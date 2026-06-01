@@ -16,6 +16,7 @@
         android:roundIcon="@mipmap/icon_round"
         android:theme="@android:style/Theme.Black.NoTitleBar"
         tools:targetApi="34"
+        android:isGame="true"
         android:appCategory="game">
 
         <meta-data android:name="com.google.android.wearable.standalone" android:value="true"/>
