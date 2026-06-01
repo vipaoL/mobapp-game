@@ -513,6 +513,36 @@ public class GameplayCanvas extends CanvasComponent {
                 // tick effect timers (speed, slowness, ...)
                 tickEffects();
 
+                if (motorTurnedOn && Math.abs(world.carX - prevCarX) <= 2 && Math.abs(world.carY - prevCarY) <= 2 && !wasPaused) {
+                    for (int i = 0; i < carContacts.length; i++) {
+                        for (int j = 0; j < carContacts[i].length; j++) {
+                            if (carContacts[i][j] == null) {
+                                continue;
+                            }
+                            Body body = carContacts[i][j].body1();
+                            UserData userData = body.getUserData();
+                            if (!(userData instanceof MUserData)) {
+                                body = carContacts[i][j].body2();
+                                userData = body.getUserData();
+                            }
+                            if (userData instanceof MUserData) {
+                                boolean staticForever = ((MUserData) userData).getFallDelay() == MUserData.STATIC;
+                                if (!staticForever && !body.isDynamic()) {
+                                    timeStuck = 0;
+                                }
+                            }
+                        }
+                    }
+                    timeStuck += TICK_DURATION;
+                    if (timeStuck > GAME_OVER_STUCK_TIME) {
+                        gameOver();
+                    }
+                } else {
+                    timeStuck = 0;
+                }
+                prevCarX = world.carX;
+                prevCarY = world.carY;
+
                 // distribute some tasks over the ticks to offload the CPU
                 if (bigTickN < 3) {
                     if (bigTickN == 1) {
@@ -624,37 +654,6 @@ public class GameplayCanvas extends CanvasComponent {
                     }
                 }
             }
-
-            if (motorTurnedOn && Math.abs(world.carX - prevCarX) <= 1 && Math.abs(world.carY - prevCarY) <= 1) {
-                for (int i = 0; i < carContacts.length; i++) {
-                    for (int j = 0; j < carContacts[i].length; j++) {
-                        if (carContacts[i][j] == null) {
-                            continue;
-                        }
-                        Body body = carContacts[i][j].body1();
-                        UserData userData = body.getUserData();
-                        if (!(userData instanceof MUserData)) {
-                            body = carContacts[i][j].body2();
-                            userData = body.getUserData();
-                        }
-                        if (userData instanceof MUserData) {
-                            boolean staticForever = ((MUserData) userData).getFallDelay() == MUserData.STATIC;
-                            if (!staticForever && !body.isDynamic()) {
-                                timeStuck = 0;
-                            }
-                        }
-                    }
-                }
-                timeStuck += tickTime;
-                if (timeStuck > GAME_OVER_STUCK_TIME) {
-                    gameOver();
-                }
-            } else {
-                timeStuck = 0;
-            }
-
-            prevCarX = world.carX;
-            prevCarY = world.carY;
 
             if (worldgen != null) {
                 int targetFrameTime = 1000 / Math.max(1, getTargetFPS());
