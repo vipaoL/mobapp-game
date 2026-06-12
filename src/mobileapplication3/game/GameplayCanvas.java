@@ -289,15 +289,12 @@ public class GameplayCanvas extends CanvasComponent {
                 world.leftWheel.setDynamic(false);
             }
 
-            setLoadingProgress(100);
-            log("ready");
-            if (hintVisibleTimer > 0) {
-                hintVisibleTimer = HINT_TIMER_MAX; // ticks
-            }
-
-            Logger.setLogMessageDelay(0);
             if (baseTimestepFX == 0) {
                 baseTimestepFX = world.getTimestepFX();
+            }
+
+            if (hintVisibleTimer > 0) {
+                hintVisibleTimer = HINT_TIMER_MAX; // ticks
             }
 
             lastFPSMeasureTime = System.currentTimeMillis();
@@ -310,6 +307,10 @@ public class GameplayCanvas extends CanvasComponent {
             performanceEvaluated = false;
             physicsTimeTotal = 0;
             ticksTotal = 0;
+
+            setLoadingProgress(100);
+            log("ready");
+            Logger.setLogMessageDelay(0);
 
             resume();
         } catch (Exception ex) {
