@@ -79,7 +79,7 @@ public abstract class Element {
 
     public static Element createTypedInstance(short id) throws IllegalArgumentException {
         if (id < 1) {
-            throw new IllegalArgumentException("Element id can't be < 1");
+            throw new IllegalArgumentException("id=" + id + ". Element id can't be < 1");
         }
 
         switch (id) {

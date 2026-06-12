@@ -177,7 +177,7 @@ public class MGStructsCommon {
         }
 
         // pre-fill optional arguments with default values
-        fillDefaults(id, data, 1 + requiredCount);
+        fillDefaults(data, 1 + requiredCount);
 
         // overwrite those optional arguments that are present
         switch (id) {
@@ -273,9 +273,9 @@ public class MGStructsCommon {
         return data;
     }
 
-    public static void fillDefaults(int id, short[] data, int startIndex) {
+    public static void fillDefaults(short[] data, int startIndex) {
         for (int i = startIndex; i < data.length; i++) {
-            data[i] = getDefaultForArg(id, i);
+            data[i] = getDefaultForArg(data[0], i - 1);
         }
     }
 
@@ -284,22 +284,22 @@ public class MGStructsCommon {
             case CIRCLE:
             case CIRCLE_FACE_OUTSIDE:
             case CIRCLE_FACE_INSIDE:
-                if (i == 4) return 360; // arcAngle
-                if (i == 5) return 0; // startAngle
-                if (i == 6) return 100; // kX
-                if (i == 7) return 100; // kY
+                if (i == 3) return 360; // arcAngle
+                if (i == 4) return 0; // startAngle
+                if (i == 5) return 100; // kX
+                if (i == 6) return 100; // kY
                 break;
             case ACCELERATOR:
-                if (i == 6) return 0; // directionOffset (m)
-                if (i == 7) return 150; // speedMultiplier (m)
-                if (i == 8) return 30; // effectDuration
+                if (i == 5) return 0; // directionOffset (m)
+                if (i == 6) return 150; // speedMultiplier (m)
+                if (i == 7) return 30; // effectDuration
                 break;
             case TRAMPOLINE:
-                if (i == 6) return 100; // elasticity
+                if (i == 5) return 100; // elasticity
                 break;
             case SQUARE_BODY:
             case ROUND_BODY:
-                int base = (id == SQUARE_BODY) ? 6 : 4;
+                int base = (id == SQUARE_BODY) ? 5 : 3;
                 if (i == base)     return 0; // elasticity
                 if (i == base + 1) return 1; // mass
                 if (i == base + 2) return 10; // friction

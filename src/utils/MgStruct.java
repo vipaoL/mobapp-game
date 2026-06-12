@@ -218,7 +218,7 @@ public class MgStruct {
                                 data[i] = dis.readShort();
                             }
                             // fill all v2+ fields with defaults
-                            MGStructsCommon.fillDefaults(id, data, 1 + legacyCount);
+                            MGStructsCommon.fillDefaults(data, 1 + legacyCount);
                             structure[e] = data;
                         }
                     } catch (EOFException ex) {
