@@ -30,7 +30,7 @@ public abstract class Body extends Element {
     protected static final short DEFAULT_FALL_DELAY = 600;
 
     protected int getColor(boolean isSelected) {
-        if (isLava) {
+        if (isLava && !isSelected) {
             return Lava.COLOR;
         } else {
             return super.getColor(isSelected);
