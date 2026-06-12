@@ -50,7 +50,7 @@ public class MgStruct {
         loadedFromRes = 0;
 
         for (int i = 1; readFromRes(PREFIX + i + EXTENSION); i++) {
-            Logger.log(i + EXTENSION);
+            Logger.log("Loading " + i + EXTENSION);
             loadedFromRes++;
         }
 
@@ -61,6 +61,10 @@ public class MgStruct {
         InputStream is = null;
         try {
             is = Platform.getResource(path);
+            if (is == null) {
+                Logger.log("Can't read " + path + ". Null InputStream");
+                return false;
+            }
             DataInputStream dis = new DataInputStream(is);
             try {
                 saveStructToStorage(readFromDataInputStream(dis));

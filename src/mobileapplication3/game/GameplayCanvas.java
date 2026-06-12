@@ -157,8 +157,7 @@ public class GameplayCanvas extends CanvasComponent {
     private int targetFPS;
 
     public GameplayCanvas() {
-        log("game: constructor");
-        setTargetFPS(60);
+        Logger.log("game: constructor");
     }
 
     public GameplayCanvas(GraphicsWorld w) {
@@ -221,6 +220,7 @@ public class GameplayCanvas extends CanvasComponent {
 
     public synchronized void postInit() {
         setLoadingProgress(0);
+        setTargetFPS(60);
         new Thread(new Runnable() {
             public void run() {
                 loadSettingsAndWorld();
