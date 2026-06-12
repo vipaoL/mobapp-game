@@ -82,9 +82,16 @@ public class MenuCanvas extends GenericMenu {
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
         try {
             if (bg != null) {
-                if (!bg.drawAsBG(g)) {
-                    bg = null;
-                    setTargetFPS(DEFAULT_FPS);
+                try {
+                    if (!bg.drawAsBG(g)) {
+                        bg = null;
+                        setTargetFPS(DEFAULT_FPS);
+                    }
+                } catch (Exception ex) {
+                    Logger.log(ex);
+                    g.setColor(0xff0000);
+                    g.drawString("Can't draw bg game!", x0, y0, TOP | LEFT);
+                    g.drawString(ex.toString(), x0, y0 + g.getFontHeight(), TOP | LEFT);
                 }
             }
             if (isInited) {
