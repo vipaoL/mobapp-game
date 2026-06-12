@@ -30,7 +30,6 @@ public class MenuCanvas extends GenericMenu {
     private static int defaultSelected = 1; // currently selected option in menu
 
     // states
-    private boolean isInited = false;
     private boolean isGameStarted = false;
     private int c = 0;
 
@@ -65,7 +64,6 @@ public class MenuCanvas extends GenericMenu {
         } catch (ClassNotFoundException ex) {
             setStateFor(STATE_INACTIVE, 4);
         }
-        isInited = true;
     }
 
     public void tick() {
@@ -94,15 +92,14 @@ public class MenuCanvas extends GenericMenu {
                     g.drawString(ex.toString(), x0, y0 + g.getFontHeight(), TOP | LEFT);
                 }
             }
-            if (isInited) {
-                int bgColor = this.bgColor;
-                if (bg != null) {
-                    this.bgColor = COLOR_TRANSPARENT;
-                }
-                super.onPaint(g, x0, y0, w, h, forceInactive);
-                this.bgColor = bgColor;
-                tick();
+
+            int bgColor = this.bgColor;
+            if (bg != null) {
+                this.bgColor = COLOR_TRANSPARENT;
             }
+            super.onPaint(g, x0, y0, w, h, forceInactive);
+            this.bgColor = bgColor;
+            tick();
         } catch (Exception ignored) { }
     }
 
