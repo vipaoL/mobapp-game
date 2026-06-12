@@ -273,6 +273,12 @@ public class MGStructsCommon {
         return data;
     }
 
+    public static void fillDefaultArgs(int id, short[] data, int startIndex) {
+        for (int i = startIndex; i < data.length; i++) {
+            data[i] = getDefaultForArg(id, i);
+        }
+    }
+
     public static void fillDefaults(short[] data, int startIndex) {
         for (int i = startIndex; i < data.length; i++) {
             data[i] = getDefaultForArg(data[0], i - 1);

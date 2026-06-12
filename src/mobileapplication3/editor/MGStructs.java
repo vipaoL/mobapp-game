@@ -95,11 +95,12 @@ public class MGStructs {
                 return null;
             }
 
-            int argsCount = element.getArgsCount();
-            short[] args = new short[argsCount];
-            for (int i = 0; i < argsCount; i++) {
+            short[] args = new short[element.getArgsCount()];
+            int legacyArgsCount = MGStructsCommon.ARGS_NUMBER_V1[id];
+            for (int i = 0; i < legacyArgsCount; i++) {
                 args[i] = is.readShort();
             }
+            MGStructsCommon.fillDefaultArgs(id, args, legacyArgsCount);
 
             logLine += Utils.shortArrayToString(args);
             Logger.logReplaceLast(prevLogLine, logLine);
