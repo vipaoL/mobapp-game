@@ -207,6 +207,19 @@ public class BrokenLine extends Line {
         return "Broken Line";
     }
 
+    public short[] getAABB() {
+        if (l <= 0) {
+            recalcCalculatedArgs();
+        }
+        int tx = -(y2 - y) * (thickness / 2) / l;
+        int ty = (x2 - x) * (thickness / 2) / l;
+        short minX = (short) Math.min(Math.min(x + tx, x - tx), Math.min(x2 + tx, x2 - tx));
+        short maxX = (short) Math.max(Math.max(x + tx, x - tx), Math.max(x2 + tx, x2 - tx));
+        short minY = (short) Math.min(Math.min(y + ty, y - ty), Math.min(y2 + ty, y2 - ty));
+        short maxY = (short) Math.max(Math.max(y + ty, y - ty), Math.max(y2 + ty, y2 - ty));
+        return new short[] {minX, minY, maxX, maxY};
+    }
+
     public boolean isBody() {
         return true;
     }

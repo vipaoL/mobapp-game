@@ -133,6 +133,27 @@ public abstract class AbstractRectBodyElement extends Element {
         return getCornerPoint(((angle+90)%360 < 180) ? 1 : 3);
     }
 
+    public short[] getAABB() {
+        short[] p0 = getCornerPoint(0);
+        short minX = p0[0], maxX = p0[0], minY = p0[1], maxY = p0[1];
+        for (int i = 1; i < 4; i++) {
+            short[] pt = getCornerPoint(i);
+            if (pt[0] < minX) {
+                minX = pt[0];
+            }
+            if (pt[0] > maxX) {
+                maxX = pt[0];
+            }
+            if (pt[1] < minY) {
+                minY = pt[1];
+            }
+            if (pt[1] > maxY) {
+                maxY = pt[1];
+            }
+        }
+        return new short[] {minX, minY, maxX, maxY};
+    }
+
     public boolean isBody() {
         return true;
     }

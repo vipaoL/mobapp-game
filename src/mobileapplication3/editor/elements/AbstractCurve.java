@@ -58,6 +58,36 @@ public abstract class AbstractCurve extends Element {
         }
     }
 
+    public short[] getAABB() {
+        if (pointsCache == null) {
+            genPoints();
+        }
+        int size = pointsCache.getSize();
+        if (size == 0) {
+            return new short[] {x, y, x, y};
+        }
+        short minX = Short.MAX_VALUE;
+        short minY = Short.MAX_VALUE;
+        short maxX = Short.MIN_VALUE;
+        short maxY = Short.MIN_VALUE;
+        for (int i = 0; i < size; i++) {
+            short[] pt = pointsCache.getPoint(i);
+            if (pt[0] < minX) {
+                minX = pt[0];
+            }
+            if (pt[0] > maxX) {
+                maxX = pt[0];
+            }
+            if (pt[1] < minY) {
+                minY = pt[1];
+            }
+            if (pt[1] > maxY) {
+                maxY = pt[1];
+            }
+        }
+        return new short[] {minX, minY, maxX, maxY};
+    }
+
     public boolean isBody() {
         return false;
     }

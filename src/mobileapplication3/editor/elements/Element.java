@@ -41,12 +41,15 @@ public abstract class Element {
     public static final int LINE_THICKNESS = 24;
 
     public static final int COLOR_LANDSCAPE = 0x4444ff;
+    public static final int COLOR_LANDSCAPE_HIGH_CONTRAST = 0xaaaaff;
     public static final int COLOR_BODY = 0xffffff;
     public static final int COLOR_SELECTED = 0xaaffff;
 
     protected static final int NO_ARROWS = 0;
     protected static final int ARROWS_NORMAL = 1;
     protected static final int ARROWS_INVERTED = -1;
+
+    public static boolean highContrast = false;
 
     protected short x, y;
     protected int color;
@@ -253,7 +256,13 @@ public abstract class Element {
     }
 
     protected int getColor(boolean isSelected) {
-        return isSelected ? colorSelected : color;
+        if (isSelected) {
+            return colorSelected;
+        }
+        if (highContrast && color == COLOR_LANDSCAPE) {
+            return COLOR_LANDSCAPE_HIGH_CONTRAST;
+        }
+        return color;
     }
 
     public static short[] concatArrays(short[] arr1, short[] arr2) {
@@ -339,6 +348,8 @@ public abstract class Element {
     public abstract short[] getStartPoint();
 
     public abstract short[] getEndPoint();
+
+    public abstract short[] getAABB();
 
     public abstract boolean isBody();
 

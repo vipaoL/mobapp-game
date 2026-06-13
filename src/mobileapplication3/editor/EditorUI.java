@@ -57,6 +57,9 @@ public class EditorUI extends Container {
         this(editorMode);
         elementsBuffer.setElements(elements);
 
+        Logger.log("");
+        Logger.log(path);
+
         if (path != null && path.startsWith(MGStructs.RESOURCE_PREFIX)) {
             String folderPath;
             if (editorMode == MODE_STRUCTURE) {
@@ -67,6 +70,19 @@ public class EditorUI extends Container {
             path = folderPath + path.substring(MGStructs.RESOURCE_PREFIX.length() + 1);
         }
         elementsBuffer.setFilePath(path);
+
+        for (int i = 0; i < elements.length; i++) {
+            Element element = elements[i];
+            if (element != null) {
+                String str = element.getName();
+                short[] data = element.getAsShortArray();
+                for (int j = 0; j < data.length; j++) {
+                    str += " " + data[j];
+                }
+                Logger.log(str);
+            }
+        }
+        Logger.log("");
     }
 
     public void init() {

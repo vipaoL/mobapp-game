@@ -47,6 +47,10 @@ public class LevelStart extends Element {
         return new short[] {x, y};
     }
 
+    public short[] getAABB() {
+        return new short[] {x, y, x, y};
+    }
+
     public boolean isBody() {
         return false;
     }

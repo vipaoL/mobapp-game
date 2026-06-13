@@ -207,6 +207,14 @@ public class Line extends Element {
         return EndPoint.compareAsEndPoints(ends[0], ends[1]);
     }
 
+    public short[] getAABB() {
+        short minX = x < x2 ? x : x2;
+        short maxX = x > x2 ? x : x2;
+        short minY = y < y2 ? y : y2;
+        short maxY = y > y2 ? y : y2;
+        return new short[] {minX, minY, maxX, maxY};
+    }
+
     public boolean isBody() {
         return false;
     }

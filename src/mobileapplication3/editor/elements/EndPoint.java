@@ -80,6 +80,10 @@ public class EndPoint extends Element {
         return endPoint;
     }
 
+    public short[] getAABB() {
+        return new short[] {x, y, x, y};
+    }
+
     public boolean isBody() {
         return false;
     }

@@ -83,5 +83,9 @@ public class RoundBody extends Body {
         return new short[]{(short) (x + r), y};
     }
 
+    public short[] getAABB() {
+        return new short[] {(short) (x - r), (short) (y - r), (short) (x + r), (short) (y + r)};
+    }
+
     public void recalcCalculatedArgs() { }
 }

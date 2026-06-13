@@ -177,6 +177,21 @@ public class Link extends Element {
         return link;
     }
 
+    public short[] getAABB() {
+        if (reference != null) {
+            short[] refAABB = reference.getAABB();
+            short dX = getDX();
+            short dY = getDY();
+            return new short[] {
+                (short) (refAABB[0] + dX), (short) (refAABB[1] + dY),
+                (short) (refAABB[2] + dX), (short) (refAABB[3] + dY)
+            };
+        } else {
+            short r = 100;
+            return new short[] {(short) (x - r), (short) (y - r), (short) (x + r), (short) (y + r)};
+        }
+    }
+
     public boolean isBody() {
         return reference != null && reference.isBody();
     }
