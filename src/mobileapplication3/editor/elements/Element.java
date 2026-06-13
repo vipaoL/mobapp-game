@@ -338,7 +338,7 @@ public abstract class Element {
 
     public abstract short[] getStartPoint();
 
-    public abstract short[] getEndPoint() throws Exception;
+    public abstract short[] getEndPoint();
 
     public abstract boolean isBody();
 

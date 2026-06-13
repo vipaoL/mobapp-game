@@ -44,8 +44,8 @@ public class EndPoint extends Element {
         return new short[] {x, y};
     }
 
-    public short[] getEndPoint() throws Exception {
-        throw new Exception("Never ask end point its end point");
+    public short[] getEndPoint() {
+        return getStartPoint();
     }
 
     public static boolean compare(short[] oldEndPoint, short[] newEndPoint) {

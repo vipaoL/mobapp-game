@@ -79,7 +79,7 @@ public class RoundBody extends Body {
         return new short[]{(short) (x - r), y};
     }
 
-    public short[] getEndPoint() throws Exception {
+    public short[] getEndPoint() {
         return new short[]{(short) (x + r), y};
     }
 

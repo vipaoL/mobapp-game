@@ -154,7 +154,7 @@ public class Link extends Element {
         return new short[] {(short) (refStartPoint[0] + d[0]), (short) (refStartPoint[1] + d[1])};
     }
 
-    public short[] getEndPoint() throws Exception {
+    public short[] getEndPoint() {
         short[] d = {getDX(), getDY()};
         if (reference == null) {
             return d;
