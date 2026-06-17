@@ -1,0 +1,48 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        google()
+    }
+    dependencies {
+        classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.3.22'
+    }
+}
+
+plugins {
+    id 'java'
+}
+apply plugin: 'robovm'
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    implementation 'com.mobidevelop.robovm:robovm-rt:2.3.22'
+    implementation 'com.mobidevelop.robovm:robovm-cocoatouch:2.3.22'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += '../src'
+            srcDirs += '../lib/mobapp-platform-ios/src'
+            srcDirs += '../lib/mobapp-framework/src'
+            srcDirs += '../lib/EminiPhysicsEngine/src'
+
+            srcDirs += 'src'
+
+            exclude 'build/**'
+            exclude '.gradle/**'
+            exclude 'at/emini/physics2DDesigner/**'
+            exclude 'at/emini/physics2DSimulationTests/**'
+            exclude 'at/emini/physics2DUnitTests/**'
+            exclude 'at/emini/physics2DVisualTest/**'
+        }
+    }
+}
+
+robovm {
+    iosSkipSigning = true
+}

@@ -1,0 +1,21 @@
+<config>
+    <executableName>MobappGame</executableName>
+    <mainClass>io.github.vipaol.mobapp.game.IOSLauncher</mainClass>
+    <os>ios</os>
+    <target>ios</target>
+    <iosInfoPList>Info.plist.xml</iosInfoPList>
+
+    <resources>
+        <resource><directory>../res</directory></resource>
+        <resource><directory>icons</directory></resource>
+    </resources>
+
+    <forceLinkClasses>
+        <pattern>mobileapplication3.**</pattern>
+        <pattern>io.github.vipaol.mobapp.**</pattern>
+    </forceLinkClasses>
+
+    <libs>
+        <lib>libs/libstubs.a</lib>
+    </libs>
+</config>
