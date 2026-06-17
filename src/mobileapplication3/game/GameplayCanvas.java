@@ -785,7 +785,7 @@ public class GameplayCanvas extends CanvasComponent {
                                 giveEffect(bodyUserData.getEffect());
                                 world.setWheelColor(bodyUserData.getColor());
                             }
-                            if (bodyUserData.isLava()) {
+                            if (bodyUserData.isLava() && !DebugMenu.simulationMode) {
                                 gameOver();
                             }
                             break;
