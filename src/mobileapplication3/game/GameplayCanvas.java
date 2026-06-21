@@ -1508,6 +1508,7 @@ public class GameplayCanvas extends CanvasComponent {
         if (!hasParent()) {
             return;
         }
+        setLoadingProgress(0);
         if (worldgen != null) {
             worldgen.reset();
         } else {
