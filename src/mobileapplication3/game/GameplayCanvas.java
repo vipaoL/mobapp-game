@@ -435,8 +435,8 @@ public class GameplayCanvas extends CanvasComponent {
 
             // Adjust physics engine tick time to current TPS
             if (!wasPaused) {
-                tickTime = (int) (System.currentTimeMillis() - lastPhysicsTickTime);
-                world.setTimestepFX(Math.max(1, baseTimestepFX * Math.min(tickTime, 100) / 50 / physicsIterations));
+                tickTime = (int) Math.min(System.currentTimeMillis() - lastPhysicsTickTime, 100);
+                world.setTimestepFX(Math.max(1, baseTimestepFX * tickTime / 50 / physicsIterations));
             } else {
                 wasPaused = false;
             }
