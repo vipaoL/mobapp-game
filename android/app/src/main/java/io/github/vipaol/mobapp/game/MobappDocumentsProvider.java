@@ -149,6 +149,29 @@ public class MobappDocumentsProvider extends DocumentsProvider {
     }
 
     @Override
+    public void removeDocument(String documentId, String parentDocumentId) throws FileNotFoundException {
+        deleteDocument(documentId);
+    }
+
+    @Override
+    public String moveDocument(String sourceDocumentId, String sourceParentDocumentId, String targetParentDocumentId) throws FileNotFoundException {
+        File sourceFile = getFileForDocId(sourceDocumentId);
+        File targetParent = getFileForDocId(targetParentDocumentId);
+        File destFile = new File(targetParent, sourceFile.getName());
+
+        try {
+            boolean renameSucceeded = sourceFile.renameTo(destFile);
+            if (!renameSucceeded) {
+                throw new FileNotFoundException("Failed to move document. Rename failed.");
+            }
+        } catch (Exception e) {
+            throw new FileNotFoundException("Failed to move document. Error: " + e.getMessage());
+        }
+
+        return getDocIdForFile(destFile);
+    }
+
+    @Override
     public String renameDocument(String documentId, String displayName) throws FileNotFoundException {
         if (displayName == null) {
             throw new IllegalArgumentException("displayName is null");
@@ -191,6 +214,10 @@ public class MobappDocumentsProvider extends DocumentsProvider {
             flags |= Document.FLAG_SUPPORTS_DELETE;
             if (SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 flags |= Document.FLAG_SUPPORTS_RENAME;
+            }
+            if (SDK_INT >= Build.VERSION_CODES.N) {
+                flags |= Document.FLAG_SUPPORTS_REMOVE;
+                flags |= Document.FLAG_SUPPORTS_MOVE;
             }
         }
 
