@@ -1342,7 +1342,7 @@ public class GameplayCanvas extends CanvasComponent {
             }
             delayedRestartThread.start();
         } else {
-            stop(true, false);
+            stop(true, true);
         }
     }
 
