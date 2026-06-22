@@ -20,6 +20,7 @@ import java.util.Vector;
 public class WorldGen {
     private static final int BUILTIN_STRUCTS_NUMBER = 6;
     private static final int FLOOR_RANDOM_WEIGHT = 4;
+    public static final int BARRIER_H2 = 10000;
 
     public final Object lock = new Object();
 
@@ -419,7 +420,7 @@ public class WorldGen {
                 if (!isLeftBarrierAdded) {
                     w.barrierX = structLog[getElementID(0)][0];
                     logDebug("barrier: x=" + w.barrierX);
-                    landscape.addSegment(FXVector.newVector(w.barrierX, -10000), FXVector.newVector(w.barrierX, 10000), (short) 1);
+                    landscape.addSegment(FXVector.newVector(w.barrierX, -BARRIER_H2), FXVector.newVector(w.barrierX, BARRIER_H2), (short) 1);
                     structLog[getElementID(1)][2] += 1;
                     isLeftBarrierAdded = true;
                 }

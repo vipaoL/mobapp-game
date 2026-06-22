@@ -28,10 +28,12 @@ public class GraphicsWorld extends World {
 
     public int colBg = 0x000000;
     public int colLandscape = DEFAULT_LANDSCAPE_COLOR;
+    public int colBarrier = 0xFF3333;
     int colBodies = 0xffffff;
     int currColBg;
     int currColWheel;
     int currColLandscape;
+    int currColBarrier;
     int currColBodies;
 
     public static int scWidth = 200;
@@ -112,6 +114,7 @@ public class GraphicsWorld extends World {
         currColBg = colBg;
         currColBodies = colBodies;
         currColLandscape = colLandscape;
+        currColBarrier = colBarrier;
     }
 
     public void setGame(GameplayCanvas game) {
@@ -136,6 +139,7 @@ public class GraphicsWorld extends World {
         }
         rmAllBodies();
         rmLandscapeSegments();
+        barrierX = Integer.MIN_VALUE;
     }
     private void rmLandscapeSegments() {
         Landscape landscape = getLandscape();
@@ -278,6 +282,7 @@ public class GraphicsWorld extends World {
             if (MobappGameSettings.RGBMode) {
                 currColLandscape = MobappGameSettings.getLandscapeColor();
             }
+            drawBarrier(g);
             if (structuresData != null && !legacyDrawingMethod && cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC) {
                 try {
                     drawLandscape(g, structuresData, structureRingBufferOffset, structureCount);
@@ -298,6 +303,39 @@ public class GraphicsWorld extends World {
             Logger.log(ex);
         }
         //g.fillTriangle(xToPX(carX+viewField/2-10), 0, xToPX(carX+viewField/2), scHeight, xToPX(carX+viewField/2+10), 0);
+    }
+
+    private void drawBarrier(Graphics g) {
+        if (barrierX == Integer.MIN_VALUE) {
+            return;
+        }
+
+        int topY = -WorldGen.BARRIER_H2;
+        int worldBottomY = WorldGen.BARRIER_H2;
+
+        int x1 = xToPX(barrierX, topY);
+        int y1 = yToPX(barrierX, topY);
+        int x2 = xToPX(barrierX, worldBottomY);
+        int y2 = yToPX(barrierX, worldBottomY);
+
+        if (Math.min(x1, x2) > scWidth || Math.max(x1, x2) < 0) {
+            return;
+        }
+
+        int color = currColBarrier;
+        if (MobappGameSettings.RGBMode) {
+            color = GraphicsUtils.shiftHue(currColLandscape, System.currentTimeMillis() * 360 / 10000 % 360);
+        }
+        g.setColor(color);
+        drawLine(g, x1, y1, x2, y2, THICKNESS_LANDSCAPE * 2);
+
+        if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC) {
+            int barrierPx = xToPX(barrierX, carY);
+            if (barrierPx > 0) {
+                g.setColor(GraphicsUtils.dimColor(color, 30));
+                g.fillRect(0, 0, barrierPx, scHeight);
+            }
+        }
     }
 
     private void drawBg(Graphics g) {
@@ -469,10 +507,19 @@ public class GraphicsWorld extends World {
     private void drawLandscape(Graphics g) {
         Landscape landscape = getLandscape();
         for (int i = 0; i < landscape.segmentCount(); i++) {
-            int stPointX = xToPX(landscape.startPoint(i).xAsInt(), landscape.startPoint(i).yAsInt());
-            int stPointY = yToPX(landscape.startPoint(i).xAsInt(), landscape.startPoint(i).yAsInt());
-            int endPointX = xToPX(landscape.endPoint(i).xAsInt(), landscape.endPoint(i).yAsInt());
-            int endPointY = yToPX(landscape.endPoint(i).xAsInt(), landscape.endPoint(i).yAsInt());
+            int x1 = landscape.startPoint(i).xAsInt();
+            int y1 = landscape.startPoint(i).yAsInt();
+            int x2 = landscape.endPoint(i).xAsInt();
+            int y2 = landscape.endPoint(i).yAsInt();
+
+            if (x1 == barrierX && x2 == barrierX) {
+                continue;
+            }
+
+            int stPointX = xToPX(x1, y1);
+            int stPointY = yToPX(x1, y1);
+            int endPointX = xToPX(x2, y2);
+            int endPointY = yToPX(x2, y2);
             if (stPointX < scWidth | endPointX > 0) {
                 if (!DebugMenu.isDebugEnabled) {
                     g.setColor(currColLandscape);

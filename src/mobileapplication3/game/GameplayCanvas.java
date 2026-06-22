@@ -1349,6 +1349,7 @@ public class GameplayCanvas extends CanvasComponent {
     private void dimColors() {
         world.currColLandscape = GraphicsUtils.dimColor(world.currColLandscape, 80);
         world.currColBodies = GraphicsUtils.dimColor(world.currColBodies, 80);
+        world.currColBarrier = GraphicsUtils.dimColor(world.currColBarrier, 90);
         if (world.currColBodies > 0) {
             int baseColor = GraphicsUtils.dimColor(world.currColLandscape, 8);
             world.currColBg = GraphicsUtils.dimColor(GraphicsUtils.getLuma(baseColor) > GraphicsUtils.getLuma(world.currColBg) ? baseColor : world.currColBg, 108);
