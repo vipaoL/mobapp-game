@@ -1052,7 +1052,7 @@ public class GameplayCanvas extends CanvasComponent {
                 }
                 drawDebugText(g, String.valueOf(FXUtil.angleInDegrees2FX(world.carbody.rotation2FX())));
             }
-            drawDebugText(g, "physics: " + measuredTickTime + "ms");
+            drawDebugText(g, "physics: " + measuredTickTime + "ms, tickTime: " + tickTime + "ms");
 
             if (flipCounter != null) {
                 int x = world.xToPX(flipCounter.lastFlipX, 0);
