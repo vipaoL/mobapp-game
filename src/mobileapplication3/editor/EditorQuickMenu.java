@@ -50,6 +50,11 @@ public class EditorQuickMenu extends AbstractPopupPage {
 
         Button saveButton = new Button("Save \"" + parent.getFileName() + "\"") {
             public void buttonPressed() {
+                String gameFolderPath = EditorSettings.getGameFolderPath();
+                if (gameFolderPath == null || gameFolderPath.equals("")) {
+                    Platform.showError("Game folder is not selected!");
+                    return;
+                }
                 close();
                 try {
                     parent.saveToFile(parent.getFilePath());
@@ -63,6 +68,11 @@ public class EditorQuickMenu extends AbstractPopupPage {
 
         Button saveAsButton = new Button("Save as...") {
             public void buttonPressed() {
+                String gameFolderPath = EditorSettings.getGameFolderPath();
+                if (gameFolderPath == null || gameFolderPath.equals("")) {
+                    Platform.showError("Game folder is not selected!");
+                    return;
+                }
                 close();
                 final int mode = parent.getMode();
                 String path;
