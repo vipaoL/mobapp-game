@@ -16,6 +16,7 @@ import mobileapplication3.ui.CanvasComponent;
 import mobileapplication3.ui.GraphicsUtils;
 import mobileapplication3.ui.IUIComponent;
 import mobileapplication3.ui.Keys;
+import utils.MgStruct;
 import utils.MobappGameSettings;
 
 import java.util.Vector;
@@ -243,6 +244,14 @@ public class GameplayCanvas extends CanvasComponent {
                 showFPS = MobappGameSettings.isFPSShown(showFPS);
                 bottomButtons = MobappGameSettings.buttonsAtTheBottom(scW < scH);
                 battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
+                boolean structuresAutoload = MobappGameSettings.structuresAutoload();
+                if (structuresAutoload) {
+                    try {
+                        MgStruct.loadFromFiles();
+                    } catch (Throwable ex) {
+                        Logger.log(ex);
+                    }
+                }
             } catch (Throwable ex) {
                 Platform.showError("Can't read settings", ex);
             }

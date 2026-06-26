@@ -21,10 +21,11 @@ public class SettingsScreen extends GenericMenu {
             SHOW_FPS = 5,
             BOTTOM_BUTTONS = 6,
             BATTERY = 7,
-            PLATFORM_SETTINGS = 8,
-            DEBUG = 9,
-            ABOUT = 10,
-            BACK = 11;
+            STRUCTURES_AUTOLOAD = 8,
+            PLATFORM_SETTINGS = 9,
+            DEBUG = 10,
+            ABOUT = 11,
+            BACK = 12;
 
     private static final int[] LANDSCAPE_COLORS = {
             GraphicsWorld.DEFAULT_LANDSCAPE_COLOR,
@@ -169,6 +170,9 @@ public class SettingsScreen extends GenericMenu {
                 }
                 MobappGameSettings.toggleBattIndicator();
                 break;
+            case STRUCTURES_AUTOLOAD:
+                MobappGameSettings.toggleStructuresAutoload();
+                break;
             case DEBUG:
                 stop();
                 RootContainer.setRootUIComponent(new DebugMenu());
@@ -232,6 +236,7 @@ public class SettingsScreen extends GenericMenu {
         menuOpts[LANDSCAPE_COLOR] = "Landscape color: " + LANDSCAPE_COLOR_NAMES[findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColorSetting())];
         menuOpts[BOTTOM_BUTTONS] = "Buttons at the bottom";
         menuOpts[BATTERY] = "Show battery level";
+        menuOpts[STRUCTURES_AUTOLOAD] = "Autoload structures";
         menuOpts[DEBUG] = "Debug settings";
         menuOpts[PLATFORM_SETTINGS] = "Platform settings";
         menuOpts[ABOUT] = "About";
@@ -252,6 +257,7 @@ public class SettingsScreen extends GenericMenu {
             setStateFor(STATE_INACTIVE, BATTERY);
         }
         setEnabledFor(MobappGameSettings.buttonsAtTheBottom(), BOTTOM_BUTTONS);
+        setEnabledFor(MobappGameSettings.structuresAutoload(), STRUCTURES_AUTOLOAD);
         try {
             Class.forName("PlatformSettingsScreen");
             menuOpts[PLATFORM_SETTINGS] = String.valueOf(getPlatformSettings());

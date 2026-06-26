@@ -32,6 +32,7 @@ public class MgStruct {
 
     public static int loadedTotal = 0;
     public static int loadedFromRes = 0;
+    public static int loadedFromFiles = 0;
     public static boolean loadCancelled = false;
 
     private static boolean isInited = false;
@@ -106,7 +107,7 @@ public class MgStruct {
         loadCancelled = false;
         loadedTotal = loadedFromRes;
 
-        int loadedFromFiles = 0;
+        loadedFromFiles = 0;
         for (int i = 0; i < paths.length; i++) {
             String path = paths[i];
             DataInputStream dis = null;

@@ -35,8 +35,6 @@ public class MenuCanvas extends GenericMenu {
 
     private GameplayCanvas bg = null;
 
-    private static boolean areExtStructsLoaded = false;
-
     public MenuCanvas(GameplayCanvas bg) {
         this();
         this.bg = bg;
@@ -55,7 +53,7 @@ public class MenuCanvas extends GenericMenu {
     public void init() {
         Logger.log("menu:init");
 
-        if (areExtStructsLoaded) { // highlight and change label of "Ext Structs" btn if it already loaded
+        if (MgStruct.loadedFromFiles > 0) { // highlight and change label of "Ext Structs" btn if it already loaded
             setStateFor(1, 2);
             menuOptions[2] = "Reload";
         }
@@ -205,15 +203,13 @@ public class MenuCanvas extends GenericMenu {
                     Logger.log(ex);
                 }
                 if (success) {
-                    areExtStructsLoaded = true;
-                    menuOptions[2] = (MgStruct.loadedTotal - MgStruct.loadedFromRes) + " loaded";
+                    menuOptions[2] = MgStruct.loadedFromFiles + " loaded";
                     setColorEnabledOption(0x0099ff00);
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException ignored) { }
                     menuOptions[2] = "Reload";
                 } else {
-                    areExtStructsLoaded = false;
                     if (!MgStruct.loadCancelled) {
                         menuOptions[2] = "Nothing loaded";
                     } else {

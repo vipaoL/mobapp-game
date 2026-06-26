@@ -21,7 +21,8 @@ public class MobappGameSettings {
             SHOW_FPS = "showFPS",
             SHOW_BG = "enBG",
             BOTTOM_BUTTONS = "bottBtns",
-            BATTERY_INDICATOR = "Batt";
+            BATTERY_INDICATOR = "Batt",
+            STRUCTURES_AUTOLOAD = "structAutoload";
 
     public static final int DYNAMIC_PHYSICS_PRECISION = -1, AUTO_PHYSICS_PRECISION = 0;
     public static final int
@@ -63,7 +64,8 @@ public class MobappGameSettings {
                     SHOW_FPS,
                     SHOW_BG,
                     BOTTOM_BUTTONS,
-                    BATTERY_INDICATOR
+                    BATTERY_INDICATOR,
+                    STRUCTURES_AUTOLOAD,
                 }, RECORD_STORE_SETTINGS);
         }
         return settingsInst;
@@ -282,6 +284,24 @@ public class MobappGameSettings {
 
     public static void toggleCameraRotationMode() {
         setCameraRotationMode((getCameraRotationMode() + 1) % (CAMERA_ROTATION_MAX_VALUE + 1));
+    }
+
+    ///
+
+    public static boolean structuresAutoload() {
+        return getSettingsInst().getBool(STRUCTURES_AUTOLOAD);
+    }
+
+    public static boolean structuresAutoload(boolean defaultValue) {
+        return getSettingsInst().getBool(STRUCTURES_AUTOLOAD, defaultValue);
+    }
+
+    public static void setStructuresAutoload(boolean b) {
+        getSettingsInst().set(STRUCTURES_AUTOLOAD, b);
+    }
+
+    public static boolean toggleStructuresAutoload() {
+        return getSettingsInst().toggleBool(STRUCTURES_AUTOLOAD);
     }
 
     ///
