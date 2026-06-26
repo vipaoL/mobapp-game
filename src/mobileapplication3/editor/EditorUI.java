@@ -407,7 +407,8 @@ public class EditorUI extends Container {
         Button[] listButtons = new Button[elements.length];
         for (int i = 0; i < elements.length; i++) {
             final Element element = elements[i];
-            listButtons[i] = new Button(elements[i].getName()) {
+            String name = element.getName();
+            listButtons[i] = new Button(name) {
                 public void buttonPressed() { }
                 public void buttonPressedSelected() {
                     placedElementsList.setVisible(false);
