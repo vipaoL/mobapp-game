@@ -40,7 +40,11 @@ public class LevelsMenu extends AbstractEditorMenu {
         String[] files = { };
         try {
             files = listFiles(getPath());
-            sortByName(files);
+            if (files == null) {
+                files = new String[0];
+            } else {
+                sortByName(files);
+            }
         } catch (IOException e) {
             Platform.showError(e);
         }
