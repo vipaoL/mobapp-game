@@ -47,7 +47,7 @@ public class DebugMenu extends GenericMenu {
         loadStatemap(new int[MENU_OPTS.length]);
     }
 
-    public void postInit() {
+    public void init() {
         setSpecialOption(4);
         refreshStates();
     }
