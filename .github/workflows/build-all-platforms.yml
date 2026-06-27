@@ -86,11 +86,20 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
 
-      - name: Install 32-bit libraries for preverifier
+      - name: Download ProGuard 6.2.2
         run: |
-          sudo dpkg --add-architecture i386
-          sudo apt update
-          sudo apt-get install -y gcc-multilib libxt6:i386
+          curl -L -o proguard6.2.2.tar.gz https://master.dl.sourceforge.net/project/proguard/proguard/6.2/proguard6.2.2.tar.gz
+          tar -xzf proguard6.2.2.tar.gz -C j2me
+
+      - name: Download Microemulator for J2ME API
+        run: |
+          curl -L -o microemulator-2.0.4.zip https://master.dl.sourceforge.net/project/microemulator/microemulator/2.0.4/microemulator-2.0.4.zip
+          unzip -q microemulator-2.0.4.zip
+          mkdir -p j2me/lib
+          cp microemulator-2.0.4/lib/*.jar j2me/lib/
+
+      - name: Download JSR-256
+        run: curl -L -o j2me/lib/jsr256.jar https://raw.githubusercontent.com/vipaoL/j2me-build-tools/master/lib/jsr256.jar
 
       - name: Build
         run: j2me/build.sh

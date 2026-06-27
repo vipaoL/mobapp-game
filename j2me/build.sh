@@ -1,25 +1,10 @@
 #!/bin/sh -e
 
-# Make it possible to run this script from any directory'`
+# Make it possible to run this script from any directory
 WORK_DIR=`readlink -f $(dirname $0)`
 cd ${WORK_DIR}
 
 . ./build-config.sh
-
-echo "Downloading and updating build tools..."
-J2ME_BUILD_TOOLS="$(pwd)"/bin/j2me-build-tools
-if [ ! -e "${J2ME_BUILD_TOOLS}" ] ; then
-  git clone https://github.com/vipaoL/j2me-build-tools.git "${J2ME_BUILD_TOOLS}"
-  echo "Done."
-else
-  echo "Already downloaded."
-fi
-
-set +e
-cd bin/j2me-build-tools && git pull
-set -e
-
-cd "${WORK_DIR}"
 
 if [ ! -e "${MANIFEST}" ] ; then
   echo
@@ -37,11 +22,10 @@ echo
 echo Adding commit hash $COMMIT to $MANIFEST
 echo "Commit: ${COMMIT}" >> "${MANIFEST}"
 
-J2ME_CLASSPATH_DIR=${J2ME_BUILD_TOOLS}/lib
+J2ME_CLASSPATH_DIR="${WORK_DIR}"/lib
 CLASSPATH=${J2ME_CLASSPATH_DIR}/*
-CLDCAPI=${J2ME_CLASSPATH_DIR}/cldc11.jar
-MIDPAPI=${J2ME_CLASSPATH_DIR}/midp21.jar
-PREVERIFY=${J2ME_BUILD_TOOLS}/bin/preverify
+CLDCAPI=${J2ME_CLASSPATH_DIR}/cldcapi11.jar
+MIDPAPI=${J2ME_CLASSPATH_DIR}/midpapi20.jar
 JAVAC=javac
 JAR=jar
 
@@ -57,6 +41,7 @@ if [ -d "${JAVA_HOME}" ] ; then
 else
   echo "Error: java is not found:"
   file "${JAVA_HOME}"
+  exit 1
 fi
 
 echo "Java: ${JAVA_HOME}"
@@ -94,11 +79,36 @@ ${JAVAC} \
 
 echo
 echo "Preverifying class files..."
-PREVERIFY_CLASSPATH="${CLDCAPI}${PATHSEP}${MIDPAPI}${PATHSEP}${CLASSPATH}${PATHSEP}bin/tmpclasses"
-${PREVERIFY} \
-    -classpath "${PREVERIFY_CLASSPATH}" \
-    -d bin/classes \
-    bin/tmpclasses
+if [ -z "${PROGUARD_HOME}" ]; then
+  PROGUARD_HOME=./proguard6.2.2
+fi
+
+PROGUARD_JAR="${PROGUARD_HOME}/lib/proguard.jar"
+if [ ! -f "${PROGUARD_JAR}" ]; then
+  echo "Error: proguard.jar not found in ${PROGUARD_HOME}/lib/. PWD: $PWD"
+  exit 1
+fi
+
+PROGUARD_LIBS=""
+for jar in "${J2ME_CLASSPATH_DIR}"/*.jar; do
+  if [ "$(basename "$jar")" != "cldcapi10.jar" ]; then
+    if [ -z "$PROGUARD_LIBS" ]; then
+      PROGUARD_LIBS="$jar"
+    else
+      PROGUARD_LIBS="${PROGUARD_LIBS}${PATHSEP}${jar}"
+    fi
+  fi
+done
+
+java -jar "${PROGUARD_JAR}" \
+    -injars bin/tmpclasses \
+    -outjars bin/classes \
+    -libraryjars "${PROGUARD_LIBS}" \
+    -microedition \
+    -dontshrink \
+    -dontoptimize \
+    -dontobfuscate \
+    -dontwarn
 
 echo
 echo "Jaring preverified class files..."
@@ -115,4 +125,3 @@ fi
 
 echo
 echo "Done!" "${APP}"
-
