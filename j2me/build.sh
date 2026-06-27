@@ -110,15 +110,25 @@ for jar in "${J2ME_CLASSPATH_DIR}"/*.jar; do
   fi
 done
 
-java -jar "${PROGUARD_JAR}" \
-    -injars bin/tmpclasses \
-    -outjars bin/classes \
-    -libraryjars "${PROGUARD_LIBS}" \
-    -microedition \
-    -dontshrink \
-    -dontoptimize \
-    -dontobfuscate \
-    -dontwarn
+if [ -f "proguard.cfg" ] && [ -s "proguard.cfg" ]; then
+  echo "Preverifying and obfuscating class files with proguard.cfg..."
+  java -jar "${PROGUARD_JAR}" \
+      -injars bin/tmpclasses \
+      -outjars bin/classes \
+      -libraryjars "${PROGUARD_LIBS}" \
+      @proguard.cfg
+else
+  echo "Preverifying class files without obfuscation (proguard.cfg not found)..."
+  java -jar "${PROGUARD_JAR}" \
+      -injars bin/tmpclasses \
+      -outjars bin/classes \
+      -libraryjars "${PROGUARD_LIBS}" \
+      -microedition \
+      -dontshrink \
+      -dontoptimize \
+      -dontobfuscate \
+      -dontwarn
+fi
 
 echo
 echo "Jaring preverified class files..."
