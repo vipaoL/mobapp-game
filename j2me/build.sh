@@ -138,7 +138,11 @@ ${JAR} cmf "${MANIFEST}" "${APP}" -C bin/classes .
 echo
 if [ -d "${RES}" ] ; then
   echo "Adding resources: ${RES}"
-  ${JAR} uf "${APP}" -C "${RES}" .
+  (
+    cd "${RES}"
+    FILES=$(find . -type f | grep -vE "${RES_EXCLUDE_PATTERN:-^$}" | sed 's|^\./||')
+    ${JAR} uf "${APP}" ${FILES:-.}
+  )
 else
   echo "Resource folder "${RES}" not found, skipping..."
 fi
