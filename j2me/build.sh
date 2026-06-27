@@ -13,14 +13,24 @@ if [ ! -e "${MANIFEST}" ] ; then
 fi
 
 MANIFEST_TMP="${WORK_DIR}"/bin/manifest-tmp.mf
-cat "${MANIFEST}" > $MANIFEST_TMP
-MANIFEST=$MANIFEST_TMP
+mkdir -p "$(dirname "$MANIFEST_TMP")"
+grep -v "^Commit:" "${MANIFEST}" > "$MANIFEST_TMP" || true
 
-# add commit hash to the manifest
-COMMIT=$(git rev-parse --short HEAD)
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+TAG_VERSION="${LAST_TAG#v}"
+
+MIDLET_VERSION=$(grep -i "^MIDlet-Version:" "${MANIFEST}" | sed 's/.*: *//' | tr -d '\r' || echo "")
+
 echo
-echo Adding commit hash $COMMIT to $MANIFEST
-echo "Commit: ${COMMIT}" >> "${MANIFEST}"
+if [ -n "${TAG_VERSION}" ] && [ "${TAG_VERSION}" = "${MIDLET_VERSION}" ]; then
+  echo "MIDlet-Version matches git tag (${TAG_VERSION}). Skipping commit hash."
+else
+  COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  echo "Adding commit hash $COMMIT to $MANIFEST_TMP"
+  echo "Commit: ${COMMIT}" >> "${MANIFEST_TMP}"
+fi
+
+MANIFEST=$MANIFEST_TMP
 
 J2ME_CLASSPATH_DIR="${WORK_DIR}"/lib
 CLASSPATH=${J2ME_CLASSPATH_DIR}/*
