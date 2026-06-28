@@ -100,6 +100,7 @@ public class PathPicker extends AbstractPopupPage {
 
     private void getNewList() {
         title.setText(currentFolder);
+        refreshSizes();
 
         (new Thread(new Runnable() {
             public void run() {
