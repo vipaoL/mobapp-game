@@ -57,7 +57,7 @@ public class SettingsScreen extends GenericMenu {
             "RGB+background"
     };
 
-    public static final int[] FPS_PRESETS = {20, 30, 40, 50, 60, 90, 120, 144, 240, 1000};
+    public static final int[] FPS_PRESETS = {15, 20, 24, 30, 40, 45, 48, 50, 60, 72, 75, 80, 90, 100, 120, 144, 165, 240, 360, 500, 1000};
 
     private static final String[] menuOpts = new String[BACK + 1];
 
