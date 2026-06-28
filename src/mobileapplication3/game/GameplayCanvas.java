@@ -1157,7 +1157,7 @@ public class GameplayCanvas extends CanvasComponent {
     }
 
     private int getButtonW() {
-        return bottomButtons ? smallfont.getHeight() * 10 / 3 : scW / 3;
+        return bottomButtons ? Math.max(scW / 8, smallfont.getHeight() * 10 / 3) : scW / 3;
     }
 
     private int getButtonH() {
