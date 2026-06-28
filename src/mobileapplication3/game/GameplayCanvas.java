@@ -54,6 +54,7 @@ public class GameplayCanvas extends CanvasComponent {
     private int gameMode = GAME_MODE_ENDLESS;
     public boolean uninterestingDebug = false;
     private boolean isWorldLoaded = false;
+    private boolean bgMode = false;
     private static int hintVisibleTimer = HINT_TIMER_MAX;
     private int levelIdVisibleTimer;
     private boolean showFPS = false;
@@ -65,7 +66,6 @@ public class GameplayCanvas extends CanvasComponent {
     private boolean bottomButtons = false;
 
     private boolean paused = false;
-    private boolean stopped = false;
     private boolean isStopping = false;
     private boolean gameOver = false;
     private boolean feltUnderTheWorld = false;
@@ -376,7 +376,7 @@ public class GameplayCanvas extends CanvasComponent {
     }
 
     public void tick() {
-        if (loadingProgress < 100 || paused || stopped || !hasParent()) {
+        if (loadingProgress < 100 || paused || !hasParent()) {
             return;
         }
 
@@ -492,6 +492,15 @@ public class GameplayCanvas extends CanvasComponent {
                 // Prevent pause right after resume to work around some Siemens bug
                 if (pauseDelay > 0) {
                     pauseDelay--;
+                }
+
+                if (bgMode && world.carY > getLowestSafeY()) {
+                    if (bgTick % 10 == 0) {
+                        dimColors();
+                        bgTick = 0;
+                    } else {
+                        bgTick++;
+                    }
                 }
 
                 // flip counter and debug posReset indicator
@@ -821,42 +830,15 @@ public class GameplayCanvas extends CanvasComponent {
         }
     }
 
-    public boolean drawAsBG(Graphics g) {
-        if (feltUnderTheWorld || world.currColBodies == 0 && world.currColBg == 0) {
-            return false;
+    public void setBgMode(boolean active) {
+        this.bgMode = active;
+        if (active) {
+            this.paused = false;
         }
+    }
 
-        world.setTimestepFX(baseTimestepFX / 7);
-        world.refreshCarPos();
-        setSimulationArea();
-        world.tickCustomBodies();
-        tickEffects();
-        for (int i = 0; i < 7; i++) {
-            world.tick();
-        }
-        tickCustomBodyInteractions(getCarContacts());
-        tickDamage();
-        if (worldgen != null) {
-            worldgen.tick();
-        }
-
-        if (worldgen != null) {
-            world.drawWorld(g, worldgen.getStructures(), worldgen.getStructuresRingBufferOffset(), worldgen.getStructuresCount());
-        } else {
-            world.drawWorld(g, null, 0, 0);
-        }
-
-        limitTopHeight();
-
-        if (world.carY > getLowestSafeY()) {
-            if (bgTick % 10 == 0) {
-                dimColors();
-                bgTick = 0;
-            } else {
-                bgTick++;
-            }
-        }
-        return true;
+    public boolean isBackgroundFinished() {
+        return feltUnderTheWorld && (world == null || (world.currColBodies == 0 && world.currColBg == 0));
     }
 
     private void drawBg(Graphics g) {
@@ -871,18 +853,25 @@ public class GameplayCanvas extends CanvasComponent {
             drawLoading(g);
             Logger.paint(g);
         } else {
-            if (bottomButtons && hintVisibleTimer > 0) {
-                int maxOffset = getButtonH() / 2;
-                world.camOffsetY = -Mathh.constrain(0, maxOffset * 8 * (hintVisibleTimer - HINT_TIMER_MAX / 8) / HINT_TIMER_MAX, maxOffset);
-            } else {
-                world.camOffsetY = 0;
+            drawWorld(g);
+            if (!bgMode) {
+                drawHUD(g);
             }
-            if (worldgen != null) {
-                world.drawWorld(g, worldgen.getStructures(), worldgen.getStructuresRingBufferOffset(), worldgen.getStructuresCount());
-            } else {
-                world.drawWorld(g, null, 0, 0);
-            }
-            drawHUD(g);
+        }
+    }
+
+    public void drawWorld(Graphics g) {
+        if (bottomButtons && hintVisibleTimer > 0) {
+            int maxOffset = getButtonH() / 2;
+            world.camOffsetY = -Mathh.constrain(0, maxOffset * 8 * (hintVisibleTimer - HINT_TIMER_MAX / 8) / HINT_TIMER_MAX, maxOffset);
+        } else {
+            world.camOffsetY = 0;
+        }
+
+        if (worldgen != null) {
+            world.drawWorld(g, worldgen.getStructures(), worldgen.getStructuresRingBufferOffset(), worldgen.getStructuresCount());
+        } else {
+            world.drawWorld(g, null, 0, 0);
         }
     }
 
@@ -1407,7 +1396,6 @@ public class GameplayCanvas extends CanvasComponent {
                 }
 
                 isStopping = true;
-                stopped = true;
 
                 if (gameMode == GAME_MODE_ENDLESS && countPoints) {
                     new Thread(new Runnable() {
@@ -1437,7 +1425,6 @@ public class GameplayCanvas extends CanvasComponent {
     }
 
     private void backToPreviousScreen() {
-        setParent(null);
         if (prevScreen == null) {
             RootContainer.setRootUIComponent(new MenuCanvas(this));
         } else {
@@ -1451,7 +1438,6 @@ public class GameplayCanvas extends CanvasComponent {
         }
         delayedStopThread = null;
         isStopping = false;
-        stopped = false;
         postInit();
     }
 

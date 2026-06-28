@@ -38,7 +38,6 @@ public class MenuCanvas extends GenericMenu {
     public MenuCanvas(GameplayCanvas bg) {
         this();
         this.bg = bg;
-        targetFPS = 1000 / GameplayCanvas.TICK_DURATION;
     }
 
     public MenuCanvas() {
@@ -64,10 +63,26 @@ public class MenuCanvas extends GenericMenu {
         }
     }
 
+    public void postInit() {
+        if (bg != null) {
+            bg.setBgMode(true);
+            bg.setParent(this);
+        }
+    }
+
     public void tick() {
         super.tick();
+        if (bg != null) {
+            bg.tick();
+            if (bg.isBackgroundFinished()) {
+                bg.setBgMode(false);
+                bg.setParent(null);
+                bg = null;
+            }
+        }
         if (c == 1) {
             if (bg != null) {
+                bg.setBgMode(false);
                 bg.startAgain();
                 RootContainer.setRootUIComponent(bg);
                 bg = null;
@@ -79,10 +94,7 @@ public class MenuCanvas extends GenericMenu {
         try {
             if (bg != null) {
                 try {
-                    if (!bg.drawAsBG(g)) {
-                        bg = null;
-                        setTargetFPS(DEFAULT_FPS);
-                    }
+                    bg.drawWorld(g);
                 } catch (Exception ex) {
                     Logger.log(ex);
                     g.setColor(0xff0000);
@@ -97,7 +109,6 @@ public class MenuCanvas extends GenericMenu {
             }
             super.onPaint(g, x0, y0, w, h, forceInactive);
             this.bgColor = bgColor;
-            tick();
         } catch (Exception ignored) { }
     }
 
