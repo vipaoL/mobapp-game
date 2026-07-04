@@ -121,6 +121,7 @@ java -jar "${PROGUARD_JAR}" \
     -dontshrink \
     -dontoptimize \
     -dontobfuscate \
+    -dontnote \
     -dontwarn
 
 HAS_OBFUSCATION=false
