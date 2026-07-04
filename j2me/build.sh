@@ -60,9 +60,11 @@ echo "Java: ${JAVA_HOME}"
 echo
 echo "Cleaning tmp directories..."
 mkdir -p bin/tmpclasses
-mkdir -p bin/classes
+mkdir -p bin/classes-unobfuscated
+mkdir -p bin/classes-obfuscated
 rm -rf bin/tmpclasses/*
-rm -rf bin/classes/*
+rm -rf bin/classes-unobfuscated/*
+rm -rf bin/classes-obfuscated/*
 
 if [ -n "${LIB_JARS_DIR}" ] ; then
   cd bin/tmpclasses
@@ -110,42 +112,55 @@ for jar in "${J2ME_CLASSPATH_DIR}"/*.jar; do
   fi
 done
 
+echo "Preverifying class files without obfuscation..."
+java -jar "${PROGUARD_JAR}" \
+    -injars bin/tmpclasses \
+    -outjars bin/classes-unobfuscated \
+    -libraryjars "${PROGUARD_LIBS}" \
+    -microedition \
+    -dontshrink \
+    -dontoptimize \
+    -dontobfuscate \
+    -dontwarn
+
+HAS_OBFUSCATION=false
 if [ -f "proguard.cfg" ] && [ -s "proguard.cfg" ]; then
   echo "Preverifying and obfuscating class files with proguard.cfg..."
   java -jar "${PROGUARD_JAR}" \
       -injars bin/tmpclasses \
-      -outjars bin/classes \
+      -outjars bin/classes-obfuscated \
       -libraryjars "${PROGUARD_LIBS}" \
       @proguard.cfg
-else
-  echo "Preverifying class files without obfuscation (proguard.cfg not found)..."
-  java -jar "${PROGUARD_JAR}" \
-      -injars bin/tmpclasses \
-      -outjars bin/classes \
-      -libraryjars "${PROGUARD_LIBS}" \
-      -microedition \
-      -dontshrink \
-      -dontoptimize \
-      -dontobfuscate \
-      -dontwarn
+  HAS_OBFUSCATION=true
 fi
 
 echo
-echo "Jaring preverified class files..."
-APP="${WORK_DIR}"/bin/"${APP_NAME}".jar
-${JAR} cmf "${MANIFEST}" "${APP}" -C bin/classes .
+echo "Packaging JAR files..."
 
-echo
-if [ -d "${RES}" ] ; then
-  echo "Adding resources: ${RES}"
-  (
-    cd "${RES}"
-    FILES=$(find . -type f | grep -vE "${RES_EXCLUDE_PATTERN:-^$}" | sed 's|^\./||')
-    ${JAR} uf "${APP}" ${FILES:-.}
-  )
-else
-  echo "Resource folder "${RES}" not found, skipping..."
+package_jar() {
+  JAR_PATH="$1"
+  CLASSES_DIR="$2"
+
+  echo "Creating ${JAR_PATH}..."
+  ${JAR} cmf "${MANIFEST}" "${JAR_PATH}" -C "${CLASSES_DIR}" .
+
+  if [ -d "${RES}" ] ; then
+    echo "Adding resources to $(basename "${JAR_PATH}")..."
+    (
+      cd "${RES}"
+      FILES=$(find . -type f | grep -vE "${RES_EXCLUDE_PATTERN:-^$}" | sed 's|^\./||')
+      ${JAR} uf "${JAR_PATH}" ${FILES:-.}
+    )
+  fi
+}
+
+APP_UNOBFUSCATED="${WORK_DIR}"/bin/"${APP_NAME}"-unobfuscated.jar
+package_jar "${APP_UNOBFUSCATED}" "bin/classes-unobfuscated"
+
+if [ "${HAS_OBFUSCATION}" = true ]; then
+  APP_OBFUSCATED="${WORK_DIR}"/bin/"${APP_NAME}".jar
+  package_jar "${APP_OBFUSCATED}" "bin/classes-obfuscated"
 fi
 
 echo
-echo "Done!" "${APP}"
+echo "Done!"
