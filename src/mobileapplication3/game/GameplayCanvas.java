@@ -161,13 +161,6 @@ public class GameplayCanvas extends CanvasComponent {
         Logger.log("game: constructor");
     }
 
-    public GameplayCanvas(GraphicsWorld w) {
-        this();
-        gameMode = GAME_MODE_EMINI_WORLD;
-        world = w;
-        world.setGame(this);
-    }
-
     public GameplayCanvas(IUIComponent prevScreen) {
         this();
         this.prevScreen = prevScreen;
@@ -204,10 +197,17 @@ public class GameplayCanvas extends CanvasComponent {
         return this;
     }
 
+    public GameplayCanvas loadLevel(GraphicsWorld w) {
+        this.gameMode = GAME_MODE_EMINI_WORLD;
+        this.world = w;
+        this.world.setGame(this);
+        return this;
+    }
+
     public void tryLoadNextLevel() {
         stop(false, true);
 
-        boolean success = currentLevelId >= 0 && Levels.openBuiltinLevel(currentLevelId + 1);
+        boolean success = currentLevelId >= 0 && Levels.openBuiltinLevel(currentLevelId + 1, prevScreen);
 
         if (!success) {
             backToPreviousScreen();
@@ -1428,6 +1428,9 @@ public class GameplayCanvas extends CanvasComponent {
         if (prevScreen == null) {
             RootContainer.setRootUIComponent(new MenuCanvas(this));
         } else {
+            if (currentLevelId > 0 && prevScreen instanceof Levels) {
+                ((Levels) prevScreen).focusOnBuiltinLevel(currentLevelId);
+            }
             RootContainer.setRootUIComponent(prevScreen);
         }
     }

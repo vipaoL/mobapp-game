@@ -10,6 +10,7 @@ import mobileapplication3.platform.Mathh;
 import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.RootContainer;
+import mobileapplication3.ui.IUIComponent;
 import utils.GameFileUtils;
 import utils.MgStruct;
 
@@ -197,14 +198,14 @@ public class Levels extends GenericMenu {
         }
     }
 
-    public static synchronized boolean openBuiltinLevel(int i) {
+    public static synchronized boolean openBuiltinLevel(int i, IUIComponent prevScreen) {
         InputStream is = null;
         try {
             is = Platform.getResource(getLevelResPath(i));
             if (is == null) {
                 return false;
             }
-            RootContainer.setRootUIComponent(openLevel(new DataInputStream(is), i));
+            RootContainer.setRootUIComponent(openLevel(new DataInputStream(is), i, prevScreen));
             return true;
         } catch (Exception ex) {
             Platform.showError("Can't open level!", ex);
@@ -240,30 +241,31 @@ public class Levels extends GenericMenu {
                 try {
                     GameplayCanvas gameCanvas = null;
                     if (path.endsWith(".phy")) {
-                        gameCanvas = new GameplayCanvas(readWorldFile(path));
+                        gameCanvas = new GameplayCanvas(Levels.this).loadLevel(readWorldFile(path));
                     } else if (path.endsWith(".mglvl")) {
-                        gameCanvas = openLevel(path);
+                        gameCanvas = openLevel(path, Levels.this);
                     }
                     if (gameCanvas != null) {
                         RootContainer.setRootUIComponent(gameCanvas);
                     }
                 } catch (Exception ex) {
                     Platform.showError(ex);
+                } finally {
                     loadingLevel = false;
                 }
             }
         })).start();
     }
 
-    private static GameplayCanvas openLevel(String path) {
-        return openLevel(FileUtils.fileToDataInputStream(path), -1);
+    private static GameplayCanvas openLevel(String path, IUIComponent prevScreen) {
+        return openLevel(FileUtils.fileToDataInputStream(path), -1, prevScreen);
     }
 
-    private static GameplayCanvas openLevel(DataInputStream dis, int i) {
+    private static GameplayCanvas openLevel(DataInputStream dis, int i, IUIComponent prevScreen) {
         try {
             short[][] level = MgStruct.readFromDataInputStream(dis);
             if (level != null) {
-                return new GameplayCanvas(new GraphicsWorld()).loadLevel(level, i);
+                return new GameplayCanvas(prevScreen).loadLevel(level, i);
             }
         } catch (IOException ex) {
             Platform.showError(ex);
@@ -302,9 +304,9 @@ public class Levels extends GenericMenu {
 
                 if (isBuiltinMode) {
                     loadingLevel = true;
-                    boolean success = openBuiltinLevel(globalIndex + 1);
+                    boolean success = openBuiltinLevel(globalIndex + 1, this);
+                    loadingLevel = false;
                     if (!success) {
-                        loadingLevel = false;
                         init();
                     }
                 } else {
@@ -326,6 +328,18 @@ public class Levels extends GenericMenu {
                 selected = i;
                 break;
             }
+        }
+    }
+
+    public void focusOnBuiltinLevel(int levelId) {
+        if (!isBuiltinMode || levelId <= 0 || levelId > builtinLevelsCount) {
+            return;
+        }
+        int globalIndex = levelId - 1;
+        if (itemsPerPage > 0) {
+            currentPage = globalIndex / itemsPerPage;
+            refreshButtons();
+            setFocusTo(allLevelNames[globalIndex]);
         }
     }
 }
