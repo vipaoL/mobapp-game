@@ -11,6 +11,7 @@ import mobileapplication3.platform.Platform;
 import mobileapplication3.platform.ui.Font;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.IUIComponent;
+import mobileapplication3.ui.Keys;
 import utils.GameFileUtils;
 import utils.MgStruct;
 
@@ -280,6 +281,36 @@ public class Levels extends GenericMenu {
         GraphicsWorld w = new GraphicsWorld(World.loadWorld(reader));
         reader.close();
         return w;
+    }
+
+    public boolean handleKeyPressed(int keyCode) {
+        int action = RootContainer.getAction(keyCode);
+        int totalPages = (allLevelNames.length + itemsPerPage - 1) / itemsPerPage;
+        if (totalPages == 0) {
+            totalPages = 1;
+        }
+
+        if (keyCode == Keys.LEFT || action == Keys.LEFT) {
+            if (totalPages > 1) {
+                if (currentPage > 0) {
+                    currentPage--;
+                    refreshButtons();
+                    return false;
+                }
+            }
+        }
+
+        if (keyCode == Keys.RIGHT || action == Keys.RIGHT) {
+            if (totalPages > 1) {
+                if (currentPage < totalPages - 1) {
+                    currentPage++;
+                    refreshButtons();
+                }
+                return false;
+            }
+        }
+
+        return super.handleKeyPressed(keyCode);
     }
 
     public synchronized void selectPressed() {
