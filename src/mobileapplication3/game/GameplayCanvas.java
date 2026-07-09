@@ -372,6 +372,7 @@ public class GameplayCanvas extends CanvasComponent {
         if (world.carbody == null) {
             world.addCar(carSpawnX, carSpawnY, FXUtil.TWO_PI_2FX / 360 * 30);
         }
+        ticksMotorTurnedOff = 50;
         setLoadingProgress(60);
     }
 
