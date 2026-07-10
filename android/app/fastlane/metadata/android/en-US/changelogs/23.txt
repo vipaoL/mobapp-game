@@ -1,0 +1,9 @@
+- Nearly twice as many structures, new levels
+- Reworked levels and structures to make gameplay rely more on skill than luck
+
+New features for creating interactive mechanisms:
+- Initial velocity properties, including for initially static bodies
+- Center of mass offset for rotation around a point
+- Collision layers
+
+Build all kinds of fun things: lifts, launching traps, catapults, perpetual motion machines... Open built-in levels in the editor for inspiration!
