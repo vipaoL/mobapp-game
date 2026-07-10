@@ -114,7 +114,11 @@ public class BrokenLine extends Line {
     }
 
     public Property[] getProperties() {
-        return concatArrays(super.getProperties(), new Property[]{
+        return new Property[]{
+                xProp,
+                yProp,
+                x2Prop,
+                y2Prop,
                 new Property("Thickness") {
                     public void setValue(int value) {
                         thickness = (short) value;
@@ -196,7 +200,7 @@ public class BrokenLine extends Line {
                         return 360;
                     }
                 }
-        });
+        };
     }
 
     public short getID() {

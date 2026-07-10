@@ -26,6 +26,24 @@ public class Line extends Element {
             return "x1=" + x + " y1=" + y + "; x2=" + x2 + " y2=" + y2;
         }
     };
+    protected final Property x2Prop = new Property("X2") {
+        public void setValue(int value) {
+            x2 = (short) value;
+        }
+
+        public int getValue() {
+            return x2;
+        }
+    };
+    protected final Property y2Prop = new Property("Y2") {
+        public void setValue(int value) {
+            y2 = (short) value;
+        }
+
+        public int getValue() {
+            return y2;
+        }
+    };
 
     public PlacementStep[] getPlacementSteps() {
         return new PlacementStep[]{
@@ -112,24 +130,8 @@ public class Line extends Element {
 
     public Property[] getProperties() {
         return concatArrays(super.getProperties(), new Property[]{
-                new Property("X2") {
-                    public void setValue(int value) {
-                        x2 = (short) value;
-                    }
-
-                    public int getValue() {
-                        return x2;
-                    }
-                },
-                new Property("Y2") {
-                    public void setValue(int value) {
-                        y2 = (short) value;
-                    }
-
-                    public int getValue() {
-                        return y2;
-                    }
-                },
+                x2Prop,
+                y2Prop,
                 new Property("Two-sided") {
                     public void setValue(int value) {
                         id = value == 1 ? LINE : LINE_FACE_UP;
