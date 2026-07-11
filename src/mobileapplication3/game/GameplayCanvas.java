@@ -64,6 +64,7 @@ public class GameplayCanvas extends CanvasComponent {
     private boolean restartGestureCompleted = false;
 
     private boolean bottomButtons = false;
+    private boolean instantRestart = false;
 
     private boolean paused = false;
     private boolean isStopping = false;
@@ -244,6 +245,7 @@ public class GameplayCanvas extends CanvasComponent {
                 showFPS = MobappGameSettings.isFPSShown(showFPS);
                 bottomButtons = MobappGameSettings.buttonsAtTheBottom(scW < scH);
                 battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
+                instantRestart = MobappGameSettings.isInstantRestartEnabled();
                 boolean structuresAutoload = MobappGameSettings.structuresAutoload();
                 if (structuresAutoload) {
                     try {
@@ -1324,7 +1326,7 @@ public class GameplayCanvas extends CanvasComponent {
         dimColors();
 
         if (gameMode == GAME_MODE_LEVEL) {
-            final int restartDelay = feltUnderTheWorld ? 0 : 1000;
+            final int restartDelay = (feltUnderTheWorld || instantRestart) ? 0 : 1000;
             if (delayedRestartThread == null) {
                 delayedRestartThread = new Thread(new Runnable() {
                     public void run() {
