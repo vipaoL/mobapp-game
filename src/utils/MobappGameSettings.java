@@ -22,6 +22,7 @@ public class MobappGameSettings {
             SHOW_BG = "enBG",
             BOTTOM_BUTTONS = "bottBtns",
             BATTERY_INDICATOR = "Batt",
+            INSTANT_RESTART = "instRestart",
             STRUCTURES_AUTOLOAD = "structAutoload";
 
     public static final int DYNAMIC_PHYSICS_PRECISION = -1, AUTO_PHYSICS_PRECISION = 0;
@@ -66,6 +67,7 @@ public class MobappGameSettings {
                     BOTTOM_BUTTONS,
                     BATTERY_INDICATOR,
                     STRUCTURES_AUTOLOAD,
+                    INSTANT_RESTART,
                 }, RECORD_STORE_SETTINGS);
         }
         return settingsInst;
@@ -302,6 +304,24 @@ public class MobappGameSettings {
 
     public static boolean toggleStructuresAutoload() {
         return getSettingsInst().toggleBool(STRUCTURES_AUTOLOAD);
+    }
+
+    ///
+
+    public static boolean isInstantRestartEnabled() {
+        return getSettingsInst().getBool(INSTANT_RESTART);
+    }
+
+    public static boolean isInstantRestartEnabled(boolean defaultValue) {
+        return getSettingsInst().getBool(INSTANT_RESTART, defaultValue);
+    }
+
+    public static void setInstantRestartEnabled(boolean b) {
+        getSettingsInst().set(INSTANT_RESTART, b);
+    }
+
+    public static boolean toggleInstantRestart() {
+        return getSettingsInst().toggleBool(INSTANT_RESTART);
     }
 
     ///
