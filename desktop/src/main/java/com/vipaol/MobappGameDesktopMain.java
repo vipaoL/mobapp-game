@@ -17,6 +17,7 @@ import mobileapplication3.platform.Logger;
 import mobileapplication3.platform.MobappDesktopMain;
 import mobileapplication3.platform.PlatformSettings;
 import mobileapplication3.platform.ui.Graphics;
+import mobileapplication3.platform.ui.GraphicsAWT;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.IUIComponent;
 
@@ -78,7 +79,7 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
             g2d.setClip(0, 0, size, size);
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            Graphics g = new Graphics(g2d);
+            Graphics g = new GraphicsAWT(g2d);
 
             StructureViewerComponent viewer = new StructureViewerComponent(elements);
             viewer.init();
@@ -128,6 +129,19 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 PlatformSettings.setFontSizeOverride(options.valueOf(cli.fontSize));
             }
 
+            String backend = options.has(cli.sdl3) ? "sdl3" : options.valueOf(cli.backend).toLowerCase();
+            switch (backend) {
+                case "sdl":
+                case "sdl3":
+                    PlatformSettings.setBackendOverride(PlatformSettings.BACKEND_SDL3);
+                    break;
+                case "awt":
+                    PlatformSettings.setBackendOverride(PlatformSettings.BACKEND_AWT);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown graphics backend '" + backend + "'. Supported backends: awt, sdl3");
+            }
+
             List<File> nonOptions = (List<File>) options.nonOptionArguments();
             if (nonOptions != null && !nonOptions.isEmpty()) {
                 if (nonOptions.size() > 1) {
@@ -165,6 +179,9 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
 
     public MobappGameDesktopMain(String[] args) {
         super(args);
+    }
+
+    public void init() {
         if (root == null) {
             root = new MenuCanvas();
         }
@@ -197,6 +214,10 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 .withRequiredArg()
                 .ofType(Integer.class)
                 .defaultsTo(128);
+        final OptionSpec<Void> sdl3 = parser.acceptsAll(Arrays.asList("sdl", "sdl3"), "Use SDL3 graphics backend");
+        final OptionSpec<String> backend = parser.accepts("backend", "Graphics backend (awt|sdl3)")
+                .withRequiredArg()
+                .defaultsTo("awt");
         final OptionSpec<Void> help = parser.acceptsAll(Arrays.asList("help", "h", "?"), "Show help").forHelp();
 
         private CLI() {
