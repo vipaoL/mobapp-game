@@ -87,6 +87,8 @@ public class GameplayCanvas extends CanvasComponent {
     // indicators
     private int flipIndicatorTimer = FLIP_INDICATOR_TIMER_MAX; // blink the counter after flip
     private int posResetIndicator = 0; // show when wg moves the world
+    private int structAddIndicator = 0;
+    private int structRmIndicator = 0;
     private int loadingProgress = 0;
     private int speedoState = 0;
     private int tickTime;
@@ -521,6 +523,18 @@ public class GameplayCanvas extends CanvasComponent {
                         posResetIndicator-=16;
                         if (posResetIndicator <= 0) {
                             posResetIndicator = 0;
+                        }
+                    }
+                    if (structAddIndicator > 0) {
+                        structAddIndicator -= 16;
+                        if (structAddIndicator <= 0) {
+                            structAddIndicator = 0;
+                        }
+                    }
+                    if (structRmIndicator > 0) {
+                        structRmIndicator -= 16;
+                        if (structRmIndicator <= 0) {
+                            structRmIndicator = 0;
                         }
                     }
                 }
@@ -1111,10 +1125,22 @@ public class GameplayCanvas extends CanvasComponent {
 
             setFont(largefont, g);
             g.drawString(String.valueOf(points), scW/2, scH * 15 / 16, Graphics.HCENTER | Graphics.BOTTOM);
-            if (DebugMenu.isDebugEnabled && posResetIndicator > 0) {
-                g.setColor(posResetIndicator, 0, 0);
+            if (DebugMenu.isDebugEnabled) {
                 int d = h / 20;
-                g.fillArc(x0, y0 + h - d, d, d, 0, 360);
+                int iy = y0 + h - d;
+
+                if (posResetIndicator > 0) {
+                    g.setColor(posResetIndicator, 0, 0);
+                    g.fillArc(x0, iy, d, d, 0, 360);
+                }
+                if (structAddIndicator > 0) {
+                    g.setColor(0, structAddIndicator, 0);
+                    g.fillArc(x0 + d + 2, iy, d, d, 0, 360);
+                }
+                if (structRmIndicator > 0) {
+                    g.setColor(0, 0, structRmIndicator);
+                    g.fillArc(x0 + (d + 2) * 2, iy, d, d, 0, 360);
+                }
             }
             int d;
             if (worldgen.firstDeferredStructureX != -1 && (d = (worldgen.firstDeferredStructureX - world.carX) / 100 * 100) >= 0) {
@@ -1462,6 +1488,14 @@ public class GameplayCanvas extends CanvasComponent {
         if (flipCounter != null) {
             flipCounter.onPosReset(dx);
         }
+    }
+
+    public void onStructAdded() {
+        structAddIndicator = 255;
+    }
+
+    public void onStructRemoved() {
+        structRmIndicator = 255;
     }
 
     public void onHide() {

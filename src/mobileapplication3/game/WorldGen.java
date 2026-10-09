@@ -175,6 +175,8 @@ public class WorldGen {
         lastY = structData[1];
         structLogger.add(structData);
 
+        game.onStructAdded();
+
         Logger.log("lastX=", lastX);
     }
 
@@ -432,6 +434,8 @@ public class WorldGen {
                 }
                 int id = getElementID(0);
                 structLog[id][2] -= deletedSegments;
+
+                game.onStructRemoved();
 
                 // if 0 segments left, then the structure was deleted completely.
                 // Deleting it from log
