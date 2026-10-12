@@ -48,12 +48,6 @@ public class GameActivity extends MobappActivity {
             Platform.showError("Can't migrate records!", ex);
         }
         // -------
-
-        // Older Android versions don't support drawing arcs
-        if (Platform.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            // Enable legacy drawing method by default
-            MobappGameSettings.isLegacyDrawingMethodEnabled(true);
-        }
     }
 
     @Override

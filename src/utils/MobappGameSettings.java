@@ -13,7 +13,7 @@ public class MobappGameSettings {
             RECORD_STORE_SETTINGS = "gamesettings",
             GRAPHICS_FOR_HIRES = "btrGr",
             LANDSCAPE_COLOR = "landscapeCol",
-            LEGACY_DRAWING_METHOD = "oldDrawing",
+            LEGACY_DRAWING_METHOD = "oldDraw",
             CAMERA_ROTATION = "camRotation",
             PHYSICS_PRECISION = "PhyPrecision",
             DETAIL_LEVEL = "DetailLvl",
