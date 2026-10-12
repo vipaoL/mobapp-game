@@ -399,8 +399,20 @@ public class GraphicsWorld extends World {
         Body[] bodies = getBodies();
         int bodyCount = getBodyCount();
         for (int i = 0; i < bodyCount; i++) {
-            if (bodies[i] != leftWheel && bodies[i] != rightWheel) {
-                drawBody(g, bodies[i]);
+            Body b = bodies[i];
+            int x = b.positionFX().xAsInt();
+            int y = b.positionFX().yAsInt();
+            int r = FXUtil.fromFX(b.shape().getBoundingRadiusFX());
+
+            int px = xToPX(x, y);
+            int py = yToPX(x, y);
+            int pr = r * 1000 / zoomOut;
+
+            if (px + pr < 0 || px - pr > scWidth || py + pr < 0 || py - pr > scHeight) {
+                continue;
+            }
+            if (b != leftWheel && b != rightWheel) {
+                drawBody(g, b);
             }
         }
     }
