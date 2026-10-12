@@ -76,6 +76,9 @@ public class GraphicsWorld extends World {
     public int barrierX = Integer.MIN_VALUE;
     public int lowestY;
 
+    private int[] polylineXBuf = new int[512];
+    private int[] polylineYBuf = new int[512];
+
     public GraphicsWorld() {
         readSettings();
         resetColors();
@@ -506,6 +509,17 @@ public class GraphicsWorld extends World {
 
     private void drawLandscape(Graphics g) {
         Landscape landscape = getLandscape();
+
+        if (!DebugMenu.isDebugEnabled) {
+            g.setColor(currColLandscape);
+        } else {
+            g.setColor(255, 255, 255);
+        }
+
+        int lastX = Integer.MIN_VALUE;
+        int lastY = Integer.MIN_VALUE;
+        int pointsCount = 0;
+
         for (int i = 0; i < landscape.segmentCount(); i++) {
             int x1 = landscape.startPoint(i).xAsInt();
             int y1 = landscape.startPoint(i).yAsInt();
@@ -516,41 +530,75 @@ public class GraphicsWorld extends World {
                 continue;
             }
 
-            int stPointX = xToPX(x1, y1);
-            int stPointY = yToPX(x1, y1);
-            int endPointX = xToPX(x2, y2);
-            int endPointY = yToPX(x2, y2);
-            if (stPointX < scWidth | endPointX > 0) {
-                if (!DebugMenu.isDebugEnabled) {
-                    g.setColor(currColLandscape);
-                } else {
-                    g.setColor(255, 255, 255);
+            int x1Px = xToPX(x1, y1);
+            int y1Px = yToPX(x1, y1);
+            int x2Px = xToPX(x2, y2);
+            int y2Px = yToPX(x2, y2);
+
+            int minX = Math.min(x1Px, x2Px);
+            int maxX = Math.max(x1Px, x2Px);
+            int minY = Math.min(y1Px, y2Px);
+            int maxY = Math.max(y1Px, y2Px);
+
+            if (maxX < 0 || minX > scWidth || maxY < 0 || minY > scHeight) {
+                if (pointsCount >= 2) {
+                    flushLandscapePolyline(g, pointsCount);
                 }
-                if (DebugMenu.whatTheGame) {
-                    drawGroundLine(
-                            g,
-                            stPointX,
-                            stPointY,
-                            endPointX,
-                            endPointY,
-                            THICKNESS_LANDSCAPE
-                    );
-                } else {
-                    drawLine(
-                            g,
-                            stPointX,
-                            stPointY,
-                            endPointX,
-                            endPointY,
-                            THICKNESS_LANDSCAPE
-                    );
-                }
-                g.setColor(0xff0000);
-                if (DebugMenu.showLinePoints) {
-                    g.fillArc(stPointX-1, stPointY-1, 2, 2, 0, 360);
-                    g.fillArc(endPointX-1, endPointY-1, 2, 2, 0, 360);
-                }
+                pointsCount = 0;
+                lastX = Integer.MIN_VALUE;
+                lastY = Integer.MIN_VALUE;
+                continue;
             }
+
+            if (pointsCount > 0 && x1 == lastX && y1 == lastY) {
+                ensurePolylineBufferSize(pointsCount + 1);
+                polylineXBuf[pointsCount] = x2Px;
+                polylineYBuf[pointsCount] = y2Px;
+                pointsCount++;
+                lastX = x2;
+                lastY = y2;
+            } else if (pointsCount > 0 && x2 == lastX && y2 == lastY) {
+                ensurePolylineBufferSize(pointsCount + 1);
+                polylineXBuf[pointsCount] = x1Px;
+                polylineYBuf[pointsCount] = y1Px;
+                pointsCount++;
+                lastX = x1;
+                lastY = y1;
+            } else {
+                if (pointsCount >= 2) {
+                    flushLandscapePolyline(g, pointsCount);
+                }
+                ensurePolylineBufferSize(2);
+                polylineXBuf[0] = x1Px;
+                polylineYBuf[0] = y1Px;
+                polylineXBuf[1] = x2Px;
+                polylineYBuf[1] = y2Px;
+                pointsCount = 2;
+                lastX = x2;
+                lastY = y2;
+            }
+        }
+
+        if (pointsCount >= 2) {
+            flushLandscapePolyline(g, pointsCount);
+        }
+    }
+
+    private void flushLandscapePolyline(Graphics g, int pointsCount) {
+        if (!DebugMenu.whatTheGame) {
+            g.drawPolyline(polylineXBuf, polylineYBuf, pointsCount, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
+        } else {
+            for (int i = 0; i < pointsCount - 1; i++) {
+                drawGroundLine(g, polylineXBuf[i], polylineYBuf[i], polylineXBuf[i + 1], polylineYBuf[i + 1], THICKNESS_LANDSCAPE);
+            }
+        }
+
+        if (DebugMenu.showLinePoints) {
+            g.setColor(0xff0000);
+            for (int i = 0; i < pointsCount; i++) {
+                g.fillArc(polylineXBuf[i] - 1, polylineYBuf[i] - 1, 2, 2, 0, 360);
+            }
+            g.setColor(DebugMenu.isDebugEnabled ? 0xffffff : currColLandscape);
         }
     }
 
@@ -595,15 +643,14 @@ public class GraphicsWorld extends World {
                         break;
                     case ElementPlacer.DRAWING_DATA_ID_PATH: {
                         int pointsCount = structureData[c++];
-                        int x = structureData[c++];
-                        int y = structureData[c++];
-                        int prevX = xToPX(x, y);
-                        int prevY = yToPX(x, y);
-                        for (int j = 1; j < pointsCount; j++) {
-                            int newX = structureData[c++];
-                            int newY = structureData[c++];
-                            drawLine(g, prevX, prevY, prevX = xToPX(newX, newY), prevY = yToPX(newX, newY), THICKNESS_LANDSCAPE);
+                        ensurePolylineBufferSize(pointsCount);
+                        for (int j = 0; j < pointsCount; j++) {
+                            int x = structureData[c++];
+                            int y = structureData[c++];
+                            polylineXBuf[j] = xToPX(x, y);
+                            polylineYBuf[j] = yToPX(x, y);
                         }
+                        g.drawPolyline(polylineXBuf, polylineYBuf, pointsCount, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
                         break;
                     }
                     case ElementPlacer.DRAWING_DATA_ID_CIRCLE: {
@@ -768,6 +815,14 @@ public class GraphicsWorld extends World {
             long rotatedY = (dx * camSin + dy * camCos) / 1000;
 
             return (int)(rotatedY * 1000 / zoomOut) + offsetY + camOffsetY;
+        }
+    }
+
+    private void ensurePolylineBufferSize(int needed) {
+        if (polylineXBuf.length < needed) {
+            int newSize = Math.max(polylineXBuf.length * 2, needed + 64);
+            polylineXBuf = new int[newSize];
+            polylineYBuf = new int[newSize];
         }
     }
 
