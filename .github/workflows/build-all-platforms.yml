@@ -32,6 +32,19 @@ jobs:
       - name: Build Release
         run: cd android/ && ./gradlew clean assembleRelease
 
+      - name: Convert Resources to UTF-16 (Android 1.0 compatibility)
+        run: |
+          ZIPALIGN=$(find $ANDROID_HOME/build-tools -name zipalign | sort -V | tail -n 1)
+          echo "Using zipalign: $ZIPALIGN"
+
+          APK_DIR="android/app/build/outputs/apk/release"
+          INPUT_APK=$(find "$APK_DIR" -name "*unsigned.apk" | head -n 1)
+          echo "INPUT_APK: $INPUT_APK"
+
+          OUTPUT_APK="${INPUT_APK%.apk}-utf16.apk"
+
+          python3 android/tools/utf16_resources.py "$INPUT_APK" "$OUTPUT_APK" --zipalign "$ZIPALIGN"
+
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
