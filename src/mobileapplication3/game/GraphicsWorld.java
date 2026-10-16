@@ -343,10 +343,10 @@ public class GraphicsWorld extends World {
 
     private void drawBg(Graphics g) {
         // some very boring code
-        if (game.points == 292) {
+        if (game.getPoints() == 292) {
             currColBg = 0x2f92ff;
             currColLandscape = 0xffffff;
-        } else if (game.points == 293) {
+        } else if (game.getPoints() == 293) {
             currColBg = colBg;
             currColLandscape = colLandscape;
         }

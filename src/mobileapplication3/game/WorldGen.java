@@ -92,7 +92,7 @@ public class WorldGen {
 
         if (w.carX > nextPointsCounterTargetX) {
             nextPointsCounterTargetX += POINTS_DIVIDER;
-            game.points++;
+            game.addPoint();
         }
 
         structLogger.rmFarStructures();
