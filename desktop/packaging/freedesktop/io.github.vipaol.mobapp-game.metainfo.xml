@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.vipaol.mobapp-game</id>
+
+  <name>Mobapp Game</name>
+  <summary>Minimalist physics arcade: speed, flips, built-in editor</summary>
+  <developer id="io.github.vipaol">
+    <name>vipaoL</name>
+  </developer>
+
+  <metadata_license>MIT</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <url type="homepage">https://github.com/vipaol/mobapp-game</url>
+  <url type="bugtracker">https://github.com/vipaol/mobapp-game/issues</url>
+  <url type="vcs-browser">https://github.com/vipaol/mobapp-game</url>
+
+  <recommends>
+    <display_length compare="ge">128</display_length>
+  </recommends>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+
+  <description>
+    <p>
+      A cross-platform minimalist arcade game powered by Emini physics engine. Android, desktop Java, and J2ME are supported.
+    </p>
+
+    <p>Two game modes:</p>
+    <ul>
+      <li>Endless mode: the track is procedurally generated on the fly, randomly connecting various structures (both built-in and custom).</li>
+      <li>Levels: completely predefined tracks with obstacles, where the main goal is to reach the finish plate.</li>
+    </ul>
+
+    <p>
+      Built-in editor: The game offers complete creative freedom. You can create your own levels and structure blocks for endless mode.
+    </p>
+    <p>
+      Examples: The editor allows you to open the game&apos;s built-in structures and levels - they are highlighted and displayed at the end. Built-in structures can be overridden by naming a custom one with the same name (don&apos;t forget to load the structures from the main menu).
+    </p>
+
+    <p>Tools for creating tracks of any difficulty:</p>
+    <ul>
+      <li>Surfaces: Lines, Circles (arcs with adjustable radius and scaling), and Sinusoids for smooth transitions.</li>
+      <li>Interactive Platforms: Trampolines with adjustable springiness, deadly &quot;Lava&quot;, and &quot;Broken Lines&quot; (falling slabs).</li>
+      <li>Accelerators: Plates that change the engine&apos;s power and direction (can also slow down).</li>
+      <li>Physics Bodies: Round and Square physical entities. Adjust their mass, friction, elasticity, gravity, color, fall timers, or turn them into moving lava!</li>
+      <li>Auxiliary elements: Finish, Spawn points, and &quot;Link&quot; (copies another element with an offset).</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">io.github.vipaol.mobapp-game.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/vipaoL/mobapp-game/refs/heads/master/desktop/packaging/screenshots/1.png</image>
+      <caption>Endless mode gameplay</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/vipaoL/mobapp-game/refs/heads/master/desktop/packaging/screenshots/2.png</image>
+      <caption>Built-in level editor</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/vipaoL/mobapp-game/refs/heads/master/desktop/packaging/screenshots/3.png</image>
+      <caption>Browsing built-in structures in the editor</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/vipaoL/mobapp-game/refs/heads/master/desktop/packaging/screenshots/4.png</image>
+      <caption>Level 10</caption>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="0.9.8" date="2026-10-27">
+      <url type="details">https://github.com/vipaol/mobapp-game/releases/tag/v0.9.8</url>
+      <description>
+        <p>This is primarily a technical and Quality-of-Life update focused on player feedback and compatibility:</p>
+        <ul>
+          <li>Reworked on-screen hints</li>
+          <li>Option to use a restart button instead of swipe</li>
+          <li>Resume from the main menu instead of always starting a new run</li>
+        </ul>
+
+        <p>Android:</p>
+        <ul>
+          <li>Android 1.0 support, proper rendering and better performance on ≤4.4</li>
+          <li>Support opening the game directory in the system file manager</li>
+        </ul>
+
+        <p>Desktop:</p>
+        <ul>
+          <li>Added SDL3 graphics backend: brings better overall performance and proper HiDPI support, paving the way for Linux Mobile</li>
+        </ul>
+
+        <p>Accessibility:</p>
+        <ul>
+          <li>The entire game can now be operated with literally one button: navigate menus, drive, pause, and restart via multi-taps</li>
+        </ul>
+
+        <p>Other changes:</p>
+        <ul>
+          <li>World rendering optimizations for hi-res screens</li>
+          <li>Memory allocation optimizations (less GC stutter). This is most noticeable on iOS</li>
+          <li>Lowered minimum iOS version requirement to 8.0</li>
+          <li>Reorganized settings, so all options fit on smaller displays</li>
+          <li>Redesigned the battery indicator</li>
+          <li>Added a few new structures to world generation</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.9.7" date="2026-07-11">
+      <url type="details">https://github.com/vipaol/mobapp-game/releases/tag/v0.9.7</url>
+      <description>
+        <p>Gameplay updates:</p>
+        <ul>
+          <li>Nearly twice as many structures, new levels</li>
+          <li>Reworked levels and structures to make gameplay rely more on skill than luck</li>
+        </ul>
+
+        <p>New features for creating interactive mechanisms:</p>
+        <ul>
+          <li>Initial velocity properties, including for initially static bodies</li>
+          <li>Center of mass offset for rotation around a point</li>
+          <li>Collision layers</li>
+        </ul>
+
+        <p>
+          Build all kinds of fun things in the editor: lifts, launching traps, catapults, perpetual motion machines!
+        </p>
+
+        <p>Other updates:</p>
+        <ul>
+          <li>Added CLI for generating file thumbnails for levels and structures</li>
+          <li>Added battery level indicator via oshi library</li>
+          <li>Added a setting to automatically load external structures on every game start</li>
+          <li>Cross-platform optimizations</li>
+          <li>Bug fixes</li>
+          <li>New bugs</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>
