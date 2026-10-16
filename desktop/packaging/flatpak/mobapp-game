@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eu
+
+APP_ID="io.github.vipaol.mobapp-game"
+JAR="/app/share/mobapp-game/mobapp-game-desktop.jar"
+
+DEFAULT_WORKDIR="${XDG_DATA_HOME:-$HOME/.var/app/$APP_ID/data}/mobapp-game"
+
+has_workdir=false
+for arg in "$@"; do
+    case "$arg" in
+        --workdir|--workdir=*)
+            has_workdir=true
+            break
+            ;;
+    esac
+done
+
+if [ "$has_workdir" = false ]; then
+    mkdir -p "$DEFAULT_WORKDIR"
+    set -- --workdir "$DEFAULT_WORKDIR" "$@"
+fi
+
+exec /app/jre/bin/java -jar "$JAR" "$@"

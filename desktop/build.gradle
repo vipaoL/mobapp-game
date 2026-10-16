@@ -20,6 +20,7 @@ project.logger.lifecycle("Version: " + version)
 
 repositories {
     mavenCentral()
+    maven { url '../offline-repository' }
 }
 
 dependencies {

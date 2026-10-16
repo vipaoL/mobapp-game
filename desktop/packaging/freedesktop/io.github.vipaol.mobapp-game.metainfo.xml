@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.vipaol.mobapp-game</id>
+
+  <name>Mobapp Game</name>
+  <summary>Minimalist physics arcade: speed, flips, built-in editor</summary>
+
+  <metadata_license>MIT</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <recommends>
+    <display_length compare="ge">128</display_length>
+  </recommends>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+
+  <description>
+    <p>
+      A cross-platform minimalist arcade game powered by Emini physics engine. Android, desktop Java, and J2ME are supported. Two game modes: - Endless mode: the track is procedurally generated on the fly, randomly connecting various structures (both built-in and custom). - Levels: completely predefined tracks with obstacles, where the main goal is to reach the finish plate.
+    </p>
+    <p>
+      Built-in editor: The game offers complete creative freedom. You can create your own levels and structure blocks for endless mode.
+    </p>
+    <p>
+      Examples: The editor allows you to open the game&apos;s built-in structures and levels - they are highlighted and displayed at the end. Built-in structures can be overridden by naming a custom one with the same name (but don&apos;t forget to load the structures from the main menu).
+    </p>
+    <p>
+      Tools: Create tracks of any difficulty by combining various objects and adjusting their length, thickness, and other parameters: - Surfaces: Lines, Circles (arcs with adjustable radius and scaling), and Sinusoids for smooth transitions. - Interactive Platforms: Trampolines with adjustable springiness, deadly &quot;Lava,&quot; and &quot;Broken Lines&quot; (slabs that begin to fall when driven over). - Accelerators (can also slow down): Plates that change the engine&apos;s power and direction. - Physics Bodies: Round and Square objects. These are fully-fledged physical entities. You can adjust their mass, friction, elasticity, gravity, and color. Make them static (with a fall timer, like the &quot;Broken Line&quot;) or turn them into moving &quot;lava&quot;! - Auxiliary elements: Finish, Spawn point for levels and &quot;Link&quot;, which copies another element with an offset.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.vipaol.mobapp-game.desktop</launchable>
+</component>
