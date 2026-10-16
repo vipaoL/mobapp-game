@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mobapp-game-desktop" default="jar" basedir=".">
+
+    <description>Builds the desktop (Java SE) version of mobapp-game with Apache Ant</description>
+
+    <import file="../build-common.xml"/>
+
+    <!-- Maven repository used to download dependencies. Use a mirror if needed:
+         ant -Dmaven.repo=https://maven.aliyun.com/repository/central -->
+    <property name="maven.repo" value="https://repo.maven.apache.org/maven2"/>
+
+    <!-- Same java compatibility as the old Gradle build -->
+    <property name="java.source" value="1.8"/>
+    <property name="java.target" value="1.8"/>
+
+    <property name="libs.dir" location="libs"/>
+    <property name="classes.dir" location="build/classes"/>
+    <property name="dist.dir" location="build/libs"/>
+
+    <!-- Runtime dependencies, same coordinates as the old Gradle build.
+         jna/jna-platform are transitive dependencies of oshi-core. -->
+    <property name="dep.jopt-simple" value="net/sf/jopt-simple/jopt-simple/6.0-alpha-3/jopt-simple-6.0-alpha-3.jar"/>
+    <property name="dep.oshi-core" value="com/github/oshi/oshi-core/6.12.0/oshi-core-6.12.0.jar"/>
+    <property name="dep.jna" value="net/java/dev/jna/jna/5.18.1/jna-5.18.1.jar"/>
+    <property name="dep.jna-platform" value="net/java/dev/jna/jna-platform/5.18.1/jna-platform-5.18.1.jar"/>
+
+    <property name="lib.jopt-simple" location="${libs.dir}/jopt-simple-6.0-alpha-3.jar"/>
+    <property name="lib.oshi-core" location="${libs.dir}/oshi-core-6.12.0.jar"/>
+    <property name="lib.jna" location="${libs.dir}/jna-5.18.1.jar"/>
+    <property name="lib.jna-platform" location="${libs.dir}/jna-platform-5.18.1.jar"/>
+
+    <target name="init" description="Create build directories">
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+    <target name="deps" description="Download runtime dependencies from Maven Central">
+        <mkdir dir="${libs.dir}"/>
+        <get src="${maven.repo}/${dep.jopt-simple}" dest="${lib.jopt-simple}" skipexisting="true"/>
+        <get src="${maven.repo}/${dep.oshi-core}" dest="${lib.oshi-core}" skipexisting="true"/>
+        <get src="${maven.repo}/${dep.jna}" dest="${lib.jna}" skipexisting="true"/>
+        <get src="${maven.repo}/${dep.jna-platform}" dest="${lib.jna-platform}" skipexisting="true"/>
+    </target>
+
+    <target name="compile" depends="init,deps" description="Compile all sources">
+        <javac destdir="${classes.dir}" source="${java.source}" target="${java.target}"
+               includeantruntime="false" encoding="UTF-8" debug="true">
+            <src path="src/main/java"/>
+            <src path="../src"/>
+            <src path="../lib/mobapp-platform-desktop/src"/>
+            <src path="../lib/mobapp-framework/src"/>
+            <src path="../lib/EminiPhysicsEngine/src"/>
+
+            <!-- Same exclusions as the old Gradle build -->
+            <exclude name="at/emini/physics2DDesigner/**"/>
+            <exclude name="at/emini/physics2DSimulationTests/**"/>
+            <exclude name="at/emini/physics2DUnitTests/**"/>
+            <exclude name="at/emini/physics2DVisualTest/**"/>
+
+            <classpath>
+                <fileset dir="${libs.dir}" includes="*.jar"/>
+            </classpath>
+            <compilerarg value="-Xlint:-options"/>
+        </javac>
+    </target>
+
+    <target name="jar" depends="git-version,compile" description="Build runnable fat jar">
+        <jar destfile="${dist.dir}/mobapp-game-desktop-${git.version}.jar">
+            <fileset dir="${classes.dir}"/>
+
+            <zipfileset src="${lib.jopt-simple}" excludes="META-INF/MANIFEST.MF"/>
+            <zipfileset src="${lib.oshi-core}" excludes="META-INF/MANIFEST.MF"/>
+            <zipfileset src="${lib.jna}" excludes="META-INF/MANIFEST.MF"/>
+            <zipfileset src="${lib.jna-platform}" excludes="META-INF/MANIFEST.MF"/>
+
+            <manifest>
+                <attribute name="Main-Class" value="com.vipaol.MobappGameDesktopMain"/>
+                <attribute name="Implementation-Version" value="${git.version}"/>
+            </manifest>
+        </jar>
+        <echo message="Jar: ${dist.dir}/mobapp-game-desktop-${git.version}.jar"/>
+    </target>
+
+    <target name="run" depends="jar" description="Run the game">
+        <java jar="${dist.dir}/mobapp-game-desktop-${git.version}.jar" fork="true" failonerror="true"/>
+    </target>
+
+    <target name="clean" description="Remove build outputs (downloaded dependencies are kept)">
+        <delete dir="build"/>
+    </target>
+
+</project>

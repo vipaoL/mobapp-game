@@ -15,7 +15,6 @@
         <pattern>io.github.vipaol.mobapp.**</pattern>
     </forceLinkClasses>
 
-    <libs>
-        <lib>libs/libstubs.a</lib>
-    </libs>
+    <!-- No native libraries are used; the reference to libs/libstubs.a was removed
+         (the file does not exist in the repository) to make CI builds possible -->
 </config>

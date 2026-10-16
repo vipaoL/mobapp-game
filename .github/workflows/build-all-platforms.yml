@@ -7,6 +7,7 @@ on:
   pull_request:
     paths-ignore:
       - '**.md'
+  workflow_dispatch:
 
 jobs:
   Build-Android:
@@ -24,22 +25,24 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x android/gradlew
+      - name: Install Android SDK packages
+        run: |
+          SDKMANAGER=$(find "${ANDROID_HOME}/cmdline-tools" -name sdkmanager -type f | sort -V | tail -n 1)
+          yes | "${SDKMANAGER}" --licenses > /dev/null
+          "${SDKMANAGER}" "platforms;android-34" "build-tools;36.0.0"
 
       - name: Build Release
-        run: cd android/ && ./gradlew clean assembleRelease
+        run: cd android/ && ant clean release
 
       - name: Build Debug
-        run: cd android/ && ./gradlew build
+        run: cd android/ && ant debug
 
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
           name: mobapp-game-android
-          path: ${{ github.workspace }}/android/app/build/outputs/apk/*
+          path: ${{ github.workspace }}/android/build/outputs/apk/*
 
   Build-Desktop:
     runs-on: ubuntu-latest
@@ -51,24 +54,55 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Set up JDK 25
+      - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
-          java-version: '25'
+          java-version: '21'
           distribution: 'temurin'
-          cache: gradle
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x desktop/gradlew
-
-      - name: Build with Gradle
-        run: cd desktop/ && ./gradlew jar
+      - name: Build with Ant
+        run: cd desktop/ && ant jar
 
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
           name: mobapp-game-desktop
           path: ${{ github.workspace }}/desktop/build/libs/*.jar
+
+  Build-IOS:
+    # Best-effort: RoboVM (MobiVM 2.3.22) is unmaintained and may break with
+    # newer Xcode on GitHub runner images; keep continue-on-error until stable.
+    # macos-13 (Intel) is the oldest available image: Temurin JDK 8 has no
+    # macOS arm64 builds, so arm64 images (macos-14/15) cannot be used here.
+    runs-on: macos-13
+    continue-on-error: true
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v5
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Show toolchain versions
+        run: |
+          java -version
+          xcodebuild -version
+          ls /Applications | grep -i xcode || true
+
+      - name: Build with Gradle (RoboVM)
+        run: cd ios/ && ./gradlew --no-daemon createIPA
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: mobapp-game-ios
+          path: ${{ github.workspace }}/ios/build/robovm/*
+          if-no-files-found: warn
 
   Build-J2ME:
     runs-on: ubuntu-latest

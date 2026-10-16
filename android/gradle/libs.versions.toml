@@ -1,7 +1,0 @@
-[versions]
-agp = "8.7.3"
-grgit = "5.3.3"
-
-[plugins]
-android-application = { id = "com.android.application", version.ref = "agp" }
-grgit = { id = "org.ajoberstar.grgit", version.ref = "grgit" }

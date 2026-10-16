@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mobapp-game-android" default="debug" basedir=".">
+
+    <description>
+        Builds the Android APK of mobapp-game with Apache Ant.
+        Replaces the old Gradle/AGP build: aapt2 (resources) - javac (java) - d8 (dex) -
+        zipalign - apksigner. Requires Android SDK with platforms;android-34 and
+        build-tools;36.0.0 (sdkmanager "platforms;android-34" "build-tools;36.0.0")
+        and JDK 17+. Newer build-tools are required: d8 from 34.x crashes on
+        MethodParameters attributes with unnamed (mandated) parameters emitted by
+        modern javac versions.
+    </description>
+
+    <import file="../build-common.xml"/>
+
+    <property environment="env"/>
+    <!-- sdk.dir from local.properties (same as the old Gradle build) wins over the environment -->
+    <property file="local.properties"/>
+    <condition property="sdk.dir" value="${env.ANDROID_HOME}">
+        <isset property="env.ANDROID_HOME"/>
+    </condition>
+    <condition property="sdk.dir" value="${env.ANDROID_SDK_ROOT}">
+        <isset property="env.ANDROID_SDK_ROOT"/>
+    </condition>
+
+    <!-- Same values as the old android/app/build.gradle -->
+    <property name="namespace" value="io.github.vipaol.mobapp.game"/>
+    <property name="debug.app.id" value="${namespace}.dev"/>
+    <property name="release.app.id" value="${namespace}"/>
+    <property name="version.name" value="v0.9.7"/>
+    <property name="version.code" value="23"/>
+    <property name="min.sdk" value="1"/>
+    <property name="target.sdk" value="34"/>
+    <property name="compile.sdk" value="34"/>
+    <property name="build.tools.version" value="36.0.0"/>
+    <property name="java.source" value="1.8"/>
+    <property name="java.target" value="1.8"/>
+
+    <property name="app.dir" location="app"/>
+    <property name="build.dir" location="build"/>
+    <property name="outputs.dir" location="${build.dir}/outputs/apk"/>
+    <property name="debug.keystore" location="${build.dir}/debug.keystore"/>
+
+    <!-- Android SDK tools -->
+    <property name="android.jar" location="${sdk.dir}/platforms/android-${compile.sdk}/android.jar"/>
+    <property name="build.tools.dir" location="${sdk.dir}/build-tools/${build.tools.version}"/>
+    <property name="aapt2" location="${build.tools.dir}/aapt2"/>
+    <property name="d8" location="${build.tools.dir}/d8"/>
+    <property name="zipalign" location="${build.tools.dir}/zipalign"/>
+    <property name="apksigner" location="${build.tools.dir}/apksigner"/>
+
+    <target name="check-sdk" description="Check that the Android SDK is set up">
+        <fail unless="sdk.dir"
+              message="Android SDK not found: set sdk.dir in android/local.properties or the ANDROID_HOME/ANDROID_SDK_ROOT environment variable."/>
+        <fail message="Android platform API ${compile.sdk} not found (${android.jar}). Install it: sdkmanager &quot;platforms;android-${compile.sdk}&quot;">
+            <condition>
+                <not>
+                    <available file="${android.jar}"/>
+                </not>
+            </condition>
+        </fail>
+        <fail message="Android build-tools ${build.tools.version} not found (${build.tools.dir}). Install it: sdkmanager &quot;build-tools;${build.tools.version}&quot;">
+            <condition>
+                <not>
+                    <available file="${aapt2}"/>
+                </not>
+            </condition>
+        </fail>
+    </target>
+
+    <target name="check-debug-keystore">
+        <available file="${debug.keystore}" property="debug.keystore.present"/>
+    </target>
+
+    <target name="debug-keystore" depends="check-debug-keystore" unless="debug.keystore.present"
+            description="Generate a debug keystore (same credentials as ~/.android/debug.keystore)">
+        <mkdir dir="${build.dir}"/>
+        <exec executable="${java.home}/bin/keytool" failonerror="true">
+            <arg value="-genkeypair"/>
+            <arg value="-noprompt"/>
+            <arg value="-keystore"/><arg value="${debug.keystore}"/>
+            <arg value="-storepass"/><arg value="android"/>
+            <arg value="-keypass"/><arg value="android"/>
+            <arg value="-alias"/><arg value="androiddebugkey"/>
+            <arg value="-keyalg"/><arg value="RSA"/>
+            <arg value="-keysize"/><arg value="2048"/>
+            <arg value="-validity"/><arg value="10950"/>
+            <arg value="-dname"/><arg value="CN=Android Debug,O=Android,C=US"/>
+        </exec>
+    </target>
+
+    <!-- Full per-variant pipeline, replacing AGP: manifest processing, resource
+         compilation/linking (with R.java generation), javac, d8, zipalign -->
+    <macrodef name="build-variant">
+        <attribute name="variant"/>
+        <attribute name="app.id"/>
+        <sequential>
+            <local name="variant.dir"/>
+            <property name="variant.dir" value="${build.dir}/@{variant}"/>
+
+            <mkdir dir="${variant.dir}/flat"/>
+            <mkdir dir="${variant.dir}/gen"/>
+            <mkdir dir="${variant.dir}/gen-res/values"/>
+            <mkdir dir="${variant.dir}/classes"/>
+            <mkdir dir="${variant.dir}/dex"/>
+
+            <!-- Manifest processing (was done by AGP manifest merger):
+                 inject the package attribute, expand relative component names
+                 (they would resolve against the suffixed debug package otherwise)
+                 and replace the ${applicationId} placeholder -->
+            <copy file="${app.dir}/src/main/AndroidManifest.xml"
+                  tofile="${variant.dir}/AndroidManifest.xml" overwrite="true">
+                <filterchain>
+                    <replaceregex pattern='xmlns:tools="http://schemas.android.com/tools">'
+                                 replace='xmlns:tools="http://schemas.android.com/tools" package="@{app.id}">'/>
+                    <replaceregex pattern='android:name="GameActivity"'
+                                 replace="android:name=&quot;${namespace}.GameActivity&quot;"/>
+                    <replaceregex pattern='android:name="\.MobappDocumentsProvider"'
+                                 replace="android:name=&quot;${namespace}.MobappDocumentsProvider&quot;"/>
+                    <replaceregex pattern='\$\{applicationId\}'
+                                 replace="@{app.id}"/>
+                </filterchain>
+            </copy>
+
+            <!-- resValue 'string', 'git_version' from the old Gradle build -->
+            <echo file="${variant.dir}/gen-res/values/git_version.xml"
+                  message='&lt;?xml version="1.0" encoding="utf-8"?&gt;&#10;&lt;resources&gt;&#10;    &lt;string name="git_version"&gt;${git.version}&lt;/string&gt;&#10;&lt;/resources&gt;&#10;'/>
+
+            <!-- Compile resources -->
+            <exec executable="${aapt2}" failonerror="true">
+                <arg value="compile"/>
+                <arg value="--dir"/><arg value="${app.dir}/src/main/res"/>
+                <arg value="-o"/><arg value="${variant.dir}/flat/res.zip"/>
+            </exec>
+            <exec executable="${aapt2}" failonerror="true">
+                <arg value="compile"/>
+                <arg value="--dir"/><arg value="${variant.dir}/gen-res"/>
+                <arg value="-o"/><arg value="${variant.dir}/flat/gen-res.zip"/>
+            </exec>
+
+            <!-- Link resources and manifest into an APK, generate R.java -->
+            <exec executable="${aapt2}" failonerror="true">
+                <arg value="link"/>
+                <arg value="-o"/><arg value="${variant.dir}/app-resources.apk"/>
+                <arg value="-I"/><arg value="${android.jar}"/>
+                <arg value="--manifest"/><arg value="${variant.dir}/AndroidManifest.xml"/>
+                <arg value="--java"/><arg value="${variant.dir}/gen"/>
+                <arg value="--custom-package"/><arg value="${namespace}"/>
+                <arg value="--min-sdk-version"/><arg value="${min.sdk}"/>
+                <arg value="--target-sdk-version"/><arg value="${target.sdk}"/>
+                <arg value="--version-code"/><arg value="${version.code}"/>
+                <arg value="--version-name"/><arg value="${version.name}"/>
+                <arg value="-A"/><arg value="${app.dir}/src/main/assets"/>
+                <arg value="${variant.dir}/flat/res.zip"/>
+                <arg value="${variant.dir}/flat/gen-res.zip"/>
+            </exec>
+
+            <!-- Compile java (R.java from aapt2 included) -->
+            <javac destdir="${variant.dir}/classes" source="${java.source}" target="${java.target}"
+                   bootclasspath="${android.jar}" includeantruntime="false" encoding="UTF-8" debug="true">
+                <src path="../src"/>
+                <src path="../lib/mobapp-platform-android/src"/>
+                <src path="../lib/mobapp-framework/src"/>
+                <src path="../lib/EminiPhysicsEngine/src"/>
+                <src path="${app.dir}/src/main/java"/>
+                <src path="${variant.dir}/gen"/>
+
+                <!-- Same exclusions as the old Gradle build -->
+                <exclude name="at/emini/physics2DDesigner/**"/>
+                <exclude name="at/emini/physics2DSimulationTests/**"/>
+                <exclude name="at/emini/physics2DUnitTests/**"/>
+                <exclude name="at/emini/physics2DVisualTest/**"/>
+
+                <compilerarg value="-Xlint:-options"/>
+            </javac>
+
+            <!-- Dex -->
+            <jar destfile="${variant.dir}/classes.jar" basedir="${variant.dir}/classes"/>
+            <exec executable="${d8}" failonerror="true">
+                <arg value="--release"/>
+                <arg value="--min-api"/><arg value="${min.sdk}"/>
+                <arg value="--lib"/><arg value="${android.jar}"/>
+                <arg value="--output"/><arg value="${variant.dir}/dex"/>
+                <arg value="${variant.dir}/classes.jar"/>
+            </exec>
+
+            <!-- Add classes*.dex to the APK and align -->
+            <zip destfile="${variant.dir}/app-with-dex.apk">
+                <zipfileset src="${variant.dir}/app-resources.apk"/>
+                <fileset dir="${variant.dir}/dex" includes="*.dex"/>
+            </zip>
+            <exec executable="${zipalign}" failonerror="true">
+                <arg value="-f"/>
+                <arg value="-p"/>
+                <arg value="4"/>
+                <arg value="${variant.dir}/app-with-dex.apk"/>
+                <arg value="${variant.dir}/app-aligned.apk"/>
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <target name="build-debug" depends="check-sdk,git-version">
+        <build-variant variant="debug" app.id="${debug.app.id}"/>
+    </target>
+
+    <target name="build-release" depends="check-sdk,git-version">
+        <build-variant variant="release" app.id="${release.app.id}"/>
+    </target>
+
+    <target name="sign-debug" depends="build-debug,debug-keystore">
+        <mkdir dir="${outputs.dir}/debug"/>
+        <exec executable="${apksigner}" failonerror="true">
+            <arg value="sign"/>
+            <arg value="--ks"/><arg value="${debug.keystore}"/>
+            <arg value="--ks-key-alias"/><arg value="androiddebugkey"/>
+            <arg value="--ks-pass"/><arg value="pass:android"/>
+            <arg value="--key-pass"/><arg value="pass:android"/>
+            <arg value="--out"/><arg value="${outputs.dir}/debug/app-debug.apk"/>
+            <arg value="${build.dir}/debug/app-aligned.apk"/>
+        </exec>
+        <echo message="Signed debug APK: ${outputs.dir}/debug/app-debug.apk"/>
+    </target>
+
+    <target name="debug" depends="sign-debug" description="Build signed debug APK (applicationIdSuffix .dev)"/>
+
+    <target name="release" depends="build-release" description="Build unsigned release APK (as the old Gradle build did)">
+        <mkdir dir="${outputs.dir}/release"/>
+        <copy file="${build.dir}/release/app-aligned.apk"
+              tofile="${outputs.dir}/release/app-release-unsigned.apk" overwrite="true"/>
+        <echo message="Unsigned release APK: ${outputs.dir}/release/app-release-unsigned.apk"/>
+    </target>
+
+    <target name="apk" depends="debug,release" description="Build debug and release APKs"/>
+
+    <target name="clean" description="Remove build outputs">
+        <delete dir="${build.dir}"/>
+    </target>
+
+</project>

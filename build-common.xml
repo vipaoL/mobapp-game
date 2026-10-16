@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mobapp-game-common">
+
+    <description>Shared logic for Ant builds of mobapp-game modules (desktop, android)</description>
+
+    <!--
+        Computes the version string the same way the old Gradle builds did (grgit):
+        "git describe" with tags and fallback to commit id, plus a "-dirty" suffix if
+        the working tree has staged/unstaged changes or conflicts.
+        Untracked files do not mark the build dirty.
+    -->
+    <target name="git-version" description="Compute version string from git">
+        <exec executable="git" outputproperty="git.describe" failonerror="true">
+            <arg value="describe"/>
+            <arg value="--tags"/>
+            <arg value="--always"/>
+        </exec>
+        <exec executable="git" outputproperty="git.status" failonerror="true">
+            <arg value="status"/>
+            <arg value="--porcelain"/>
+            <arg value="--untracked-files=no"/>
+        </exec>
+        <condition property="git.dirty" value="-dirty" else="">
+            <not>
+                <equals arg1="${git.status}" arg2=""/>
+            </not>
+        </condition>
+        <property name="git.version" value="${git.describe}${git.dirty}"/>
+        <echo message="Version (git): ${git.version}"/>
+    </target>
+
+</project>

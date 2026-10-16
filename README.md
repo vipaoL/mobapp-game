@@ -22,12 +22,30 @@ A crossplatform game based on Emini Physics Engine (Android, J2ME and desktop Ja
 
 # Build
 `git clone https://github.com/vipaoL/mobapp-game.git --recurse-submodules`
-## IDE
-### Android
-Open `android/` folder in Android Studio
+## Command-line (Apache Ant)
 ### Desktop
-Open `desktop/` folder in IntelliJ IDEA
+```
+cd desktop
+ant jar
+```
+Produces a runnable fat jar `desktop/build/libs/mobapp-game-desktop-<version>.jar` (Main-Class is set, `java -jar` works). Dependencies (jopt-simple, oshi-core, jna) are downloaded from Maven Central into `desktop/libs/`; use `-Dmaven.repo=<url>` to use a mirror, `ant run` to start the game.
+### Android
+Requires JDK 17+ and Android SDK with `platforms;android-34` and `build-tools;36.0.0`:
+```
+sdkmanager "platforms;android-34" "build-tools;36.0.0"
+cd android
+ant debug     # signed debug APK (applicationId suffix .dev) -> build/outputs/apk/debug/
+ant release   # unsigned release APK -> build/outputs/apk/release/
+```
+The SDK path is taken from `sdk.dir` in `android/local.properties` or from the `ANDROID_HOME`/`ANDROID_SDK_ROOT` environment variable.
+### J2ME
+See `j2me/build.sh`
+## IDE
+### Desktop
+Open `desktop/` folder in IntelliJ IDEA as a plain Java module (run `ant deps` first to download the libraries into `desktop/libs/`)
+### Android
+Open `android/app/src/main/java` folder in Android Studio for editing; building is done with Ant (see above)
 ### J2ME
 Use IntelliJ IDEA integration in KEmulator nnmod to open the project (`j2me/` folder is the project root)
-## Command-line
+## CI
 See `.github/workflows/`
