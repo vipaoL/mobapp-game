@@ -16,6 +16,6 @@
     </forceLinkClasses>
 
     <libs>
-        <lib>libs/libstubs.a</lib>
+        <lib>libs/librobovm_hooks.a</lib>
     </libs>
 </config>
