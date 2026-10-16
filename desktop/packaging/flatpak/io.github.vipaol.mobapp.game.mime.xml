@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-mobapp-game-custom">
+    <comment>Level/Structure for Mobapp Game</comment>
+    <glob pattern="*.mgstruct"/>
+    <glob pattern="*.mglvl"/>
+  </mime-type>
+</mime-info>

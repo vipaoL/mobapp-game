@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Mobapp Game
+Exec=mobapp-game %f
+Icon=io.github.vipaol.mobapp.game
+Terminal=false
+Categories=Game;
+MimeType=application/x-mobapp-game-custom;

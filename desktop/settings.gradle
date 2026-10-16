@@ -1,2 +1,9 @@
+pluginManagement {
+    repositories {
+        maven {
+            url = uri('../offline-repository')
+        }
+        gradlePluginPortal()
+    }
+}
 rootProject.name = 'mobapp-game-desktop'
-
