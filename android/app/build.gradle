@@ -21,6 +21,7 @@ project.logger.lifecycle("Version (git): " + gitVersion)
 android {
     namespace 'io.github.vipaol.mobapp.game'
     compileSdk 34
+    buildToolsVersion '34.0.0'
 
     defaultConfig {
         applicationId 'io.github.vipaol.mobapp.game'
