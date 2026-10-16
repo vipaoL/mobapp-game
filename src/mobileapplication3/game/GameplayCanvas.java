@@ -109,7 +109,7 @@ public class GameplayCanvas extends CanvasComponent {
     private boolean menuTouched = false;
 
     // counters
-    public int points = 0;
+    private int points = 0;
     private boolean countPoints = true;
     private int damage;
     private int timeStuck = 0;
@@ -127,9 +127,9 @@ public class GameplayCanvas extends CanvasComponent {
     private int currentLevelId = -1;
 
     // fonts
-    private Font smallfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_SMALL);
-    private Font mediumfont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM);
-    private Font largefont = Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_LARGE);
+    private final Font smallfont = new Font(Font.SIZE_SMALL);
+    private final Font mediumfont = new Font(Font.SIZE_MEDIUM);
+    private final Font largefont = new Font(Font.SIZE_LARGE);
     private Font currentFont = largefont;
     private int currentFontH = currentFont.getHeight();
 
@@ -145,6 +145,8 @@ public class GameplayCanvas extends CanvasComponent {
     private Thread delayedStopThread;
     private Thread delayedRestartThread;
 
+    private static FXVector bufFXVector = new FXVector();
+
     private long lastFPSMeasureTime = 0;
     private long lastPhysicsTickTime = 0;
     private long lastBattUpdateTime = 0;
@@ -159,6 +161,11 @@ public class GameplayCanvas extends CanvasComponent {
     private int physicsIterationsSetting;
     private int bigTickN = 0;
     private int targetFPS;
+
+    private String pointsStr = "0";
+    private String fpsText = "FPS: -";
+    private String batLevelText = "BAT: ?%";
+    private String levelIdText = null;
 
     public GameplayCanvas() {
         Logger.log("game: constructor");
@@ -185,6 +192,7 @@ public class GameplayCanvas extends CanvasComponent {
 
     public GameplayCanvas loadLevel(short[][] levelData, int i) {
         this.currentLevelId = i;
+        this.levelIdText = "Level " + i;
         return loadLevel(levelData);
     }
 
@@ -286,6 +294,8 @@ public class GameplayCanvas extends CanvasComponent {
             if (gameMode == GAME_MODE_LEVEL) {
                 levelIdVisibleTimer = 40;
             }
+
+            updateFPSIndicator();
 
             setLoadingProgress(80);
 
@@ -421,6 +431,7 @@ public class GameplayCanvas extends CanvasComponent {
                     ticksFromLastTPSMeasure = 0;
                     fpsCounterReady = true;
                 }
+                updateFPSIndicator();
             }
 
             if (!lockPhysicsPrecision) {
@@ -458,24 +469,21 @@ public class GameplayCanvas extends CanvasComponent {
             lastPhysicsTickTime = System.currentTimeMillis();
 
             // Tick
-            Contact[][] carContacts = getCarContacts();
             setSimulationArea();
-
             long tickStart = System.currentTimeMillis();
             for (int i = 0; i < physicsIterations; i++) {
                 world.tick();
                 // Check if the car contacts with custom bodies (accelerators, falling platforms, ...)
-                carContacts = getCarContacts();
-                tickCustomBodyInteractions(carContacts);
+                checkCarInteractions();
                 ticksFromLastTPSMeasure++;
                 ticksTotal++;
             }
             measuredTickTime = (int) (System.currentTimeMillis() - tickStart);
             physicsTimeTotal += measuredTickTime;
 
-            boolean leftWheelContacts = carContacts[0][0] != null;
-            boolean carBodyContacts = carContacts[1][0] != null;
-            boolean rightWheelContacts = carContacts[2][0] != null;
+            boolean leftWheelContacts = world.leftWheel.getContacts()[0] != null;
+            boolean carBodyContacts = world.carbody.getContacts()[0] != null;
+            boolean rightWheelContacts = world.rightWheel.getContacts()[0] != null;
 
             // some things should be performed once at a fixed interval (50ms, or 20 times per second)
             boolean bigTick = System.currentTimeMillis() - lastBigTickTime > TICK_DURATION;
@@ -541,34 +549,25 @@ public class GameplayCanvas extends CanvasComponent {
 
                 // move the car to the right in the simulation mode
                 if (DebugMenu.simulationMode) {
-                    world.carbody.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-                    world.leftWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
-                    world.rightWheel.translate(new FXVector(FXUtil.ONE_FX*100, 0), 0);
+                    bufFXVector.xFX = FXUtil.ONE_FX * 100;
+                    bufFXVector.yFX = 0;
+                    world.carbody.translate(bufFXVector, 0);
+                    world.leftWheel.translate(bufFXVector, 0);
+                    world.rightWheel.translate(bufFXVector, 0);
                 }
 
                 // tick effect timers (speed, slowness, ...)
                 tickEffects();
 
                 if (motorTurnedOn && Math.abs(world.carX - prevCarX) <= 2 && Math.abs(world.carY - prevCarY) <= 2 && !wasPaused) {
-                    for (int i = 0; i < carContacts.length; i++) {
-                        for (int j = 0; j < carContacts[i].length; j++) {
-                            if (carContacts[i][j] == null) {
-                                continue;
-                            }
-                            Body body = carContacts[i][j].body1();
-                            UserData userData = body.getUserData();
-                            if (!(userData instanceof MUserData)) {
-                                body = carContacts[i][j].body2();
-                                userData = body.getUserData();
-                            }
-                            if (userData instanceof MUserData) {
-                                boolean staticForever = ((MUserData) userData).getFallDelay() == MUserData.STATIC;
-                                if (!staticForever && !body.isDynamic()) {
-                                    timeStuck = 0;
-                                }
-                            }
-                        }
+                    boolean touchingTemporaryStaticPlatform = hasContactWithTemporaryStaticPlatform(world.leftWheel)
+                            || hasContactWithTemporaryStaticPlatform(world.carbody)
+                            || hasContactWithTemporaryStaticPlatform(world.rightWheel);
+
+                    if (touchingTemporaryStaticPlatform) {
+                        timeStuck = 0;
                     }
+
                     timeStuck += TICK_DURATION;
                     if (timeStuck > GAME_OVER_STUCK_TIME) {
                         gameOver();
@@ -592,6 +591,7 @@ public class GameplayCanvas extends CanvasComponent {
                     tickDamage();
                     if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD && battIndicator) {
                         batLevel = Battery.getBatteryLevel();
+                        batLevelText = "BAT: " + batLevel + "%";
                         lastBattUpdateTime = System.currentTimeMillis();
                     }
                 }
@@ -648,7 +648,9 @@ public class GameplayCanvas extends CanvasComponent {
                     }
                     int motorForceX = Mathh.cos(carAngle - 15 + directionOffset) * speedMultiplier / 50;
                     int motorForceY = Mathh.sin(carAngle - 15 + directionOffset) * speedMultiplier / -50;
-                    world.carbody.applyMomentum(new FXVector(convertByTimestep(motorForceX), convertByTimestep(motorForceY)));
+                    bufFXVector.xFX = convertByTimestep(motorForceX);
+                    bufFXVector.yFX = convertByTimestep(motorForceY);
+                    world.carbody.applyMomentum(bufFXVector);
 
                     if ((!leftWheelContacts && carBodyContacts) || rightWheelContacts) {
                         int torque;
@@ -677,7 +679,9 @@ public class GameplayCanvas extends CanvasComponent {
                             world.carbody.applyTorque(2 * convertByTimestep(world.carbody.angularVelocity2FX()));
                         }
                         if (isNotFlying && !uninterestingDebug) {
-                            world.carbody.applyMomentum(new FXVector(convertByTimestep(-world.carbody.velocityFX().xFX/2), convertByTimestep(-world.carbody.velocityFX().yFX/2)));
+                            bufFXVector.xFX = convertByTimestep(-world.carbody.velocityFX().xFX / 2);
+                            bufFXVector.yFX = convertByTimestep(-world.carbody.velocityFX().yFX / 2);
+                            world.carbody.applyMomentum(bufFXVector);
                         }
                         if (bigTick) {
                             ticksMotorTurnedOff++;
@@ -709,6 +713,14 @@ public class GameplayCanvas extends CanvasComponent {
         }
     }
 
+    private void updateFPSIndicator() {
+        if (showFPS) {
+            fpsText = "FPS:" + (fpsCounterReady ? String.valueOf(fps) : " -")
+                    + " TPS:" + tps
+                    + " m=" + physicsIterations;
+        }
+    }
+
     private void tryReduceLags() {
         if (gameMode == GAME_MODE_ENDLESS) {
             int layer = MGStructsCommon.COLLISION_LAYER_GROUND;
@@ -728,7 +740,9 @@ public class GameplayCanvas extends CanvasComponent {
         if (worldgen != null && carVelocityFX.yAsInt() < 0) {
             int d = worldgen.lastY - world.carY - 7000;
             if (d > 1) {
-                world.carbody.applyMomentum(new FXVector(0, FXUtil.divideFX(carVelocityFX.yFX, FXUtil.toFX(-Math.max(100000 / d, 1)))));
+                bufFXVector.xFX = 0;
+                bufFXVector.yFX = FXUtil.divideFX(carVelocityFX.yFX, FXUtil.toFX(-Math.max(100000 / d, 1)));
+                world.carbody.applyMomentum(bufFXVector);
             }
         }
     }
@@ -782,57 +796,85 @@ public class GameplayCanvas extends CanvasComponent {
             world.getContactsForBody(world.rightWheel)};
     }
 
-    private void tickCustomBodyInteractions(Contact[][] carContacts) {
+    private void checkCarInteractions() {
+        tickBodyInteractions(world.leftWheel.getContacts());
+        tickBodyInteractions(world.carbody.getContacts());
+        tickBodyInteractions(world.rightWheel.getContacts());
+    }
+
+    private void tickBodyInteractions(Contact[] contacts) {
         // if touched an interactive object (falling platform, effect plate)
-        for (int j = 0; j < carContacts.length; j++) {
-            for (int i = 0; i < carContacts[j].length; i++) {
-                if (carContacts[j][i] != null) {
-                    Body body = carContacts[j][i].body1();
-                    if (body == world.leftWheel || body == world.carbody || body == world.rightWheel) {
-                        body = carContacts[j][i].body2();
-                    }
-                    if (body == null) {
-                        continue;
-                    }
-                    UserData userData = body.getUserData();
-                    if (!(userData instanceof MUserData)) {
-                        continue;
-                    }
-                    MUserData bodyUserData = (MUserData) body.getUserData();
-                    int bodyType = bodyUserData.bodyType;
-                    switch (bodyType) {
-                        // add fall countdown timer on falling platform
-                        case MUserData.TYPE_BODY:
-                            if (!world.waitingForDynamic.contains(body)) {
-                                if (bodyUserData.getFallDelay() != MUserData.STATIC) {
-                                    if (bodyUserData.getFallDelay() <= 0) {
-                                        body.setDynamic(true);
+        for (int i = 0; i < contacts.length && contacts[i] != null; i++) {
+            Contact c = contacts[i];
+            if (c != null) {
+                Body body = c.body1();
+                if (body == world.leftWheel || body == world.carbody || body == world.rightWheel) {
+                    body = c.body2();
+                }
+                if (body == null) {
+                    continue;
+                }
+                UserData userData = body.getUserData();
+                if (!(userData instanceof MUserData)) {
+                    continue;
+                }
+                MUserData bodyUserData = (MUserData) body.getUserData();
+                int bodyType = bodyUserData.bodyType;
+                switch (bodyType) {
+                    // add fall countdown timer on falling platform
+                    case MUserData.TYPE_BODY:
+                        if (!world.waitingForDynamic.contains(body)) {
+                            if (bodyUserData.getFallDelay() != MUserData.STATIC) {
+                                if (bodyUserData.getFallDelay() <= 0) {
+                                    body.setDynamic(true);
+                                } else {
+                                    if (uninterestingDebug) {
+                                        world.removeBody(body);
                                     } else {
-                                        if (uninterestingDebug) {
-                                            world.removeBody(body);
-                                        } else {
-                                            world.waitingForDynamic.addElement(body);
-                                        }
+                                        world.waitingForDynamic.addElement(body);
                                     }
                                 }
                             }
-                            if (bodyUserData.getEffect() != null) {
-                                giveEffect(bodyUserData.getEffect());
-                                world.setWheelColor(bodyUserData.getColor());
-                            }
-                            if (bodyUserData.isLava() && !DebugMenu.simulationMode) {
-                                gameOver();
-                            }
-                            break;
-                        case MUserData.TYPE_LEVEL_FINISH:
-                            if (!isPopupShown() && !gameOver) {
-                                showPopup(new LevelCompletedScreen(this));
-                            }
-                            break;
-                    }
+                        }
+                        if (bodyUserData.getEffect() != null) {
+                            giveEffect(bodyUserData.getEffect());
+                            world.setWheelColor(bodyUserData.getColor());
+                        }
+                        if (bodyUserData.isLava() && !DebugMenu.simulationMode) {
+                            gameOver();
+                        }
+                        break;
+                    case MUserData.TYPE_LEVEL_FINISH:
+                        if (!isPopupShown() && !gameOver) {
+                            showPopup(new LevelCompletedScreen(this));
+                        }
+                        break;
                 }
             }
         }
+    }
+
+    private boolean hasContactWithTemporaryStaticPlatform(Body carPart) {
+        Contact[] contacts = carPart.getContacts();
+        for (int i = 0; i < contacts.length && contacts[i] != null; i++) {
+            Contact c = contacts[i];
+
+            Body otherBody = (c.body1() == carPart) ? c.body2() : c.body1();
+            if (otherBody == null) {
+                continue;
+            }
+
+            UserData userData = otherBody.getUserData();
+            if (userData instanceof MUserData) {
+                MUserData mData = (MUserData) userData;
+                boolean staticForever = (mData.getFallDelay() == MUserData.STATIC);
+
+                if (!staticForever && !otherBody.isDynamic()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void tickEffects() {
@@ -982,7 +1024,7 @@ public class GameplayCanvas extends CanvasComponent {
 
             if (hintVisibleTimer <= RESTART_HINT_TIME) {
                 g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(100, (100 * hintVisibleTimer / 10))));
-                setFont(new Font(Font.SIZE_MEDIUM), g);
+                setFont(mediumfont, g);
                 if (RootContainer.displayKbHints) {
                     g.drawString(RESTART_HINT, w / 2, y, HCENTER | BOTTOM);
                     g.drawString(RESTART_HINT_KB, w / 2, y, HCENTER | TOP);
@@ -997,22 +1039,21 @@ public class GameplayCanvas extends CanvasComponent {
             drawRestartGesture(g);
         }
 
-        if (currentLevelId >= 0 && levelIdVisibleTimer > 0) {
+        if (levelIdText != null && levelIdVisibleTimer > 0) {
             int x = scW / 2;
             int y = scH / 8;
-            String str = "Level " + currentLevelId;
             int landscapeColor = getLandscapeColor();
             int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(25, (25 * levelIdVisibleTimer / 10)));
             if (GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
-                int bgW = g.getFont().stringWidth(str) + g.getFontHeight() * 2;
+                int bgW = g.getFont().stringWidth(levelIdText) + g.getFontHeight() * 2;
                 int bgH = g.getFontHeight() * 3;
                 int d = g.getFontHeight() * 4;
                 g.setColor(buttonBgColor);
                 g.fillRoundRect(x - bgW / 2, y - bgH / 2, bgW, bgH, d, d);
             }
             g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(100, (100 * levelIdVisibleTimer / 10))));
-            setFont(new Font(Font.SIZE_MEDIUM), g);
-            g.drawString(str, x, y, centerAnchor);
+            setFont(mediumfont, g);
+            g.drawString(levelIdText, x, y, centerAnchor);
         }
 
         // draw some debug info if debug is enabled
@@ -1029,7 +1070,7 @@ public class GameplayCanvas extends CanvasComponent {
                 g.setColor(0x00ff00);
             }
 
-            drawDebugText(g, "BAT: " + batLevel + "%");
+            drawDebugText(g, batLevelText);
         }
 
         g.setColor(0xffffff);
@@ -1088,7 +1129,7 @@ public class GameplayCanvas extends CanvasComponent {
                     g.setColor(255, 0, 0);
                 }
             }
-            drawDebugText(g, "FPS:" + (fpsCounterReady ? String.valueOf(fps) : " -") + " TPS:" + tps + " m=" + physicsIterations);
+            drawDebugText(g, fpsText);
         }
 
         try {
@@ -1124,7 +1165,7 @@ public class GameplayCanvas extends CanvasComponent {
             }
 
             setFont(largefont, g);
-            g.drawString(String.valueOf(points), scW/2, scH * 15 / 16, Graphics.HCENTER | Graphics.BOTTOM);
+            g.drawString(pointsStr, scW/2, scH * 15 / 16, Graphics.HCENTER | Graphics.BOTTOM);
             if (DebugMenu.isDebugEnabled) {
                 int d = h / 20;
                 int iy = y0 + h - d;
@@ -1554,7 +1595,7 @@ public class GameplayCanvas extends CanvasComponent {
         if (level != null) {
             loadLevel(level);
         }
-        points = 0;
+        setPoints(0);
         damage = 0;
         gameOver = false;
 
@@ -1721,6 +1762,19 @@ public class GameplayCanvas extends CanvasComponent {
         return true;
     }
 
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+        pointsStr = Integer.toString(points);
+    }
+
+    public void addPoint() {
+        setPoints(getPoints() + 1);
+    }
+
     private class FlipCounter {
         int step = 0;
         boolean flipDirection = false;
@@ -1760,7 +1814,7 @@ public class GameplayCanvas extends CanvasComponent {
         // blink point counter after flip and increment the score
         public void afterFlip() {
             flipIndicatorTimer = 0;
-            points++;
+            addPoint();
             lastFlipX = world.carX;
         }
 
