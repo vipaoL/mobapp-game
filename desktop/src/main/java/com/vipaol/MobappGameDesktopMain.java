@@ -129,7 +129,17 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 PlatformSettings.setFontSizeOverride(options.valueOf(cli.fontSize));
             }
 
-            String backend = options.has(cli.sdl3) ? "sdl3" : options.valueOf(cli.backend).toLowerCase();
+            isBackendExplicit = options.has(cli.backend) || options.has(cli.sdl3) || options.has(cli.awt);
+
+            String backend;
+            if (options.has(cli.awt)) {
+                backend = "awt";
+            } else if (options.has(cli.sdl3)) {
+                backend = "sdl3";
+            } else {
+                backend = options.valueOf(cli.backend).toLowerCase();
+            }
+
             switch (backend) {
                 case "sdl":
                 case "sdl3":
@@ -215,9 +225,10 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 .ofType(Integer.class)
                 .defaultsTo(128);
         final OptionSpec<Void> sdl3 = parser.acceptsAll(Arrays.asList("sdl", "sdl3"), "Use SDL3 graphics backend");
+        final OptionSpec<Void> awt = parser.accepts("awt", "Use AWT graphics backend");
         final OptionSpec<String> backend = parser.accepts("backend", "Graphics backend (awt|sdl3)")
                 .withRequiredArg()
-                .defaultsTo("awt");
+                .defaultsTo("sdl3");
         final OptionSpec<Void> help = parser.acceptsAll(Arrays.asList("help", "h", "?"), "Show help").forHelp();
 
         private CLI() {
