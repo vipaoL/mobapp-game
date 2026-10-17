@@ -253,7 +253,8 @@ public class GameplayCanvas extends CanvasComponent {
                 physicsIterationsSetting = MobappGameSettings.getPhysicsPrecision();
                 targetFPS = MobappGameSettings.getTargetFPS();
                 showFPS = MobappGameSettings.isFPSShown(showFPS);
-                bottomButtons = MobappGameSettings.buttonsAtTheBottom(scW < scH);
+                boolean wideScreen = scW > scH * 3;
+                bottomButtons = MobappGameSettings.buttonsAtTheBottom(!wideScreen);
                 battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
                 instantRestart = MobappGameSettings.isInstantRestartEnabled();
                 boolean structuresAutoload = MobappGameSettings.structuresAutoload();
