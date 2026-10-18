@@ -31,7 +31,6 @@ public class MenuCanvas extends GenericMenu {
 
     // states
     private boolean isGameStarted = false;
-    private int c = 0;
 
     private static GameplayCanvas bg = null;
 
@@ -51,6 +50,10 @@ public class MenuCanvas extends GenericMenu {
 
     public void init() {
         Logger.log("menu:init");
+
+        if (canBgBeResumed()) {
+            menuOptions[1] = "Resume";
+        }
 
         if (MgStruct.loadedFromFiles > 0) { // highlight and change label of "Ext Structs" btn if it already loaded
             setStateFor(1, 2);
@@ -74,17 +77,12 @@ public class MenuCanvas extends GenericMenu {
         super.tick();
         if (bg != null) {
             bg.tick();
+            if (!canBgBeResumed()) {
+                menuOptions[1] = "Play";
+            }
             if (bg.isBackgroundFinished()) {
                 bg.setBgMode(false);
                 bg.setParent(null);
-                bg = null;
-            }
-        }
-        if (c == 1) {
-            if (bg != null) {
-                bg.setBgMode(false);
-                bg.startAgain();
-                RootContainer.setRootUIComponent(bg);
                 bg = null;
             }
         }
@@ -142,6 +140,21 @@ public class MenuCanvas extends GenericMenu {
         }
     }
 
+    private synchronized void resumeBg() {
+        if (isGameStarted || bg == null) {
+            return;
+        }
+        isGameStarted = true;
+        bg.setBgMode(false);
+        bg.startAgain();
+        RootContainer.setRootUIComponent(bg);
+        bg = null;
+    }
+
+    private static boolean canBgBeResumed() {
+        return bg != null && !bg.gameOver;
+    }
+
     public boolean handleKeyPressed(int keyCode, int count) {         // Keyboard
         if (keyCode == Keys.KEY_STAR | keyCode == -10) {
             if (!Logger.isOnScreenLogEnabled()) {
@@ -151,27 +164,33 @@ public class MenuCanvas extends GenericMenu {
                 Logger.disableOnScreenLog();
             }
         } else if (keyCode == Keys.KEY_NUM9) {
-            c++;
-        } else {
-            c = 0;
+            resumeBg();
         }
         return super.handleKeyPressed(keyCode, count);
     }
 
     public boolean handlePointerClicked(int x, int y) {
         if (x < w / 16 && y < h / 16 && bg != null) {
-            c++;
+            resumeBg();
             return true;
         } else {
-            c = 0;
             return super.handlePointerClicked(x, y);
         }
+    }
+
+    protected void onBackgroundClicked(int x, int y) {
+        selected = 1; // Play
+        selectPressed();
     }
 
     void selectPressed() { // Do something when pressed an option in the menu
         defaultSelected = selected;
         if (selected == 1) { // Play
-            startGame();
+            if (canBgBeResumed()) {
+                resumeBg();
+            } else {
+                startGame();
+            }
         }
         if (selected == 2) { // Ext Structs / Reload
             bg = null;
