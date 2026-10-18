@@ -18,7 +18,7 @@
         android:appCategory="game">
 
         <provider
-            android:name=".MobappDocumentsProvider"
+            android:name=".MobappGameDocumentsProvider"
             android:authorities="${applicationId}.documentsProvider"
             android:exported="true"
             android:grantUriPermissions="true"
