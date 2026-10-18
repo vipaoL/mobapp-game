@@ -1,3 +1,8 @@
+import com.android.build.api.artifact.ArtifactTransformationRequest
+import com.android.build.api.artifact.SingleArtifact
+
+import javax.inject.Inject
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.grgit)
@@ -60,4 +65,53 @@ android {
 }
 
 dependencies {
+}
+
+// AAPT2 emits UTF-8 resource pools even with minSdk 1. Android 1.0 needs UTF-16.
+// Transform the final unsigned APK so resource IDs stay consistent with DEX.
+abstract class LegacyResourcesTask extends DefaultTask {
+    @InputDirectory
+    abstract DirectoryProperty getInputApks()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutputApks()
+
+    @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract RegularFileProperty getConverter()
+
+    @InputFile
+    @PathSensitive(PathSensitivity.NONE)
+    abstract RegularFileProperty getZipalign()
+
+    @Internal
+    abstract Property<ArtifactTransformationRequest<LegacyResourcesTask>> getTransformationRequest()
+
+    @Inject
+    abstract ExecOperations getExecOperations()
+
+    @TaskAction
+    void convertResources() {
+        transformationRequest.get().submit(this) { artifact ->
+            def input = new File(artifact.outputFile)
+            def output = new File(outputApks.get().asFile, input.name)
+            execOperations.exec {
+                commandLine 'python3', converter.get().asFile, input, output, '--zipalign', zipalign.get().asFile
+            }
+            return output
+        }
+    }
+}
+
+androidComponents.onVariants(androidComponents.selector().withBuildType('release')) { variant ->
+    def task = tasks.register("convert${variant.name.capitalize()}LegacyResources", LegacyResourcesTask) {
+        converter.set(layout.projectDirectory.file('../tools/utf16_resources.py'))
+        zipalign.set(androidComponents.sdkComponents.sdkDirectory.map {
+            it.file("build-tools/${android.buildToolsVersion}/zipalign")
+        })
+    }
+    def request = variant.artifacts.use(task)
+            .wiredWithDirectories({ it.inputApks }, { it.outputApks })
+            .toTransformMany(SingleArtifact.APK.INSTANCE)
+    task.configure { transformationRequest.set(request) }
 }
