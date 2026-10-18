@@ -33,11 +33,11 @@ public class MenuCanvas extends GenericMenu {
     private boolean isGameStarted = false;
     private int c = 0;
 
-    private GameplayCanvas bg = null;
+    private static GameplayCanvas bg = null;
 
-    public MenuCanvas(GameplayCanvas bg) {
+    public MenuCanvas(GameplayCanvas bgGame) {
         this();
-        this.bg = bg;
+        bg = bgGame;
     }
 
     public MenuCanvas() {
@@ -124,6 +124,7 @@ public class MenuCanvas extends GenericMenu {
             return;
         }
         isGameStarted = true;
+        bg = null;
         Logger.log("menu:startGame()");
         repaint();
         try {
@@ -173,12 +174,15 @@ public class MenuCanvas extends GenericMenu {
             startGame();
         }
         if (selected == 2) { // Ext Structs / Reload
+            bg = null;
             loadMG();
         }
         if (selected == 3) { // Levels
+            bg = null;
             RootContainer.setRootUIComponent(new Levels());
         }
         if (selected == 4) { // Editor
+            bg = null;
             try {
                 Class.forName("mobileapplication3.editor.Editor").newInstance();
             } catch (Exception ex) {
