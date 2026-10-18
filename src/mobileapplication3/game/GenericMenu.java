@@ -178,16 +178,27 @@ public abstract class GenericMenu extends CanvasComponent {
         isPressedByPointerNow = true;
         if (handlePointer(x, y)) {
             selectPressed();
+        } else if (isOptionOutOfRange(getOptionAt(x, y))) {
+            onBackgroundClicked(x, y);
         }
         isPressedByPointerNow = false;
         return true;
     }
 
-    public boolean handlePointer(int x, int y) {
-        x -= x0;
+    protected void onBackgroundClicked(int x, int y) { }
+
+    private int getOptionAt(int x, int y) {
         y -= y0;
+        int opt = firstDrawable + y / k;
+        if (opt < firstReachable && firstReachable < firstDrawable) {
+            opt = firstReachable;
+        }
+        return opt;
+    }
+
+    public boolean handlePointer(int x, int y) {
         isPaused = false;
-        int selected = firstDrawable + y / k;
+        int selected = getOptionAt(x, y);
         if (!isOptionAvailable(selected)) {
             isPressedByPointerNow = false;
             return false;
