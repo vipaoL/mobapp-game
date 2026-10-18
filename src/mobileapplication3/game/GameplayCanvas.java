@@ -68,7 +68,7 @@ public class GameplayCanvas extends CanvasComponent {
 
     private boolean paused = false;
     private boolean isStopping = false;
-    private boolean gameOver = false;
+    public boolean gameOver = false;
     private boolean feltUnderTheWorld = false;
 
     // screen
