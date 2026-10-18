@@ -55,7 +55,7 @@ public class StructurePlacer {
 
         int r2 = r/10*8;
         elementPlacer.line(x, y, x+r-r2, y);
-        elementPlacer.arc(x+r, y, r2, 90, 90, 10, 5);
+        elementPlacer.arc(x+r, y, r2, 90, 90, 100, 50);
         elementPlacer.line(x+r, y+r2/2, x+2*r, y+r2/2);
         endY += r2/2;
 
@@ -127,7 +127,7 @@ public class StructurePlacer {
         endX += prLength;
         int ang = 60; // springboard angle
         int r = l / 8;
-        elementPlacer.arc(x, y-r, r, ang, 90 - ang, 15, 10);
+        elementPlacer.arc(x, y-r, r, ang, 90 - ang, 150, 100);
         elementPlacer.line(x+l - l / 5, y - r * Mathh.cos(ang) / 1000, x+l, y - r * Mathh.cos(ang) / 1000);
         endX += l;
         y -= r * Mathh.cos(ang) / 1000;

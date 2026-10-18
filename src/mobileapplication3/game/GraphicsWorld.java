@@ -689,9 +689,9 @@ public class GraphicsWorld extends World {
                                 g.drawString("arcAngle=" + arcAngle, xToPX(x, y), yToPX(x, y), Graphics.TOP | Graphics.HCENTER);
                             }
                         }
-                        int cX = x - r * kx / 10;
-                        int cY = y - r * ky / 10;
-                        g.drawArc(xToPX(cX, cY), yToPX(cX, cY), r*2 * kx * 100 / zoomOut, r*2 * ky * 100 / zoomOut, startAngle, arcAngle, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
+                        int cX = x - r * kx / 100;
+                        int cY = y - r * ky / 100;
+                        g.drawArc(xToPX(cX, cY), yToPX(cX, cY), r*2 * kx * 10 / zoomOut, r*2 * ky * 10 / zoomOut, startAngle, arcAngle, THICKNESS_LANDSCAPE, zoomOut, betterGraphics, true, true);
                         break;
                     }
                 }
