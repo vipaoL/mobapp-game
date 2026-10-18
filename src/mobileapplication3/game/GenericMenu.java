@@ -188,11 +188,13 @@ public abstract class GenericMenu extends CanvasComponent {
         y -= y0;
         isPaused = false;
         int selected = firstDrawable + y / k;
-        if (isOptionAvailable(selected)) {
-            this.selected = selected;
+        if (!isOptionAvailable(selected)) {
+            isPressedByPointerNow = false;
+            return false;
         }
+        this.selected = selected;
         isPressedByPointerNow = true;
-        return stateMap == null || stateMap[this.selected] != STATE_INACTIVE;
+        return true;
     }
 
     private boolean handleKeyStates(int keyStates) {
