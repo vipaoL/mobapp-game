@@ -86,7 +86,7 @@ public class ElementPlacer {
                 } else {
                     face = Landscape.FACE_NONE;
                 }
-                arc(originX + data[1], originY + data[2], data[3], data[4], data[5], data[6] / 10, data[7] / 10, face);
+                arc(originX + data[1], originY + data[2], data[3], data[4], data[5], data[6], data[7], face);
                 break;
             }
             case BROKEN_LINE:
@@ -467,12 +467,12 @@ public class ElementPlacer {
         updateLowestY(y + amp);
     }
     public void arc(int x, int y, int r, int angle, int startAngle) {
-        arc(x, y, r, angle, startAngle, 10, 10);
+        arc(x, y, r, angle, startAngle, 100, 100);
     }
     public void arc(int x, int y, int r, int angle, int startAngle, int kx, int ky) {
         arc(x, y, r, angle, startAngle, kx, ky, Landscape.FACE_NONE);
     }
-    public void arc(int x, int y, int r, int angle, int startAngle, int kx, int ky, int face) { //k: 10 = 1.0
+    public void arc(int x, int y, int r, int angle, int startAngle, int kx, int ky, int face) { //k: 100 = 1.0
         // calculated formula. Initial data: r=20: sn=5,step=72; r=1000: sn=36,step=10
         int step = 10000 / (140 + r) / DETAIL_LEVEL;
         if (step <= 2) {
@@ -489,27 +489,27 @@ public class ElementPlacer {
                 step = -step;
             }
             for (int i = 0; (i <= angle - step && angle > 0) || (i >= angle - step && angle < 0); i += step) {
-                int x1 = x + Mathh.cos(i + startAngle) * kx * r / 10000;
-                int y1 = y + Mathh.sin(i + startAngle) * ky * r / 10000;
-                int x2 = x + Mathh.cos(i + step + startAngle) * kx * r / 10000;
-                int y2 = y + Mathh.sin(i + step + startAngle) * ky * r / 10000;
+                int x1 = x + Mathh.cos(i + startAngle) * kx * r / 100000;
+                int y1 = y + Mathh.sin(i + startAngle) * ky * r / 100000;
+                int x2 = x + Mathh.cos(i + step + startAngle) * kx * r / 100000;
+                int y2 = y + Mathh.sin(i + step + startAngle) * ky * r / 100000;
                 line(x1, y1, x2, y2, face, false);
                 lastAng = i + step;
             }
 
             // close the circle if the angle is not multiple of the step
             if (Math.abs(angle) % Math.abs(step) != 0) {
-                int x1 = x + Mathh.cos(lastAng + startAngle) * kx * r / 10000;
-                int y1 = y + Mathh.sin(lastAng + startAngle) * ky * r / 10000;
-                int x2 = x + Mathh.cos(angle + startAngle) * kx * r / 10000;
-                int y2 = y + Mathh.sin(angle + startAngle) * ky * r / 10000;
+                int x1 = x + Mathh.cos(lastAng + startAngle) * kx * r / 100000;
+                int y1 = y + Mathh.sin(lastAng + startAngle) * ky * r / 100000;
+                int x2 = x + Mathh.cos(angle + startAngle) * kx * r / 100000;
+                int y2 = y + Mathh.sin(angle + startAngle) * ky * r / 100000;
                 line(x1, y1, x2, y2, face, false);
             }
         }
 
-        updateLowestY(y + r * ky / 10);
+        updateLowestY(y + r * ky / 100);
 
-        if (angle == 360 && startAngle == 0 && kx == 10 && ky == 10) {
+        if (angle == 360 && startAngle == 0 && kx == 100 && ky == 100) {
             appendDrawingData(new int[] {DRAWING_DATA_ID_CIRCLE, x, y, r});
         } else {
             appendDrawingData(new int[] {DRAWING_DATA_ID_ARC, x, y, r, startAngle, angle, kx, ky});
@@ -529,20 +529,20 @@ public class ElementPlacer {
 
         double lastAng = 0;
         for(double i = 0; i <= angleD - step; i+=step) {
-            int x1 = (int) (x + Math.cos(i + startAngleD) * kx * r / 10);
-            int y1 = (int) (y + Math.sin(i + startAngleD) * ky * r / 10);
-            int x2 = (int) (x + Math.cos(i + step + startAngleD) * kx * r / 10);
-            int y2 = (int) (y + Math.sin(i + step + startAngleD) * ky * r / 10);
+            int x1 = (int) (x + Math.cos(i + startAngleD) * kx * r / 100);
+            int y1 = (int) (y + Math.sin(i + startAngleD) * ky * r / 100);
+            int x2 = (int) (x + Math.cos(i + step + startAngleD) * kx * r / 100);
+            int y2 = (int) (y + Math.sin(i + step + startAngleD) * ky * r / 100);
             line(x1, y1, x2, y2, face, false);
             lastAng = i + step;
         }
 
         // close the circle if the angle is not multiple of the step
         if (angleD % step != 0) {
-            int x1 = (int) (x + Math.cos(lastAng + startAngleD) * kx * r / 10);
-            int y1 = (int) (y + Math.sin(lastAng + startAngleD) * ky * r / 10);
-            int x2 = (int) (x + Math.cos(angleD + startAngleD) * kx * r / 10);
-            int y2 = (int) (y + Math.sin(angleD + startAngleD) * ky * r / 10);
+            int x1 = (int) (x + Math.cos(lastAng + startAngleD) * kx * r / 100);
+            int y1 = (int) (y + Math.sin(lastAng + startAngleD) * ky * r / 100);
+            int x2 = (int) (x + Math.cos(angleD + startAngleD) * kx * r / 100);
+            int y2 = (int) (y + Math.sin(angleD + startAngleD) * ky * r / 100);
             line(x1, y1, x2, y2, face, false);
         }
     }
