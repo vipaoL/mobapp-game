@@ -355,42 +355,85 @@ public class GraphicsWorld extends World {
             int sunR = Math.min(scWidth, scHeight) / 4;
             int sunCenterY = scHeight - scHeight * 3 / 5;
 
-            g.setColor(191, 0, 127);
-            int offset = (carX - bgXOffset) / 32;
-            int l = (scWidth * 4);
-            int y1 = sunCenterY + sunR;
+            int y1 = sunCenterY + (sunR * 7 / 8);
             int y2 = scHeight;
+            int groundHeight = y2 - y1;
+
+            g.setColor(255, 170, 0);
+            int sunX = halfScWidth - sunR;
+            int sunY = sunCenterY - sunR;
+            int sunD = sunR * 2;
+            // sun
+            g.fillArc(sunX, sunY, sunD, sunD, 0, 360);
+
+            g.setColor(currColBg);
+            int sunStripes = 6;
+            for (int i = 0; i < sunStripes; i++) {
+                int y = i * sunR / sunStripes + sunCenterY - sunR / 12;
+                int stripeH = bgLineThickness * 2 * (i + 1) / sunStripes;
+                g.fillRect(sunX, y, sunD, Math.max(1, stripeH));
+            }
+
+            g.setColor(currColBg);
+            g.fillRect(0, y1, scWidth, groundHeight);
+
+            int spreadFactor = Math.max(4, groundHeight / Math.max(1, scWidth));
+            int bgLineStep = Math.max(this.bgLineStep, scWidth / 8);
+            int l = scWidth * spreadFactor;
+
+            int offset = (carX - bgXOffset) / 32;
+
+            int maxThickness = Math.max(2, bgLineThickness * 2);
+            int minThickness = 1;
+            int halfNear = maxThickness / 2;
+            int halfFar = minThickness / 2;
+
+            g.setColor(191, 0, 127);
             int ii = 0;
-            int n = l/bgLineStep;
+            int n = l / bgLineStep;
             // vertical lines
             for (int i = 0; i < n; i++) {
-                int x2 = -(ii + (offset) % bgLineStep - l/2)/*  *64/8  */;
+                int x2 = -(ii + (offset) % bgLineStep - l / 2);
                 ii += bgLineStep;
-                int x1 = x2 / 4;
-                int thickness = bgLineThickness;
-                if (Math.abs(i*8 - n*4) > n) {
-                    thickness -= 1;
+
+                int x1 = x2 / spreadFactor;
+
+                int screenX1 = x1 + halfScWidth;
+                int screenX2 = x2 + halfScWidth;
+
+                if (screenX2 + halfNear < 0 && screenX1 + halfFar < 0) {
+                    continue;
                 }
-                drawLine(g, x1 + halfScWidth, y1, x2 + halfScWidth, y2, thickness, false);
+                if (screenX2 - halfNear > scWidth && screenX1 - halfFar > scWidth) {
+                    continue;
+                }
+
+                g.fillTriangle(
+                        screenX1 - halfFar, y1,
+                        screenX1 + halfFar, y1,
+                        screenX2 + halfNear, y2
+                );
+                g.fillTriangle(
+                        screenX1 - halfFar, y1,
+                        screenX2 + halfNear, y2,
+                        screenX2 - halfNear, y2
+                );
             }
+
             // horizontal lines
-            n = scHeight*2/bgLineStep;
+            n = Math.max(8, groundHeight * 2 / bgLineStep);
             for (int i = 0; i < n; i++) {
                 if (i == 1) {
                     continue;
                 }
-                int y = y1 + (y2 - y1) * i * i / n / n;
-                drawLine(g, 0, y, scWidth, y, 1, false);
-            }
-            g.setColor(255, 170, 0);
 
-            // sun
-            int lines = 6;
-            g.fillArc(halfScWidth - sunR, sunCenterY - sunR, sunR * 2, sunR * 2, 0, 360);
-            g.setColor(currColBg);
-            for (int i = 0; i < lines; i++) {
-                int y = i * sunR / lines + sunCenterY - sunR / 12;
-                drawLine(g, 0, y, scWidth, y, bgLineThickness*2*(i+1)/lines, false);
+                int i2 = i * i;
+                int n2 = n * n;
+
+                int y = y1 + groundHeight * i2 / n2;
+                int h = minThickness + (maxThickness - minThickness) * i2 / n2;
+
+                g.fillRect(0, y, scWidth, h);
             }
         }
     }
