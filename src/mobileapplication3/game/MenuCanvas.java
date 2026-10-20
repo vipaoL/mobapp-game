@@ -152,7 +152,7 @@ public class MenuCanvas extends GenericMenu {
     }
 
     private static boolean canBgBeResumed() {
-        return bg != null && !bg.gameOver;
+        return bg != null && !bg.gameOver && !bg.isBackgroundFinished();
     }
 
     public boolean handleKeyPressed(int keyCode, int count) {         // Keyboard
