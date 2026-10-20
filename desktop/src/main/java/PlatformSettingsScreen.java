@@ -7,7 +7,7 @@ import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.*;
 
 public class PlatformSettingsScreen extends Page {
-    private static final String TITLE = "Desktop settings";
+    private static final String TITLE = "System settings";
     public static final String OVERRIDDEN_BY_COMMAND_LINE_ARGUMENTS = "\n(Overridden by command line arguments)";
 
     private Button fontSizeButton = null;
