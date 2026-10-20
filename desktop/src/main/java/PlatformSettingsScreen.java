@@ -37,6 +37,10 @@ public class PlatformSettingsScreen extends Page {
     @Override
     protected IUIComponent initAndGetPageContent() {
         return new ButtonCol(new Button[]{
+                new Button("Renderer: " + PlatformSettings.getBackend()) {
+                    @Override
+                    public void buttonPressed() { }
+                }.setIsActive(false),
                 new Switch("Fullscreen mode"
                         + (PlatformSettings.fullscreenModeOverride == PlatformSettings.UNDEF ? "" : OVERRIDDEN_BY_COMMAND_LINE_ARGUMENTS)) {
                     @Override
