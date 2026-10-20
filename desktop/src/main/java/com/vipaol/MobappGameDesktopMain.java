@@ -12,10 +12,7 @@ import mobileapplication3.editor.StructureViewerComponent;
 import mobileapplication3.editor.elements.Element;
 import mobileapplication3.game.DebugMenu;
 import mobileapplication3.game.MenuCanvas;
-import mobileapplication3.platform.FileUtils;
-import mobileapplication3.platform.Logger;
-import mobileapplication3.platform.MobappDesktopMain;
-import mobileapplication3.platform.PlatformSettings;
+import mobileapplication3.platform.*;
 import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.GraphicsAWT;
 import mobileapplication3.platform.ui.RootContainer;
@@ -196,6 +193,21 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
             root = new MenuCanvas();
         }
         RootContainer.setRootUIComponent(root);
+    }
+
+    @Override
+    protected String getAppTitle() {
+        return "Mobapp Game";
+    }
+
+    @Override
+    protected String getAppId() {
+        return "io.github.vipaol.mobapp-game";
+    }
+
+    @Override
+    protected String getAppVersion() {
+        return Platform.getAppVersion();
     }
 
     private static class CLI {
