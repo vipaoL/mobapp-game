@@ -1407,8 +1407,10 @@ public class GameplayCanvas extends CanvasComponent {
     private void giveEffect(short[] data) {
         int id = data[0];
         int dataLength = data.length - 1;
-        currentEffects[id] = new short[dataLength];
-        System.arraycopy(data, 1, currentEffects[id], 0, data.length - 1);
+        if (currentEffects[id] == null || currentEffects[id].length != dataLength) {
+            currentEffects[id] = new short[dataLength];
+        }
+        System.arraycopy(data, 1, currentEffects[id], 0, dataLength);
     }
 
     private void gameOver() {
