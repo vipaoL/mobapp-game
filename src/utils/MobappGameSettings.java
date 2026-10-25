@@ -23,6 +23,7 @@ public class MobappGameSettings {
             BOTTOM_BUTTONS = "bottBtns",
             BATTERY_INDICATOR = "Batt",
             INSTANT_RESTART = "instRestart",
+            SINGLE_KEY_NAV = "singleKeyNav",
             STRUCTURES_AUTOLOAD = "structAutoload";
 
     public static final int DYNAMIC_PHYSICS_PRECISION = -1, AUTO_PHYSICS_PRECISION = 0;
@@ -68,6 +69,7 @@ public class MobappGameSettings {
                     BATTERY_INDICATOR,
                     STRUCTURES_AUTOLOAD,
                     INSTANT_RESTART,
+                    SINGLE_KEY_NAV,
                 }, RECORD_STORE_SETTINGS);
         }
         return settingsInst;
@@ -325,4 +327,20 @@ public class MobappGameSettings {
     }
 
     ///
+
+    public static boolean isSingleKeyNavEnabled() {
+        return getSettingsInst().getBool(SINGLE_KEY_NAV);
+    }
+
+    public static boolean isSingleKeyNavEnabled(boolean defaultValue) {
+        return getSettingsInst().getBool(SINGLE_KEY_NAV, defaultValue);
+    }
+
+    public static void setSingleKeyNavEnabled(boolean b) {
+        getSettingsInst().set(SINGLE_KEY_NAV, b);
+    }
+
+    public static boolean toggleSingleKeyNav() {
+        return getSettingsInst().toggleBool(SINGLE_KEY_NAV);
+    }
 }

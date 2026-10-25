@@ -10,6 +10,7 @@ import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.CanvasComponent;
 import mobileapplication3.ui.Keys;
+import utils.MobappGameSettings;
 
 /**
  *
@@ -18,6 +19,18 @@ import mobileapplication3.ui.Keys;
 public abstract class GenericMenu extends CanvasComponent {
     protected static final int DEFAULT_FPS = 60;
     private static final int PAUSE_DELAY = 5;
+
+    private static final int SINGLE_KEY_INITIAL_DELAY = 200;
+    private static final int SINGLE_KEY_PAUSE_BEFORE_REPEAT = 400;
+    private static final int SINGLE_KEY_REPEAT_DELAY = 200;
+
+    protected boolean singleKeyNav = false;
+    private long navKeyPressTime = 0;
+    private long navKeyLastMoveTime = 0;
+    private boolean isNavKeyHolding = false;
+    private boolean navKeyMovedDown = false;
+    private int navKeyRepeatCount = 0;
+
     public int x0, y0, w, h;
     private int fontH, k = 10, keyPressDelay = 0,
             keyPressDelayAfterShowing = 5, firstReachable = 0, lastReachable = NOT_SET,
@@ -51,6 +64,11 @@ public abstract class GenericMenu extends CanvasComponent {
 
     public GenericMenu() {
         targetFPS = DEFAULT_FPS;
+        try {
+            singleKeyNav = MobappGameSettings.isSingleKeyNavEnabled();
+        } catch (Throwable ex) {
+            Logger.log(ex);
+        }
     }
 
     protected void onPaint(Graphics g, int x0, int y0, int w, int h, boolean forceInactive) {
@@ -69,7 +87,7 @@ public abstract class GenericMenu extends CanvasComponent {
                 if (i == selected) { // highlighting selected option
                     offset = Mathh.sin((int) ((System.currentTimeMillis() % 450) * 800 / 1000)); // waving animation
                     g.setColor(selectedColor);
-                    if (isPressedByPointerNow) {
+                    if (isPressedByPointerNow || (singleKeyNav && isNavKeyHolding && !navKeyMovedDown)) {
                         g.setColor(pressedColor);
                         g.setFont(pressedFont);
                     }
@@ -214,6 +232,15 @@ public abstract class GenericMenu extends CanvasComponent {
         return stateMap == null || stateMap[selected] != STATE_INACTIVE;
     }
 
+    private void startNavKeyHold() {
+        isKnownButton = true;
+        isNavKeyHolding = true;
+        navKeyMovedDown = false;
+        navKeyRepeatCount = 0;
+        navKeyPressTime = System.currentTimeMillis();
+        navKeyLastMoveTime = navKeyPressTime;
+    }
+
     private boolean handleKeyStates(int keyStates) {
         if (keyStates == 0) {
             return false;
@@ -229,6 +256,10 @@ public abstract class GenericMenu extends CanvasComponent {
             case Keys.RIGHT:
                 return triggerSelect();
             case Keys.FIRE:
+                if (singleKeyNav) {
+                    startNavKeyHold();
+                    return false;
+                }
                 return triggerSelect();
         }
 
@@ -262,6 +293,9 @@ public abstract class GenericMenu extends CanvasComponent {
     }
 
     public boolean handleKeyRepeated(int keyCode, int pressedCount) {
+        if (singleKeyNav && isNavKeyHolding) {
+            return true;
+        }
         handleKeyPressed(keyCode);
         return true;
     }
@@ -339,7 +373,13 @@ public abstract class GenericMenu extends CanvasComponent {
             case SIEMENS_KEY_FIRE:
                 return handleKeyStates(Keys.FIRE);
             default:
-                return handleKeyStates(RootContainer.getAction(keyCode));
+                if (handleKeyStates(RootContainer.getAction(keyCode))) {
+                    return true;
+                }
+                if (singleKeyNav && !isKnownButton) {
+                    startNavKeyHold();
+                }
+                return false;
         }
         selected += firstReachable;
 
@@ -355,6 +395,13 @@ public abstract class GenericMenu extends CanvasComponent {
     }
 
     public boolean handleKeyReleased(int keyCode, int count) {
+        if (singleKeyNav && isNavKeyHolding) {
+            if (!navKeyMovedDown && isOptionAvailable(selected)) {
+                selectPressed();
+            }
+            isNavKeyHolding = false;
+        }
+
         keyPressDelay = 0;
         isSelectPressed = false;
         return true;
@@ -388,9 +435,11 @@ public abstract class GenericMenu extends CanvasComponent {
 
         isPaused = false;
         pauseDelay = PAUSE_DELAY;
+        isNavKeyHolding = false;
     }
 
     public void onHide() {
+        isNavKeyHolding = false;
         Logger.log("menu:hideNotify");
         // It prevents a bug on siemens that calls hideNotify right after calling showNotify.
         if (pauseDelay <= 0) {
@@ -501,6 +550,25 @@ public abstract class GenericMenu extends CanvasComponent {
         }
         if (keyPressDelay > 0) {
             keyPressDelay--;
+        }
+
+        if (singleKeyNav && isNavKeyHolding) {
+            long currentTime = System.currentTimeMillis();
+            if (!navKeyMovedDown) {
+                if (currentTime - navKeyPressTime >= SINGLE_KEY_INITIAL_DELAY) {
+                    handleKeyStates(Keys.DOWN);
+                    navKeyMovedDown = true;
+                    navKeyLastMoveTime = currentTime;
+                    navKeyRepeatCount = 1;
+                }
+            } else {
+                long currentDelay = (navKeyRepeatCount == 1) ? SINGLE_KEY_PAUSE_BEFORE_REPEAT : SINGLE_KEY_REPEAT_DELAY;
+                if (currentTime - navKeyLastMoveTime >= currentDelay) {
+                    handleKeyStates(Keys.DOWN);
+                    navKeyLastMoveTime = currentTime;
+                    navKeyRepeatCount++;
+                }
+            }
         }
     }
 

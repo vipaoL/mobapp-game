@@ -23,10 +23,11 @@ public class SettingsScreen extends GenericMenu {
             BATTERY = 7,
             STRUCTURES_AUTOLOAD = 8,
             INSTANT_RESTART = 9,
-            PLATFORM_SETTINGS = 10,
-            DEBUG = 11,
-            ABOUT = 12,
-            BACK = 13;
+            SINGLE_KEY_NAV = 10,
+            PLATFORM_SETTINGS = 11,
+            DEBUG = 12,
+            ABOUT = 13,
+            BACK = 14;
 
     private static final int[] LANDSCAPE_COLORS = {
             GraphicsWorld.DEFAULT_LANDSCAPE_COLOR,
@@ -177,6 +178,9 @@ public class SettingsScreen extends GenericMenu {
             case INSTANT_RESTART:
                 MobappGameSettings.toggleInstantRestart();
                 break;
+            case SINGLE_KEY_NAV:
+                singleKeyNav = MobappGameSettings.toggleSingleKeyNav();
+                break;
             case DEBUG:
                 stop();
                 RootContainer.setRootUIComponent(new DebugMenu());
@@ -242,6 +246,7 @@ public class SettingsScreen extends GenericMenu {
         menuOpts[BATTERY] = "Show battery level";
         menuOpts[STRUCTURES_AUTOLOAD] = "Autoload structures";
         menuOpts[INSTANT_RESTART] = "Instant level restart";
+        menuOpts[SINGLE_KEY_NAV] = "Single key navigation";
         menuOpts[DEBUG] = "Debug settings";
         menuOpts[PLATFORM_SETTINGS] = "Platform settings";
         menuOpts[ABOUT] = "About";
@@ -264,6 +269,7 @@ public class SettingsScreen extends GenericMenu {
         setEnabledFor(MobappGameSettings.buttonsAtTheBottom(), BOTTOM_BUTTONS);
         setEnabledFor(MobappGameSettings.structuresAutoload(), STRUCTURES_AUTOLOAD);
         setEnabledFor(MobappGameSettings.isInstantRestartEnabled(), INSTANT_RESTART);
+        setEnabledFor(MobappGameSettings.isSingleKeyNavEnabled(), SINGLE_KEY_NAV);
         try {
             Class.forName("PlatformSettingsScreen");
             menuOpts[PLATFORM_SETTINGS] = String.valueOf(getPlatformSettings());
