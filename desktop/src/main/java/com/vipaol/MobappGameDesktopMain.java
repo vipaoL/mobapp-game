@@ -17,6 +17,7 @@ import mobileapplication3.platform.ui.Graphics;
 import mobileapplication3.platform.ui.GraphicsAWT;
 import mobileapplication3.platform.ui.RootContainer;
 import mobileapplication3.ui.IUIComponent;
+import utils.MobappGameSettings;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -126,6 +127,12 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
                 PlatformSettings.setFontSizeOverride(options.valueOf(cli.fontSize));
             }
 
+            if (options.has(cli.singleKey)) {
+                MobappGameSettings.setSingleKeyNavEnabled(true);
+            } else if (options.has(cli.noSingleKey)) {
+                MobappGameSettings.setSingleKeyNavEnabled(false);
+            }
+
             isBackendExplicit = options.has(cli.backend) || options.has(cli.sdl3) || options.has(cli.awt);
 
             String backend;
@@ -228,6 +235,8 @@ public class MobappGameDesktopMain extends MobappDesktopMain {
         final OptionSpec<Void> noFullscreen = parser.accepts("no-fullscreen", "Disable fullscreen mode");
         final OptionSpec<Void> bw = parser.acceptsAll(Arrays.asList("black-and-white", "bw"), "Enable black and white mode");
         final OptionSpec<Void> noBw = parser.acceptsAll(Arrays.asList("no-black-and-white", "no-bw"), "Disable black and white mode");
+        final OptionSpec<Void> singleKey = parser.accepts("single-key-nav", "Enable single key navigation mode");
+        final OptionSpec<Void> noSingleKey = parser.accepts("no-single-key-nav", "Disable single key navigation mode");
         final OptionSpec<File> thumbnailOut = parser.accepts("thumbnail-out", "Path to save generated PNG thumbnail")
                 .withRequiredArg()
                 .ofType(File.class)
