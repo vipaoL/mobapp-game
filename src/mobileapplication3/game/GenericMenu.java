@@ -208,6 +208,12 @@ public abstract class GenericMenu extends CanvasComponent {
         return true;
     }
 
+    private boolean triggerSelect() {
+        isSelectPressed = true;
+        isKnownButton = true;
+        return stateMap == null || stateMap[selected] != STATE_INACTIVE;
+    }
+
     private boolean handleKeyStates(int keyStates) {
         if (keyStates == 0) {
             return false;
@@ -219,11 +225,11 @@ public abstract class GenericMenu extends CanvasComponent {
         switch (keyStates) {
             case Keys.LEFT:
                 selected = lastReachable; // back
+                return triggerSelect();
             case Keys.RIGHT:
+                return triggerSelect();
             case Keys.FIRE:
-                isSelectPressed = true;
-                isKnownButton = true;
-                return stateMap == null || stateMap[selected] != STATE_INACTIVE;
+                return triggerSelect();
         }
 
         boolean needRepeat;
