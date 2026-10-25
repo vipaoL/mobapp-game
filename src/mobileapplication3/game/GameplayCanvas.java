@@ -47,6 +47,8 @@ public class GameplayCanvas extends CanvasComponent {
     public static final int FLIP_INDICATOR_TIMER_MAX = 255;
     public static final int HINT_TIMER_MAX = 120;
 
+    private static final FXVector bufFXVector = new FXVector();
+
     // to prevent siemens' bug which calls hideNotify right after showing canvas
     private static final int PAUSE_DELAY = 5;
     private int pauseDelay = PAUSE_DELAY;
@@ -57,11 +59,6 @@ public class GameplayCanvas extends CanvasComponent {
     public boolean uninterestingDebug = false;
     private boolean isWorldLoaded = false;
     private boolean bgMode = false;
-    private static int hintVisibleTimer = HINT_TIMER_MAX;
-    private int levelIdVisibleTimer;
-    private boolean showFPS = false;
-    private boolean battIndicator = false;
-    private int batLevel;
     private boolean restartGestureStarted = false;
     private boolean restartGestureCompleted = false;
 
@@ -89,6 +86,8 @@ public class GameplayCanvas extends CanvasComponent {
 
     // indicators
     private int flipIndicatorTimer = FLIP_INDICATOR_TIMER_MAX; // blink the counter after flip
+    private static int hintVisibleTimer = HINT_TIMER_MAX;
+    private int levelIdVisibleTimer;
     private int posResetIndicator = 0; // show when wg moves the world
     private int structAddIndicator = 0;
     private int structRmIndicator = 0;
@@ -97,9 +96,17 @@ public class GameplayCanvas extends CanvasComponent {
     private int tickTime;
     private int fps;
     private int tps;
+    private int batLevel;
     private int physicsIterations;
     private int measuredTickTime;
     private String statusMessage = null;
+    private String pointsStr = "0";
+    private String fpsText = "FPS: -";
+    private String batLevelText = "BAT: ?%";
+    private String levelIdText = null;
+
+    private boolean showFPS = false;
+    private boolean battIndicator = false;
 
     // debug
     private int debugTextOffset;
@@ -126,10 +133,6 @@ public class GameplayCanvas extends CanvasComponent {
     private int ticksFromLastTPSMeasure = 0;
     private boolean fpsCounterReady = false;
 
-    public short[][] currentEffects = new short[1][];
-    private short[][] level = null;
-    private int currentLevelId = -1;
-
     // fonts
     private final Font smallfont = new Font(Font.SIZE_SMALL);
     private final Font mediumfont = new Font(Font.SIZE_MEDIUM);
@@ -142,14 +145,14 @@ public class GameplayCanvas extends CanvasComponent {
     private FlipCounter flipCounter;
     private IUIComponent prevScreen = null;
 
-    private int baseTimestepFX = 0;
+    public short[][] currentEffects = new short[1][];
+    private short[][] level = null;
+    private int currentLevelId = -1;
 
     private Vector deferredStructures = null;
 
     private Thread delayedStopThread;
     private Thread delayedRestartThread;
-
-    private static FXVector bufFXVector = new FXVector();
 
     private long lastFPSMeasureTime = 0;
     private long lastPhysicsTickTime = 0;
@@ -159,17 +162,13 @@ public class GameplayCanvas extends CanvasComponent {
     private int measureSeconds = 0;
     private int physicsTimeTotal = 0;
     private int ticksTotal = 0;
+    private int baseTimestepFX = 0;
     private boolean performanceEvaluated = false;
     private boolean lockPhysicsPrecision = false;
     private boolean dynamicPhysicsPrecision = false;
     private int physicsIterationsSetting;
     private int bigTickN = 0;
     private int targetFPS;
-
-    private String pointsStr = "0";
-    private String fpsText = "FPS: -";
-    private String batLevelText = "BAT: ?%";
-    private String levelIdText = null;
 
     public GameplayCanvas() {
         Logger.log("game: constructor");
