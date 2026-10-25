@@ -31,6 +31,8 @@ public class GameplayCanvas extends CanvasComponent {
     public static final String MENU_HINT_KB = "#, 9";
     public static final String PAUSE_HINT = "PAUSE";
     public static final String PAUSE_HINT_KB = "*, 3";
+    public static final String RESTART_BUTTON_HINT = "RESET";
+    public static final String RESTART_BUTTON_HINT_KB = "7";
     public static final String RESTART_HINT = "Swipe to restart";
     public static final String RESTART_HINT_KB = "(7 or Right mouse click)";
     public static final short EFFECT_SPEED = 0;
@@ -64,6 +66,7 @@ public class GameplayCanvas extends CanvasComponent {
     private boolean restartGestureCompleted = false;
 
     private boolean bottomButtons = false;
+    private boolean restartButton = false;
     private boolean instantRestart = false;
 
     private boolean paused = false;
@@ -106,6 +109,7 @@ public class GameplayCanvas extends CanvasComponent {
     private int pointerPressedX, pointerPressedY;
     private long pointerPressedTime;
     private boolean pauseTouched = false;
+    private boolean restartTouched = false;
     private boolean menuTouched = false;
 
     // counters
@@ -255,6 +259,7 @@ public class GameplayCanvas extends CanvasComponent {
                 showFPS = MobappGameSettings.isFPSShown(showFPS);
                 boolean wideScreen = scW > scH * 3;
                 bottomButtons = MobappGameSettings.buttonsAtTheBottom(!wideScreen);
+                restartButton = MobappGameSettings.isRestartButtonEnabled();
                 battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
                 instantRestart = MobappGameSettings.isInstantRestartEnabled();
                 boolean structuresAutoload = MobappGameSettings.structuresAutoload();
@@ -975,13 +980,17 @@ public class GameplayCanvas extends CanvasComponent {
 
             int menuX = getMenuButtonLeftX();
             int pauseX = getPauseButtonLeftX();
+            int restartX = getRestartButtonLeftX();
+            int restartW = getRestartButtonW();
             int btnY = getButtonsTopY();
 
             int btnRoundingD = Math.min(btnW, btnH) / 4;
+            int restartRoundingD = Math.min(restartW, btnH) / 4;
 
             int textY = btnY + btnH / 2;
             int menuTextX = menuX + btnW / 2;
             int pauseTextX = pauseX + btnW / 2;
+            int restartTextX = restartX + restartW / 2;
 
             int landscapeColor = getLandscapeColor();
             int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer) / 3);
@@ -989,6 +998,9 @@ public class GameplayCanvas extends CanvasComponent {
                 g.setColor(buttonBgColor);
                 g.fillRoundRect(menuX, btnY, btnW, btnH, btnRoundingD, btnRoundingD);
                 g.fillRoundRect(pauseX, btnY, btnW, btnH, btnRoundingD, btnRoundingD);
+                if (restartButton) {
+                    g.fillRoundRect(restartX, btnY, restartW, btnH, restartRoundingD, restartRoundingD);
+                }
             }
 
             g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer)));
@@ -999,14 +1011,21 @@ public class GameplayCanvas extends CanvasComponent {
                 g.drawString(MENU_HINT_KB, menuTextX, textY + currentFontH / 2, centerAnchor);
                 g.drawString(PAUSE_HINT, pauseTextX, textY - currentFontH / 2, centerAnchor);
                 g.drawString(PAUSE_HINT_KB, pauseTextX, textY + currentFontH / 2, centerAnchor);
+                if (restartButton) {
+                    g.drawString(RESTART_BUTTON_HINT, restartTextX, textY - currentFontH / 2, centerAnchor);
+                    g.drawString(RESTART_BUTTON_HINT_KB, restartTextX, textY + currentFontH / 2, centerAnchor);
+                }
             } else {
                 g.drawString(MENU_HINT, menuTextX, textY, centerAnchor);
                 g.drawString(PAUSE_HINT, pauseTextX, textY, centerAnchor);
+                if (restartButton) {
+                    g.drawString(RESTART_BUTTON_HINT, restartTextX, textY, centerAnchor);
+                }
             }
         }
 
         // restart gesture hint
-        if (hintVisibleTimer > 0 && levelIdVisibleTimer <= 0 && !restartGestureStarted) {
+        if (!restartButton && hintVisibleTimer > 0 && levelIdVisibleTimer <= 0 && !restartGestureStarted) {
             int landscapeColor = getLandscapeColor();
             int y = scH * 7 / 8;
 
@@ -1036,7 +1055,7 @@ public class GameplayCanvas extends CanvasComponent {
         }
 
         // restart gesture visualisation
-        if (restartGestureStarted) {
+        if (!restartButton && restartGestureStarted) {
             drawRestartGesture(g);
         }
 
@@ -1248,6 +1267,15 @@ public class GameplayCanvas extends CanvasComponent {
 
     private int getPauseButtonLeftX() {
         return bottomButtons ? scW - getButtonW() - getButtonMarginX() : scW - getButtonW();
+    }
+
+    private int getRestartButtonW() {
+        int w = getButtonW();
+        return bottomButtons ? w : w * 4 / 5;
+    }
+
+    private int getRestartButtonLeftX() {
+        return (scW - getRestartButtonW()) / 2;
     }
 
     private int getLandscapeColor() {
@@ -1675,17 +1703,23 @@ public class GameplayCanvas extends CanvasComponent {
 
         int menuLeftX = getMenuButtonLeftX();
         int pauseLeftX = getPauseButtonLeftX();
+        int restartLeftX = getRestartButtonLeftX();
+        int restartW = getRestartButtonW();
         int btnTopY = getButtonsTopY();
 
         boolean inMenuArea = (menuLeftX <= x && x <= menuLeftX + btnW) && (btnTopY <= y && y <= btnTopY + btnH);
         boolean inPauseArea = (pauseLeftX <= x && x <= pauseLeftX + btnW) && (btnTopY <= y && y <= btnTopY + btnH);
+        boolean inRestartArea = restartButton && (restartLeftX <= x && x <= restartLeftX + restartW) && (btnTopY <= y && y <= btnTopY + btnH);
 
         pauseTouched = false;
         menuTouched = false;
+        restartTouched = false;
         if (inPauseArea) {
             pauseTouched = true;
         } else if (inMenuArea) {
             menuTouched = true;
+        } else if (inRestartArea) {
+            restartTouched = true;
         }
 
         motorTurnedOn = true;
@@ -1728,14 +1762,22 @@ public class GameplayCanvas extends CanvasComponent {
         if (menuTouched) {
             stop(true, false);
         }
+        if (restartTouched) {
+            restart();
+            motorTurnedOn = false;
+        }
 
         pauseTouched = false;
         menuTouched = false;
+        restartTouched = false;
 
         return true;
     }
 
     private boolean isRestartGestureStarted() {
+        if (restartButton) {
+            return false;
+        }
         if (!restartGestureStarted && System.currentTimeMillis() - pointerPressedTime > 500) {
             return false;
         }

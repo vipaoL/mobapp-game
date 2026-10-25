@@ -24,6 +24,7 @@ public class MobappGameSettings {
             BATTERY_INDICATOR = "Batt",
             INSTANT_RESTART = "instRestart",
             SINGLE_KEY_NAV = "singleKeyNav",
+            RESTART_BUTTON = "rstBtn",
             STRUCTURES_AUTOLOAD = "structAutoload";
 
     public static final int DYNAMIC_PHYSICS_PRECISION = -1, AUTO_PHYSICS_PRECISION = 0;
@@ -70,6 +71,7 @@ public class MobappGameSettings {
                     STRUCTURES_AUTOLOAD,
                     INSTANT_RESTART,
                     SINGLE_KEY_NAV,
+                    RESTART_BUTTON,
                 }, RECORD_STORE_SETTINGS);
         }
         return settingsInst;
@@ -342,5 +344,23 @@ public class MobappGameSettings {
 
     public static boolean toggleSingleKeyNav() {
         return getSettingsInst().toggleBool(SINGLE_KEY_NAV);
+    }
+
+    ///
+
+    public static boolean isRestartButtonEnabled() {
+        return getSettingsInst().getBool(RESTART_BUTTON);
+    }
+
+    public static boolean isRestartButtonEnabled(boolean defaultValue) {
+        return getSettingsInst().getBool(RESTART_BUTTON, defaultValue);
+    }
+
+    public static void setRestartButtonEnabled(boolean b) {
+        getSettingsInst().set(RESTART_BUTTON, b);
+    }
+
+    public static boolean toggleRestartButton() {
+        return getSettingsInst().toggleBool(RESTART_BUTTON);
     }
 }
