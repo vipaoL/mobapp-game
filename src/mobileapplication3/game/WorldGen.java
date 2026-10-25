@@ -253,13 +253,18 @@ public class WorldGen {
     }
 
     private void movePoints(FXVector[] points, int dx) {
-        try {
-            for (int i = 0; i < landscape.segmentCount(); i++) {
-                FXVector point = points[i];
-                points[i] = new FXVector(point.xFX + FXUtil.toFX(dx), point.yFX);
+        if (points == null || landscape == null) {
+            return;
+        }
+
+        int dxFX = FXUtil.toFX(dx);
+        int count = landscape.segmentCount();
+
+        for (int i = 0; i < count; i++) {
+            FXVector point = points[i];
+            if (point != null) {
+                point.xFX += dxFX;
             }
-        } catch(NullPointerException ex) {
-            Logger.log(ex);
         }
     }
 
