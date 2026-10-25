@@ -14,20 +14,14 @@ import utils.MobappGameSettings;
 public class SettingsScreen extends GenericMenu {
     private static final int
             LANDSCAPE_COLOR = 0,
-            HI_RES_GRAPHICS = 1,
-            LEGACY_DRAWING_METHOD = 2,
-            CAMERA_ROTATION_MODE = 3,
-            TARGET_FPS = 4,
-            SHOW_FPS = 5,
-            BOTTOM_BUTTONS = 6,
-            BATTERY = 7,
-            STRUCTURES_AUTOLOAD = 8,
-            INSTANT_RESTART = 9,
-            SINGLE_KEY_NAV = 10,
-            PLATFORM_SETTINGS = 11,
-            DEBUG = 12,
-            ABOUT = 13,
-            BACK = 14;
+            SHOW_FPS = 1,
+            BATTERY = 2,
+            GRAPHICS_SETTINGS = 3,
+            OTHER_SETTINGS = 4,
+            PLATFORM_SETTINGS = 5,
+            DEBUG = 6,
+            ABOUT = 7,
+            BACK = 8;
 
     private static final int[] LANDSCAPE_COLORS = {
             GraphicsWorld.DEFAULT_LANDSCAPE_COLOR,
@@ -58,8 +52,6 @@ public class SettingsScreen extends GenericMenu {
             "RGB",
             "RGB+background"
     };
-
-    public static final int[] FPS_PRESETS = {15, 20, 24, 30, 40, 45, 48, 50, 60, 72, 75, 80, 90, 100, 120, 144, 165, 240, 360, 500, 1000};
 
     private static final String[] menuOpts = new String[BACK + 1];
 
@@ -128,28 +120,11 @@ public class SettingsScreen extends GenericMenu {
     void selectPressed() {
         int selected = this.selected;
         switch (selected) {
-            case LEGACY_DRAWING_METHOD:
-                MobappGameSettings.toggleLegacyDrawingMethod();
-                break;
-            case CAMERA_ROTATION_MODE:
-                MobappGameSettings.toggleCameraRotationMode();
-                break;
-            case TARGET_FPS:
-                int i = findArrayIndex(FPS_PRESETS, MobappGameSettings.getTargetFPS());
-                MobappGameSettings.setTargetFPS(FPS_PRESETS[(i + 1) % FPS_PRESETS.length]);
-                setTargetFPS(FPS_PRESETS[(i + 1) % FPS_PRESETS.length]);
-                break;
-            case HI_RES_GRAPHICS:
-                MobappGameSettings.toggleBetterGraphics();
-                break;
-            case SHOW_FPS:
-                MobappGameSettings.toggleFPSShown();
-                break;
             case LANDSCAPE_COLOR:
                 nextLandscapeColor();
                 break;
-            case BOTTOM_BUTTONS:
-                MobappGameSettings.toggleButtonsAtTheBottom();
+            case SHOW_FPS:
+                MobappGameSettings.toggleFPSShown();
                 break;
             case BATTERY:
                 if (!MobappGameSettings.isBattIndicatorEnabled()) {
@@ -172,22 +147,19 @@ public class SettingsScreen extends GenericMenu {
                 }
                 MobappGameSettings.toggleBattIndicator();
                 break;
-            case STRUCTURES_AUTOLOAD:
-                MobappGameSettings.toggleStructuresAutoload();
-                break;
-            case INSTANT_RESTART:
-                MobappGameSettings.toggleInstantRestart();
-                break;
-            case SINGLE_KEY_NAV:
-                singleKeyNav = MobappGameSettings.toggleSingleKeyNav();
-                break;
-            case DEBUG:
-                stop();
-                RootContainer.setRootUIComponent(new DebugMenu());
+            case GRAPHICS_SETTINGS:
+                RootContainer.setRootUIComponent(new GraphicsSettingsScreen());
+                return;
+            case OTHER_SETTINGS:
+                RootContainer.setRootUIComponent(new OtherSettingsScreen());
                 return;
             case PLATFORM_SETTINGS:
                 stop();
                 RootContainer.setRootUIComponent(getPlatformSettings());
+                return;
+            case DEBUG:
+                stop();
+                RootContainer.setRootUIComponent(new DebugMenu());
                 return;
             case ABOUT:
                 stop();
@@ -222,54 +194,25 @@ public class SettingsScreen extends GenericMenu {
     }
 
     void refreshStates() {
-        int currentFPS = MobappGameSettings.getTargetFPS();
-        int cameraRotationMode = MobappGameSettings.getCameraRotationMode();
-        String cameraRotationModeString = "?";
-        switch (cameraRotationMode) {
-            case MobappGameSettings.CAMERA_ROTATION_STATIC:
-                cameraRotationModeString = "Static";
-                break;
-            case MobappGameSettings.CAMERA_ROTATION_DONT_FLIP:
-                cameraRotationModeString = "Stay horizontal";
-                break;
-            case MobappGameSettings.CAMERA_ROTATION_FULL:
-                cameraRotationModeString = "Full";
-                break;
-        }
-        menuOpts[LEGACY_DRAWING_METHOD] = "Legacy drawing method";
-        menuOpts[CAMERA_ROTATION_MODE] = "Camera rotation: " + cameraRotationModeString;
-        menuOpts[TARGET_FPS] = "Target FPS: " + currentFPS;
-        menuOpts[HI_RES_GRAPHICS] = "Graphics for hi-res screens";
-        menuOpts[SHOW_FPS] = "Show FPS";
         menuOpts[LANDSCAPE_COLOR] = "Landscape color: " + LANDSCAPE_COLOR_NAMES[findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColorSetting())];
-        menuOpts[BOTTOM_BUTTONS] = "Buttons at the bottom";
+        menuOpts[SHOW_FPS] = "Show FPS";
         menuOpts[BATTERY] = "Show battery level";
-        menuOpts[STRUCTURES_AUTOLOAD] = "Autoload structures";
-        menuOpts[INSTANT_RESTART] = "Instant level restart";
-        menuOpts[SINGLE_KEY_NAV] = "Single key navigation";
-        menuOpts[DEBUG] = "Debug settings";
+        menuOpts[GRAPHICS_SETTINGS] = "Graphics settings";
+        menuOpts[OTHER_SETTINGS] = "Other settings";
         menuOpts[PLATFORM_SETTINGS] = "Platform settings";
+        menuOpts[DEBUG] = "Debug settings";
         menuOpts[ABOUT] = "About";
         menuOpts[BACK] = "Back";
-        setEnabledFor(currentFPS != MobappGameSettings.DEFAULT_TARGET_FPS, TARGET_FPS);
-        setEnabledFor(cameraRotationMode != MobappGameSettings.CAMERA_ROTATION_DEFAULT_VALUE, CAMERA_ROTATION_MODE);
-        if (cameraRotationMode == MobappGameSettings.CAMERA_ROTATION_STATIC) {
-            setEnabledFor(MobappGameSettings.isLegacyDrawingMethodEnabled(), LEGACY_DRAWING_METHOD);
-        } else {
-            setStateFor(STATE_INACTIVE, LEGACY_DRAWING_METHOD);
-        }
-        setEnabledFor(MobappGameSettings.isBetterGraphicsEnabled(), HI_RES_GRAPHICS);
-        setEnabledFor(MobappGameSettings.isFPSShown(), SHOW_FPS);
+
         setEnabledFor(findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor()) != 0, LANDSCAPE_COLOR);
+        setEnabledFor(MobappGameSettings.isFPSShown(), SHOW_FPS);
+
         if (!batFailed) {
             setEnabledFor(MobappGameSettings.isBattIndicatorEnabled(), BATTERY);
         } else {
             setStateFor(STATE_INACTIVE, BATTERY);
         }
-        setEnabledFor(MobappGameSettings.buttonsAtTheBottom(), BOTTOM_BUTTONS);
-        setEnabledFor(MobappGameSettings.structuresAutoload(), STRUCTURES_AUTOLOAD);
-        setEnabledFor(MobappGameSettings.isInstantRestartEnabled(), INSTANT_RESTART);
-        setEnabledFor(MobappGameSettings.isSingleKeyNavEnabled(), SINGLE_KEY_NAV);
+
         try {
             Class.forName("PlatformSettingsScreen");
             menuOpts[PLATFORM_SETTINGS] = String.valueOf(getPlatformSettings());
@@ -278,7 +221,7 @@ public class SettingsScreen extends GenericMenu {
         }
     }
 
-    private int findArrayIndex(int[] arr, int a) {
+    static int findArrayIndex(int[] arr, int a) {
         for (int i = 0; i < arr.length; i++) {
             if (arr[i] == a) {
                 return i;
