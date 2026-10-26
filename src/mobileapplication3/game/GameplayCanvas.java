@@ -33,6 +33,8 @@ public class GameplayCanvas extends CanvasComponent {
     public static final String PAUSE_HINT_KB = "*, 3";
     public static final String RESTART_BUTTON_HINT = "RESET";
     public static final String RESTART_BUTTON_HINT_KB = "7";
+    public static final String DRIVING_HINT_TOUCH = "TOUCH & HOLD";
+    public static final String DRIVING_HINT_KB = "HOLD ANY KEY";
     public static final short EFFECT_SPEED = 0;
     private static final int BATT_UPD_PERIOD = 10000;
     private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2, GAME_MODE_EMINI_WORLD = 3;
@@ -82,6 +84,8 @@ public class GameplayCanvas extends CanvasComponent {
     // indicators
     private int flipIndicatorTimer = FLIP_INDICATOR_TIMER_MAX; // blink the counter after flip
     private static int hintVisibleTimer = HINT_TIMER_MAX;
+    private static int drivingHintAlpha = 255;
+    private boolean drivingHintDismissed = false;
     private int levelIdVisibleTimer;
     private int posResetIndicator = 0; // show when wg moves the world
     private int structAddIndicator = 0;
@@ -320,6 +324,11 @@ public class GameplayCanvas extends CanvasComponent {
                 hintVisibleTimer = HINT_TIMER_MAX; // ticks
             }
 
+            if (drivingHintAlpha > 0) {
+                drivingHintAlpha = 255;
+                drivingHintDismissed = false;
+            }
+
             lastFPSMeasureTime = System.currentTimeMillis();
             lastPhysicsTickTime = System.currentTimeMillis();
             lastBattUpdateTime = 0;
@@ -500,6 +509,16 @@ public class GameplayCanvas extends CanvasComponent {
                         hintVisibleTimer--;
                     }
                     levelIdVisibleTimer--;
+                }
+
+                if (motorTurnedOn) {
+                    drivingHintDismissed = true;
+                }
+                if (drivingHintDismissed && drivingHintAlpha > 0) {
+                    drivingHintAlpha -= 12;
+                    if (drivingHintAlpha < 0) {
+                        drivingHintAlpha = 0;
+                    }
                 }
 
                 // Prevent pause right after resume to work around some Siemens bug
@@ -1008,6 +1027,43 @@ public class GameplayCanvas extends CanvasComponent {
                 if (restartButton) {
                     g.drawString(RESTART_BUTTON_HINT, restartTextX, textY, centerAnchor);
                 }
+            }
+        }
+
+        // driving hint (touch & hold / hold any key)
+        if (drivingHintAlpha > 0 && levelIdVisibleTimer <= 0 && !restartGestureStarted) {
+            int landscapeColor = getLandscapeColor();
+            int baseAlpha = drivingHintAlpha;
+
+            int hintY = scH * 7 / 10;
+
+            if (!RootContainer.displayKbHints) {
+                int hintX = scW * 7 / 10;
+                setFont(mediumfont, g);
+                int fontHeight = currentFontH;
+                int r0 = fontHeight * 3 / 5;
+
+                int pulseProgress = (int) ((System.currentTimeMillis() % 1200) * 1000 / 1200);
+                int pulseR = r0 + r0 * pulseProgress / 1000;
+                int pulseAlpha = (1000 - pulseProgress) * baseAlpha / 1000;
+
+                if (pulseAlpha > 10) {
+                    g.setColor(GraphicsUtils.dimColor(landscapeColor, pulseAlpha));
+                    g.drawArc(hintX - pulseR, hintY - pulseR, pulseR * 2, pulseR * 2, 0, 360, Math.max(1, fontHeight / 8), 1000, true, false, true);
+                }
+
+                int innerAlpha = baseAlpha * 140 / 255;
+                if (innerAlpha > 5) {
+                    g.setColor(GraphicsUtils.dimColor(landscapeColor, innerAlpha));
+                    g.fillArc(hintX - r0, hintY - r0, r0 * 2, r0 * 2, 0, 360);
+                }
+
+                g.setColor(GraphicsUtils.dimColor(landscapeColor, baseAlpha));
+                g.drawString(DRIVING_HINT_TOUCH, hintX, hintY + r0 + fontHeight / 3, Graphics.HCENTER | Graphics.TOP);
+            } else {
+                setFont(mediumfont, g);
+                g.setColor(GraphicsUtils.dimColor(landscapeColor, baseAlpha));
+                g.drawString(DRIVING_HINT_KB, scW / 2, hintY, centerAnchor);
             }
         }
 
