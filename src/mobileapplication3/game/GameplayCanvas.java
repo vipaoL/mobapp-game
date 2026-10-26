@@ -31,8 +31,8 @@ public class GameplayCanvas extends CanvasComponent {
     public static final String MENU_HINT_KB = "#, 9";
     public static final String PAUSE_HINT = "PAUSE";
     public static final String PAUSE_HINT_KB = "*, 3";
-    public static final String RESTART_BUTTON_HINT = "RESET";
-    public static final String RESTART_BUTTON_HINT_KB = "7";
+    public static final String RESTART_HINT = "RESET";
+    public static final String RESTART_HINT_KB = "7";
     public static final String DRIVING_HINT_TOUCH = "TOUCH & HOLD";
     public static final String DRIVING_HINT_KB = "HOLD ANY KEY";
     public static final short EFFECT_SPEED = 0;
@@ -1058,14 +1058,14 @@ public class GameplayCanvas extends CanvasComponent {
                 g.drawString(PAUSE_HINT, pauseTextX, textY - currentFontH / 2, centerAnchor);
                 g.drawString(PAUSE_HINT_KB, pauseTextX, textY + currentFontH / 2, centerAnchor);
                 if (restartButton) {
-                    g.drawString(RESTART_BUTTON_HINT, restartTextX, textY - currentFontH / 2, centerAnchor);
-                    g.drawString(RESTART_BUTTON_HINT_KB, restartTextX, textY + currentFontH / 2, centerAnchor);
+                    g.drawString(RESTART_HINT, restartTextX, textY - currentFontH / 2, centerAnchor);
+                    g.drawString(RESTART_HINT_KB, restartTextX, textY + currentFontH / 2, centerAnchor);
                 }
             } else {
                 g.drawString(MENU_HINT, menuTextX, textY, centerAnchor);
                 g.drawString(PAUSE_HINT, pauseTextX, textY, centerAnchor);
                 if (restartButton) {
-                    g.drawString(RESTART_BUTTON_HINT, restartTextX, textY, centerAnchor);
+                    g.drawString(RESTART_HINT, restartTextX, textY, centerAnchor);
                 }
             }
         }
