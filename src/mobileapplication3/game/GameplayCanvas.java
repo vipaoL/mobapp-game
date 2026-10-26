@@ -29,10 +29,13 @@ public class GameplayCanvas extends CanvasComponent {
     public static final int TICK_DURATION = 50;
     public static final String MENU_HINT = "MENU";
     public static final String MENU_HINT_KB = "#, 9";
+    public static final String MENU_HINT_SINGLE_KEY = "4x";
     public static final String PAUSE_HINT = "PAUSE";
     public static final String PAUSE_HINT_KB = "*, 3";
+    public static final String PAUSE_HINT_SINGLE_KEY = "2x";
     public static final String RESTART_HINT = "RESET";
     public static final String RESTART_HINT_KB = "7";
+    public static final String RESTART_HINT_SINGLE_KEY = "3x";
     public static final String DRIVING_HINT_TOUCH = "TOUCH & HOLD";
     public static final String DRIVING_HINT_KB = "HOLD ANY KEY";
     public static final short EFFECT_SPEED = 0;
@@ -1052,14 +1055,22 @@ public class GameplayCanvas extends CanvasComponent {
             g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer * 3)));
             setFont(getButtonFont(), g);
 
-            if (RootContainer.displayKbHints) {
+            boolean showSubHints = singleKeyActions || RootContainer.displayKbHints;
+
+            if (showSubHints) {
+                String menuSub = singleKeyActions ? MENU_HINT_SINGLE_KEY : MENU_HINT_KB;
+                String pauseSub = singleKeyActions ? PAUSE_HINT_SINGLE_KEY : PAUSE_HINT_KB;
+                String restartSub = singleKeyActions ? RESTART_HINT_SINGLE_KEY : RESTART_HINT_KB;
+
                 g.drawString(MENU_HINT, menuTextX, textY - currentFontH / 2, centerAnchor);
-                g.drawString(MENU_HINT_KB, menuTextX, textY + currentFontH / 2, centerAnchor);
+                g.drawString(menuSub, menuTextX, textY + currentFontH / 2, centerAnchor);
+
                 g.drawString(PAUSE_HINT, pauseTextX, textY - currentFontH / 2, centerAnchor);
-                g.drawString(PAUSE_HINT_KB, pauseTextX, textY + currentFontH / 2, centerAnchor);
+                g.drawString(pauseSub, pauseTextX, textY + currentFontH / 2, centerAnchor);
+
                 if (restartButton) {
                     g.drawString(RESTART_HINT, restartTextX, textY - currentFontH / 2, centerAnchor);
-                    g.drawString(RESTART_HINT_KB, restartTextX, textY + currentFontH / 2, centerAnchor);
+                    g.drawString(restartSub, restartTextX, textY + currentFontH / 2, centerAnchor);
                 }
             } else {
                 g.drawString(MENU_HINT, menuTextX, textY, centerAnchor);
@@ -1333,6 +1344,17 @@ public class GameplayCanvas extends CanvasComponent {
             setFont(largefont, g);
             g.setColor(255, 255, 255);
             g.drawString("PAUSED", scW / 2, scH / 3, Graphics.VCENTER | Graphics.HCENTER);
+
+            if (singleKeyActions) {
+                int y = scH / 3 + currentFontH / 2;
+                setFont(smallfont, g);
+                y += currentFontH;
+                g.drawString("2x: RESUME", scW / 2, y, centerAnchor);
+                y += currentFontH * 3 / 2;
+                g.drawString("3x: RESTART", scW / 2, y, centerAnchor);
+                y += currentFontH * 3 / 2;
+                g.drawString("4x: MENU", scW / 2, y, centerAnchor);
+            }
         }
     }
 
@@ -1349,7 +1371,8 @@ public class GameplayCanvas extends CanvasComponent {
             return scH / 6;
         } else {
             int minH = scH / 16;
-            int h = smallfont.getHeight() * (RootContainer.displayKbHints ? 5 : 3) / 2;
+            boolean twoLines = RootContainer.displayKbHints || singleKeyActions;
+            int h = smallfont.getHeight() * (twoLines ? 5 : 3) / 2;
             return Math.max(h, minH);
         }
     }
