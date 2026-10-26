@@ -33,16 +33,11 @@ public class GameplayCanvas extends CanvasComponent {
     public static final String PAUSE_HINT_KB = "*, 3";
     public static final String RESTART_BUTTON_HINT = "RESET";
     public static final String RESTART_BUTTON_HINT_KB = "7";
-    public static final String RESTART_HINT = "Swipe to restart";
-    public static final String RESTART_HINT_KB = "(7 or Right mouse click)";
     public static final short EFFECT_SPEED = 0;
     private static final int BATT_UPD_PERIOD = 10000;
     private static final int GAME_MODE_ENDLESS = 1, GAME_MODE_LEVEL = 2, GAME_MODE_EMINI_WORLD = 3;
     private static final int GAME_OVER_DAMAGE = 8;
     private static final int GAME_OVER_STUCK_TIME = 1000; // ms
-
-    public static final int RESTART_HINT_TIME = 40;
-    public static final int CIRCLE_ANIM_TIME = 25;
 
     public static final int FLIP_INDICATOR_TIMER_MAX = 255;
     public static final int HINT_TIMER_MAX = 120;
@@ -1023,36 +1018,6 @@ public class GameplayCanvas extends CanvasComponent {
             }
         }
 
-        // restart gesture hint
-        if (!restartButton && hintVisibleTimer > 0 && levelIdVisibleTimer <= 0 && !restartGestureStarted) {
-            int landscapeColor = getLandscapeColor();
-            int y = scH * 7 / 8;
-
-            if (!RootContainer.displayKbHints) {
-                int xLeft = scW / 6;
-                int xRight = scW - xLeft;
-                int x = (RESTART_HINT_TIME - hintVisibleTimer) * w / CIRCLE_ANIM_TIME;
-                int xConstrained = Mathh.constrain(xLeft, x, xRight);
-                int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(25, (25 * hintVisibleTimer / 10)));
-                if (hintVisibleTimer <= RESTART_HINT_TIME && GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
-                    int d = g.getFontHeight() * 2;
-                    g.setColor(buttonBgColor);
-                    g.fillArc(xConstrained - d / 2, y - d / 2, d, d, 0, 360);
-                }
-            }
-
-            if (hintVisibleTimer <= RESTART_HINT_TIME) {
-                g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(100, (100 * hintVisibleTimer / 10))));
-                setFont(mediumfont, g);
-                if (RootContainer.displayKbHints) {
-                    g.drawString(RESTART_HINT, w / 2, y, HCENTER | BOTTOM);
-                    g.drawString(RESTART_HINT_KB, w / 2, y, HCENTER | TOP);
-                } else {
-                    g.drawString(RESTART_HINT, w / 2, y, centerAnchor);
-                }
-            }
-        }
-
         // restart gesture visualisation
         if (!restartButton && restartGestureStarted) {
             drawRestartGesture(g);
@@ -1169,7 +1134,7 @@ public class GameplayCanvas extends CanvasComponent {
         }
 
         // score counter and debug posReset indicator
-        if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 0 || (hintVisibleTimer > RESTART_HINT_TIME + 10 && !bottomButtons)) && !restartGestureStarted) {
+        if (WorldGen.isEnabled && world != null && (hintVisibleTimer <= 20 || !bottomButtons) && !restartGestureStarted) {
             int flipIndicatorIdleColor = countPoints ? 0xffffff : 0x802020;
             int accent = getLandscapeColor();
 
