@@ -86,7 +86,7 @@ public class GameplayCanvas extends CanvasComponent {
     private static int hintVisibleTimer = HINT_TIMER_MAX;
     private static int drivingHintAlpha = 255;
     private boolean drivingHintDismissed = false;
-    private int levelIdVisibleTimer;
+    private int levelIdVisibleTimer = 40;
     private int posResetIndicator = 0; // show when wg moves the world
     private int structAddIndicator = 0;
     private int structRmIndicator = 0;
@@ -103,6 +103,7 @@ public class GameplayCanvas extends CanvasComponent {
     private String fpsText = "FPS: -";
     private String batLevelText = "BAT: ?%";
     private String levelIdText = null;
+    private String levelSubText = null;
 
     private boolean showFPS = false;
     private boolean battIndicator = false;
@@ -296,7 +297,16 @@ public class GameplayCanvas extends CanvasComponent {
             }
 
             if (gameMode == GAME_MODE_LEVEL) {
-                levelIdVisibleTimer = 40;
+                levelSubText = null;
+            } else if (gameMode == GAME_MODE_ENDLESS) {
+                levelIdText = "Endless mode";
+
+                int[] records = Records.getRecords();
+                if (records.length > 0 && records[0] > 0) {
+                    levelSubText = "Best: " + records[0];
+                } else {
+                    levelSubText = null;
+                }
             }
 
             updateFPSIndicator();
@@ -1072,21 +1082,73 @@ public class GameplayCanvas extends CanvasComponent {
             drawRestartGesture(g);
         }
 
+        // level / mode banner
         if (levelIdText != null && levelIdVisibleTimer > 0) {
             int x = scW / 2;
             int y = scH / 8;
             int landscapeColor = getLandscapeColor();
             int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(25, (25 * levelIdVisibleTimer / 10)));
-            if (GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
-                int bgW = g.getFont().stringWidth(levelIdText) + g.getFontHeight() * 2;
-                int bgH = g.getFontHeight() * 3;
-                int d = g.getFontHeight() * 4;
-                g.setColor(buttonBgColor);
-                g.fillRoundRect(x - bgW / 2, y - bgH / 2, bgW, bgH, d, d);
+
+            int mFontH = mediumfont.getHeight();
+            int sFontH = smallfont.getHeight();
+
+            int textW = mediumfont.stringWidth(levelIdText);
+            if (levelSubText != null) {
+                textW = Math.max(textW, smallfont.stringWidth(levelSubText));
             }
-            g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(100, (100 * levelIdVisibleTimer / 10))));
-            setFont(mediumfont, g);
-            g.drawString(levelIdText, x, y, centerAnchor);
+
+            int bgH = (levelSubText != null) ? (mFontH + sFontH + mFontH) : (mFontH * 5 / 2);
+            int bgW = textW + bgH / 3;
+
+            int bx = x - bgW / 2;
+            int by = y - bgH / 2;
+
+            if (GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
+                g.setColor(buttonBgColor);
+
+                if (levelSubText == null) {
+                    g.fillRoundRect(bx, by, bgW, bgH, bgH, bgH);
+                } else {
+                    int prevClipX = g.getClipX();
+                    int prevClipY = g.getClipY();
+                    int prevClipW = g.getClipWidth();
+                    int prevClipH = g.getClipHeight();
+
+                    int d = bgH / 2;
+                    int halfH = bgH / 2;
+
+                    g.setClip(bx, by, bgW, halfH);
+                    g.fillRoundRect(bx, by, bgW, bgH, d, d);
+
+                    d = bgH;
+
+                    g.setClip(bx, by + halfH, bgW, bgH - halfH);
+                    g.fillRoundRect(bx, by, bgW, bgH, d, d);
+
+                    g.setClip(prevClipX, prevClipY, prevClipW, prevClipH);
+                }
+            }
+
+            int textColor = GraphicsUtils.dimColor(landscapeColor, Math.min(100, (100 * levelIdVisibleTimer / 10)));
+
+            if (levelSubText == null) {
+                setFont(mediumfont, g);
+                g.setColor(textColor);
+                g.drawString(levelIdText, x, y, centerAnchor);
+            } else {
+                int spacing = 2;
+                int contentH = mFontH + sFontH + spacing;
+                int startY = y - contentH / 2;
+
+                setFont(mediumfont, g);
+                g.setColor(textColor);
+                g.drawString(levelIdText, x, startY + mFontH / 2, centerAnchor);
+
+                setFont(smallfont, g);
+                int subTextColor = GraphicsUtils.dimColor(landscapeColor, Math.min(75, (75 * levelIdVisibleTimer / 10)));
+                g.setColor(subTextColor);
+                g.drawString(levelSubText, x, startY + mFontH + spacing + sFontH / 2, centerAnchor);
+            }
         }
 
         // draw some debug info if debug is enabled
