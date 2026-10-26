@@ -35,6 +35,12 @@ public class MobappGameSettings {
     public static final int MAX_PHYSICS_PRECISION = 16, MAX_DETAIL_LEVEL = 3;
 
     public static final int
+            BATTERY_OFF = 0,
+            BATTERY_LEFT = 1,
+            BATTERY_CENTER = 2,
+            BATTERY_RIGHT = 3;
+
+    public static final int
             CAMERA_ROTATION_STATIC = 0,
             CAMERA_ROTATION_DONT_FLIP = 1,
             CAMERA_ROTATION_FULL = 2,
@@ -85,20 +91,30 @@ public class MobappGameSettings {
         getSettingsInst().saveToDisk();
     }
 
+    public static int getBatteryPosition() {
+        try {
+            return getSettingsInst().getInt(BATTERY_INDICATOR, BATTERY_OFF);
+        } catch (Throwable ignored) {
+            return getSettingsInst().getBool(BATTERY_INDICATOR) ? BATTERY_CENTER : BATTERY_OFF;
+        }
+    }
+
+    public static void setBatteryPosition(int pos) {
+        getSettingsInst().set(BATTERY_INDICATOR, String.valueOf(pos));
+    }
+
+    public static int nextBatteryPosition() {
+        int next = (getBatteryPosition() + 1) % 4;
+        setBatteryPosition(next);
+        return next;
+    }
+
     public static boolean isBattIndicatorEnabled() {
-        return getSettingsInst().getBool(BATTERY_INDICATOR);
+        return getBatteryPosition() != BATTERY_OFF;
     }
 
     public static boolean isBattIndicatorEnabled(boolean defaultValue) {
-        return getSettingsInst().getBool(BATTERY_INDICATOR, defaultValue);
-    }
-
-    public static void setBattIndicatorEnabled(boolean b) {
-        getSettingsInst().set(BATTERY_INDICATOR, b);
-    }
-
-    public static boolean toggleBattIndicator() {
-        return getSettingsInst().toggleBool(BATTERY_INDICATOR);
+        return getBatteryPosition() != BATTERY_OFF;
     }
 
     ///

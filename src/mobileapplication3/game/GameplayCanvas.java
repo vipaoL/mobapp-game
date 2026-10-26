@@ -112,12 +112,13 @@ public class GameplayCanvas extends CanvasComponent {
     private String statusMessage = null;
     private String pointsStr = "0";
     private String fpsText = "FPS: -";
-    private String batLevelText = "BAT: ?%";
+    private String batLevelText = "?";
     private String levelIdText = null;
     private String levelSubText = null;
 
     private boolean showFPS = false;
     private boolean battIndicator = false;
+    private int battPosition = MobappGameSettings.BATTERY_OFF;
 
     // debug
     private int debugTextOffset;
@@ -270,7 +271,8 @@ public class GameplayCanvas extends CanvasComponent {
                 boolean wideScreen = scW > scH * 3;
                 bottomButtons = MobappGameSettings.buttonsAtTheBottom(!wideScreen);
                 restartButton = MobappGameSettings.isRestartButtonEnabled();
-                battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
+                battPosition = MobappGameSettings.getBatteryPosition();
+                battIndicator = (battPosition != MobappGameSettings.BATTERY_OFF) && Battery.checkAndInit();
                 instantRestart = MobappGameSettings.isInstantRestartEnabled();
                 singleKeyActions = MobappGameSettings.isSingleKeyNavEnabled();
                 boolean structuresAutoload = MobappGameSettings.structuresAutoload();
@@ -653,7 +655,7 @@ public class GameplayCanvas extends CanvasComponent {
                     tickDamage();
                     if (System.currentTimeMillis() - lastBattUpdateTime > BATT_UPD_PERIOD && battIndicator) {
                         batLevel = Battery.getBatteryLevel();
-                        batLevelText = "BAT: " + batLevel + "%";
+                        batLevelText = batLevel + "%";
                         lastBattUpdateTime = System.currentTimeMillis();
                     }
                 }
@@ -1192,22 +1194,14 @@ public class GameplayCanvas extends CanvasComponent {
             }
         }
 
+        // battery indicator
+        if (battIndicator) {
+            drawBatteryIndicator(g);
+        }
+
         // draw some debug info if debug is enabled
         setFont(smallfont, g);
         debugTextOffset = 0;
-        if (battIndicator) {
-            if (batLevel < 6) {
-                g.setColor(0xff0000);
-            } else if (batLevel < 10) {
-                g.setColor(0xff8000);
-            } else if (batLevel < 30) {
-                g.setColor(0xffff00);
-            } else {
-                g.setColor(0x00ff00);
-            }
-
-            drawDebugText(g, batLevelText);
-        }
 
         g.setColor(0xffffff);
         if (DebugMenu.showContacts) {
@@ -1478,6 +1472,74 @@ public class GameplayCanvas extends CanvasComponent {
         int x3 = x + (arcR - fontHeight / 5)  * Mathh.cos(totalAngle) / 1000;
         int y3 = y + (arcR - fontHeight / 5)  * Mathh.sin(totalAngle) / 1000;
         g.fillTriangle(x1, y1, x2, y2, x3, y3);
+    }
+
+    private void drawBatteryIndicator(Graphics g) {
+        setFont(smallfont, g);
+        int fontH = currentFontH;
+
+        int batH = fontH * 6 / 10;
+        int batW = batH * 9 / 5;
+        int tipW = Math.max(2, fontH / 10);
+        int tipH = Math.max(3, batH / 2);
+        int arc = Math.max(2, fontH / 4);
+        int pad = Math.max(1, fontH / 12);
+        int gap = fontH / 3;
+
+        int textW = smallfont.stringWidth(batLevelText);
+        int totalW = batW + tipW + gap + textW;
+
+        int startX;
+        switch (battPosition) {
+            case MobappGameSettings.BATTERY_LEFT:
+                startX = fontH;
+                break;
+            case MobappGameSettings.BATTERY_RIGHT:
+                startX = Math.max(0, scW - totalW - fontH);
+                break;
+            case MobappGameSettings.BATTERY_CENTER:
+            default:
+                startX = (scW - totalW) / 2;
+                break;
+        }
+
+        int topY = fontH / 4 + batH / 2;
+        int centerY = topY + fontH / 2;
+
+        int batY = centerY - batH / 2;
+        int tipY = centerY - tipH / 2;
+        int tipX = startX + batW;
+
+        int level = Mathh.constrain(0, batLevel, 100);
+        int low = 0xff0000;
+        int normal = 0xffaa00;
+        int high = 0x44ff00;
+        int color;
+        if (level >= 50) {
+            color = GraphicsUtils.blendColor(normal, high, level - 50, 50);
+        } else {
+            color = GraphicsUtils.blendColor(low, normal, level, 50);
+        }
+
+        if (batLevel < 6 && (System.currentTimeMillis() / 501) % 2 == 1) {
+            color = GraphicsUtils.dimColor(color, 40);
+        }
+        g.setColor(color);
+
+        g.drawRoundRect(startX, batY, batW, batH, arc, arc);
+
+        g.fillRect(tipX, tipY, tipW, tipH);
+
+        int fillX = startX + 1 + pad;
+        int fillY = batY + 1 + pad;
+        int maxFillW = batW - 1 - pad * 2;
+        int maxFillH = batH - 1 - pad * 2;
+        int fillW = maxFillW * level / 100;
+        if (fillW > 0 && maxFillH > 0) {
+            g.fillRect(fillX, fillY, fillW, maxFillH);
+        }
+
+        g.drawString(batLevelText, tipX + tipW + gap, centerY, Graphics.LEFT | Graphics.VCENTER);
     }
 
     private void drawLoading(Graphics g) {

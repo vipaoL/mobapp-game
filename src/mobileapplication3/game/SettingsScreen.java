@@ -53,6 +53,13 @@ public class SettingsScreen extends GenericMenu {
             "RGB+background"
     };
 
+    private static final String[] BATTERY_POS_NAMES = {
+            "Off",
+            "Left",
+            "Center",
+            "Right"
+    };
+
     private static final String[] menuOpts = new String[BACK + 1];
 
     // array with states of all buttons (active/inactive/enabled)
@@ -127,7 +134,8 @@ public class SettingsScreen extends GenericMenu {
                 MobappGameSettings.toggleFPSShown();
                 break;
             case BATTERY:
-                if (!MobappGameSettings.isBattIndicatorEnabled()) {
+                int currentPos = MobappGameSettings.getBatteryPosition();
+                if (currentPos == MobappGameSettings.BATTERY_OFF) {
                     if (!Battery.checkAndInit()) {
                         batFailed = true;
                         Logger.log("Battery init failed");
@@ -140,12 +148,11 @@ public class SettingsScreen extends GenericMenu {
                             Logger.log(err);
                             break;
                         } else {
-                            menuOpts[selected] = "Battery: " + batLevel + "%";
                             Logger.log("bat method: " + Battery.getMethod());
                         }
                     }
                 }
-                MobappGameSettings.toggleBattIndicator();
+                MobappGameSettings.nextBatteryPosition();
                 break;
             case GRAPHICS_SETTINGS:
                 RootContainer.setRootUIComponent(new GraphicsSettingsScreen());
@@ -196,7 +203,6 @@ public class SettingsScreen extends GenericMenu {
     void refreshStates() {
         menuOpts[LANDSCAPE_COLOR] = "Landscape color: " + LANDSCAPE_COLOR_NAMES[findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColorSetting())];
         menuOpts[SHOW_FPS] = "Show FPS";
-        menuOpts[BATTERY] = "Show battery level";
         menuOpts[GRAPHICS_SETTINGS] = "Graphics settings";
         menuOpts[OTHER_SETTINGS] = "Other settings";
         menuOpts[PLATFORM_SETTINGS] = "Platform settings";
@@ -207,8 +213,11 @@ public class SettingsScreen extends GenericMenu {
         setEnabledFor(findArrayIndex(LANDSCAPE_COLORS, MobappGameSettings.getLandscapeColor()) != 0, LANDSCAPE_COLOR);
         setEnabledFor(MobappGameSettings.isFPSShown(), SHOW_FPS);
 
+        int batPos = MobappGameSettings.getBatteryPosition();
+        menuOpts[BATTERY] = "Battery: " + BATTERY_POS_NAMES[batPos];
+
         if (!batFailed) {
-            setEnabledFor(MobappGameSettings.isBattIndicatorEnabled(), BATTERY);
+            setEnabledFor(batPos != MobappGameSettings.BATTERY_OFF, BATTERY);
         } else {
             setStateFor(STATE_INACTIVE, BATTERY);
         }
