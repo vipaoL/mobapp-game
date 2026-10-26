@@ -4,6 +4,15 @@
 </p>
 
 
+# Download
+## Releases
+[<img src="https://f-droid.org/badge/get-it-on.png"
+    alt="Get it on F-Droid"
+    height="80">](https://f-droid.org/packages/io.github.vipaol.mobapp.game)
+
+[GitHub Releases](https://github.com/vipaoL/mobapp-game/releases)
+## Development builds
+[GitHub Actions](https://github.com/vipaoL/mobapp-game/actions)
 # About
 A crossplatform game based on Emini Physics Engine (Android, J2ME and desktop Java are supported)
 - Endless gameplay with procedural world generation (random combination of predefined or custom structures)
