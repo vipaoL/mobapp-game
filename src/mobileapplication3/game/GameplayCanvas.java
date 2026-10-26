@@ -920,13 +920,6 @@ public class GameplayCanvas extends CanvasComponent {
     }
 
     public void drawWorld(Graphics g) {
-        if (bottomButtons && hintVisibleTimer > 0) {
-            int maxOffset = getButtonH() / 2;
-            world.camOffsetY = -Mathh.constrain(0, maxOffset * 8 * (hintVisibleTimer - HINT_TIMER_MAX / 8) / HINT_TIMER_MAX, maxOffset);
-        } else {
-            world.camOffsetY = 0;
-        }
-
         if (worldgen != null) {
             world.drawWorld(g, worldgen.getStructures(), worldgen.getStructuresRingBufferOffset(), worldgen.getStructuresCount());
         } else {
