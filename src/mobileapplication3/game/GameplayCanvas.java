@@ -980,7 +980,7 @@ public class GameplayCanvas extends CanvasComponent {
             int restartTextX = restartX + restartW / 2;
 
             int landscapeColor = getLandscapeColor();
-            int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer) / 3);
+            int buttonBgColor = GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer * 3) / 3);
             if (GraphicsUtils.getLuma(buttonBgColor) / 2 > GraphicsUtils.getLuma(world.currColBg)) {
                 g.setColor(buttonBgColor);
                 g.fillRoundRect(menuX, btnY, btnW, btnH, btnRoundingD, btnRoundingD);
@@ -990,7 +990,7 @@ public class GameplayCanvas extends CanvasComponent {
                 }
             }
 
-            g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer)));
+            g.setColor(GraphicsUtils.dimColor(landscapeColor, Math.min(200, hintVisibleTimer * 3)));
             setFont(getButtonFont(), g);
 
             if (RootContainer.displayKbHints) {
