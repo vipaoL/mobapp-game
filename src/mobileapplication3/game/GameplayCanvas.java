@@ -68,6 +68,14 @@ public class GameplayCanvas extends CanvasComponent {
     public boolean gameOver = false;
     private boolean feltUnderTheWorld = false;
 
+    // single-key actions (2 = pause, 3 = restart, 4 = menu)
+    private boolean singleKeyActions = false;
+    private static final int MULTI_TAP_MAX_HOLD = 200;
+    private static final int MULTI_TAP_MAX_GAP = 280;
+    private int multiTapCount = 0;
+    private long lastTapReleaseTime = 0;
+    private long currentTapDownTime = 0;
+
     // screen
     private int scW, scH;
     private int maxScSide;
@@ -261,6 +269,7 @@ public class GameplayCanvas extends CanvasComponent {
                 restartButton = MobappGameSettings.isRestartButtonEnabled();
                 battIndicator = MobappGameSettings.isBattIndicatorEnabled(battIndicator) && Battery.checkAndInit();
                 instantRestart = MobappGameSettings.isInstantRestartEnabled();
+                singleKeyActions = MobappGameSettings.isSingleKeyNavEnabled();
                 boolean structuresAutoload = MobappGameSettings.structuresAutoload();
                 if (structuresAutoload) {
                     try {
@@ -410,7 +419,28 @@ public class GameplayCanvas extends CanvasComponent {
     }
 
     public void tick() {
-        if (loadingProgress < 100 || paused || !hasParent()) {
+        if (loadingProgress < 100 || !hasParent()) {
+            return;
+        }
+
+        if (singleKeyActions && multiTapCount > 0 && !motorTurnedOn) {
+            if (System.currentTimeMillis() - lastTapReleaseTime > MULTI_TAP_MAX_GAP) {
+                int taps = multiTapCount;
+                multiTapCount = 0;
+
+                if (taps == 2) {
+                    motorTurnedOn = false;
+                    pauseButtonPressed();
+                    return;
+                } else if (taps == 3) {
+                    motorTurnedOn = false;
+                    restart();
+                    return;
+                }
+            }
+        }
+
+        if (paused) {
             return;
         }
 
@@ -1709,6 +1739,32 @@ public class GameplayCanvas extends CanvasComponent {
         startAgain();
     }
 
+    private void handleDriveInput(boolean pressed) {
+        motorTurnedOn = pressed;
+
+        if (singleKeyActions) {
+            long now = System.currentTimeMillis();
+            if (pressed) {
+                currentTapDownTime = now;
+                if (multiTapCount > 0 && (now - lastTapReleaseTime > MULTI_TAP_MAX_GAP)) {
+                    multiTapCount = 0;
+                }
+            } else {
+                long holdDuration = now - currentTapDownTime;
+                if (holdDuration <= MULTI_TAP_MAX_HOLD) {
+                    lastTapReleaseTime = now;
+                    multiTapCount++;
+                    if (multiTapCount >= 4) {
+                        multiTapCount = 0;
+                        stop(true, false);
+                    }
+                } else {
+                    multiTapCount = 0;
+                }
+            }
+        }
+    }
+
     public boolean handleMouseEvent(int event, int x, int y) {
         if (event == MOUSE_SECONDARY_RELEASED) {
             restart();
@@ -1724,7 +1780,7 @@ public class GameplayCanvas extends CanvasComponent {
     // keyboard events
     public boolean handleKeyReleased(int keyCode, int count) {
         // turn off motor
-        motorTurnedOn = false;
+        handleDriveInput(false);
         if (timeFlying > 0) {
             timeFlying = Math.max(5, timeFlying);
         }
@@ -1759,7 +1815,7 @@ public class GameplayCanvas extends CanvasComponent {
                     pauseButtonPressed();
                 } else {
                     // any other button turns the motor on
-                    motorTurnedOn = true;
+                    handleDriveInput(true);
                 }
                 break;
         }
@@ -1799,7 +1855,7 @@ public class GameplayCanvas extends CanvasComponent {
             restartTouched = true;
         }
 
-        motorTurnedOn = true;
+        handleDriveInput(true);
 
         return true;
     }
@@ -1821,7 +1877,7 @@ public class GameplayCanvas extends CanvasComponent {
             Platform.vibrate(1);
         }
 
-        motorTurnedOn = false;
+        handleDriveInput(false);
 
         pointerPressedX = pointerX = 0;
         pointerPressedY = pointerY = 0;
