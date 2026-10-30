@@ -6,3 +6,4 @@ Icon=io.github.vipaol.mobapp-game
 Terminal=false
 Categories=Game;
 MimeType=application/x-mobapp-game-custom;
+X-Purism-FormFactor=Workstation;Mobile;
