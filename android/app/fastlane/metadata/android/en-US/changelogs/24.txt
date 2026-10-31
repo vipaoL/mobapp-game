@@ -1,0 +1,10 @@
+This is primarily a technical and QoL update focused on player feedback and compatibility:
+- Revamped hints to make controls and game flow clearer
+- Option to use a restart button instead of swipe
+- Resume run directly from the main menu
+- Single-Key: play and navigate with just one button
+- Legacy support: runs on Android 1.0+, fixed graphics on <=4.4
+- Open game folder in file manager
+- Reorganized settings and redesigned battery indicator
+- New structures
+- Performance optimizations
